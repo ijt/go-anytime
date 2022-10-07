@@ -1,6 +1,6 @@
 module github.com/ijt/go-anytime
 
-go 1.18
+go 1.19
 
 require (
 	github.com/ijt/goparsify v0.0.0-20220927233006-1d449f5aaa80
