@@ -61,6 +61,7 @@ func TestParse_goodTimes(t *testing.T) {
 		{`10:15am tomorrow`, dateAtTime(now.AddDate(0, 0, 1), 10, 15, 0)},
 		{"next December 25th at 7:30am UTC-7", timeInLocation(nextMonthDayTime(now, time.December, 25, 7, 30, 0), fixedZone(-7))},
 		{`next December 23rd AT 5:25 PM`, nextMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
+		{`last December 23rd AT 5:25 PM`, prevMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
 		{`last sunday at 5:30pm`, dateAtTime(prevWeekdayFrom(now, time.Sunday), 12+5, 30, 0)},
 		{`next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday), 22, 45, 0)},
 		{`next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday), 22, 45, 0)},
