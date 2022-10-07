@@ -1,6 +1,5 @@
 # Go Anytime
 
-[![CircleCI](https://circleci.com/gh/ijt/go-anytime/tree/master.svg?style=shield)](https://circleci.com/gh/ijt/go-anytime/tree/master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ijt/go-anytime)](https://goreportcard.com/report/github.com/ijt/go-anytime)
 [![GoDoc](https://godoc.org/github.com/ijt/go-anytime?status.svg)](https://godoc.org/github.com/ijt/go-anytime)
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
