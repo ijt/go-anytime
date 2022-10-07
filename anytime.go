@@ -10,6 +10,38 @@ import (
 	gp "github.com/ijt/goparsify"
 )
 
+// Range is a time range.
+type Range struct {
+	// Start is the start of the range.
+	Start time.Time
+
+	// End is the end of the range.
+	End time.Time
+}
+
+type direction int
+
+const (
+	future = iota
+	past
+)
+
+type opts struct {
+	defaultDirection direction
+}
+
+// DefaultToFuture sets the option to default to the future in case of
+// ambiguous dates.
+func DefaultToFuture(o *opts) {
+	o.defaultDirection = future
+}
+
+// DefaultToPast sets the option to default to the past in case of
+// ambiguous dates.
+func DefaultToPast(o *opts) {
+	o.defaultDirection = past
+}
+
 // Parse parses a string assumed to contain a date and possibly a time
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
@@ -612,15 +644,6 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		weekdayNoDirection)
 }
 
-// Range is a time range.
-type Range struct {
-	// Start is the start of the range.
-	Start time.Time
-
-	// End is the end of the range.
-	End time.Time
-}
-
 // ParseRange parses a string such as "from april 20 at 5pm to may 5 at 9pm"
 // and returns a Range.
 func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
@@ -767,27 +790,4 @@ func setLocation(t time.Time, loc *time.Location) time.Time {
 
 // pass is something to call so you can put a breakpoint in an empty func.
 func pass() {
-}
-
-type direction int
-
-const (
-	future = iota
-	past
-)
-
-type opts struct {
-	defaultDirection direction
-}
-
-// DefaultToFuture sets the option to default to the future in case of
-// ambiguous dates.
-func DefaultToFuture(o *opts) {
-	o.defaultDirection = future
-}
-
-// DefaultToPast sets the option to default to the past in case of
-// ambiguous dates.
-func DefaultToPast(o *opts) {
-	o.defaultDirection = past
 }
