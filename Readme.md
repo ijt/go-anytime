@@ -6,10 +6,10 @@
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Natural date time parsing for Go. This package was originally forked from
-github.com/tj/go-naturaldate but has diverged so much that it needed a new name
+[github.com/tj/go-naturaldate](https://github.com/tj/go-naturaldate) but has diverged so much that it needed a new name
 to avoid confusion. Here are the largest differences:
 
-1. The `go-anytime` module is written in terms of the `github.com/ijt/goparsify` parser combinator module, rather than the `github.com/pointlander/peg` module. That made its development and debugging easier, and also means that its parsers can be use within other parsers that use `ijt/goparsify`.
+1. The `go-anytime` module is written in terms of the [github.com/ijt/goparsify](https://github.com/ijt/goparsify) parser combinator module, rather than the [github.com/pointlander/peg](https://github.com/pointlander/peg) parsing module. That made its development and debugging easier, and also means that its parsers can be use within other parsers that use `ijt/goparsify`.
 2. Ranges can be parsed using `ParseRange` or `RangeParser`, for example `"from 3 feb 2022 until 6 oct 2022"`.
 
 ## Examples
