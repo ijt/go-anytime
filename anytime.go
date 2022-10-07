@@ -10,29 +10,6 @@ import (
 	gp "github.com/ijt/goparsify"
 )
 
-type direction int
-
-const (
-	future = iota
-	past
-)
-
-type opts struct {
-	defaultDirection direction
-}
-
-// DefaultToFuture sets the option to default to the future in case of
-// ambiguous dates.
-func DefaultToFuture(o *opts) {
-	o.defaultDirection = future
-}
-
-// DefaultToPast sets the option to default to the past in case of
-// ambiguous dates.
-func DefaultToPast(o *opts) {
-	o.defaultDirection = past
-}
-
 // Parse parses a string assumed to contain a date and possibly a time
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
@@ -644,6 +621,8 @@ type Range struct {
 	End time.Time
 }
 
+// ParseRange parses a string such as "from april 20 at 5pm to may 5 at 9pm"
+// and returns a Range.
 func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
 	s = strings.ToLower(s)
 	p := RangeParser(ref, opts...)
@@ -655,6 +634,7 @@ func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
 	return r, nil
 }
 
+// RangeParser takes a reference time ref and returns a parser for date ranges.
 func RangeParser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	preposition := gp.AnyWithName("a preposition such as to or until", "to", "until", "til", "'til", "till")
 	return gp.Seq(gp.Maybe("from"), Parser(ref, options...), preposition, Parser(ref, options...)).Map(func(n *gp.Result) {
@@ -787,4 +767,27 @@ func setLocation(t time.Time, loc *time.Location) time.Time {
 
 // pass is something to call so you can put a breakpoint in an empty func.
 func pass() {
+}
+
+type direction int
+
+const (
+	future = iota
+	past
+)
+
+type opts struct {
+	defaultDirection direction
+}
+
+// DefaultToFuture sets the option to default to the future in case of
+// ambiguous dates.
+func DefaultToFuture(o *opts) {
+	o.defaultDirection = future
+}
+
+// DefaultToPast sets the option to default to the past in case of
+// ambiguous dates.
+func DefaultToPast(o *opts) {
+	o.defaultDirection = past
 }
