@@ -754,7 +754,7 @@ func TestParseRange(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseRange() got = %v, want %v", got, tt.want)
+				t.Errorf("ParseRange() got =\n%v\nwant\n%v", got, tt.want)
 			}
 		})
 	}
