@@ -226,7 +226,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 
 	// Second can go up to 60 because of leap seconds, for example
 	// 1990-12-31T15:59:60-08:00.
-	second := gp.Regex(`[0-6]?\d\b`).Map(func(n *gp.Result) {
+	second := gp.Regex(`[0-6]?\d`).Map(func(n *gp.Result) {
 		s, err := strconv.Atoi(n.Token)
 		if err != nil {
 			panic(fmt.Sprintf("parsing second: %v", err))
