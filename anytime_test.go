@@ -552,6 +552,150 @@ func TestParseRange(t *testing.T) {
 				End:   setLocation(setTime(nextWeekdayFrom(now, time.Thursday), 23, 52, 0, 0), fixedZone(14)),
 			},
 		},
+		// yesterday
+		{
+			"yesterday",
+			Range{
+				Start: now.AddDate(0, 0, -1),
+				End:   now,
+			},
+		},
+		// today
+		{
+			"today",
+			Range{
+				Start: now,
+				End:   now.AddDate(0, 0, 1),
+			},
+		},
+		// tomorrow
+		{
+			"tomorrow",
+			Range{
+				Start: now.AddDate(0, 0, 1),
+				End:   now.AddDate(0, 0, 2),
+			},
+		},
+		// last week
+		{
+			"last week",
+			Range{
+				Start: time.Date(2022, 9, 18, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// this week
+		{
+			"this week",
+			Range{
+				Start: time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// next week
+		{
+			"next week",
+			Range{
+				Start: time.Date(2022, 10, 3, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// last month
+		{
+			"last month",
+			Range{
+				Start: time.Date(2022, 8, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// this month
+		{
+			"this month",
+			Range{
+				Start: time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// next month
+		{
+			"next month",
+			Range{
+				Start: time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// last year
+		{
+			"last year",
+			Range{
+				Start: time.Date(2021, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// this year
+		{
+			"this year",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// next year
+		{
+			"next year",
+			Range{
+				Start: time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// absolute year
+		{
+			"2025",
+			Range{
+				Start: time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// absolute month
+		{
+			"feb 2025",
+			Range{
+				Start: time.Date(2025, 2, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// absolute day
+		{
+			"3 feb 2025",
+			Range{
+				Start: time.Date(2025, 2, 3, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2025, 2, 4, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// absolute hour
+		{
+			"3 feb 2025 at 5pm",
+			Range{
+				Start: time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
+				End:   time.Date(2025, 2, 4, 12+5+1, 0, 0, 0, now.Location()),
+			},
+		},
+		// absolute minute
+		{
+			"3 feb 2025 at 5:35pm",
+			Range{
+				Start: time.Date(2025, 2, 3, 12+5, 35, 0, 0, now.Location()),
+				End:   time.Date(2025, 2, 4, 12+5, 36, 0, 0, now.Location()),
+			},
+		},
+		// absolute second
+		{
+			"3 feb 2025 at 5:35:52pm",
+			Range{
+				Start: time.Date(2025, 2, 3, 12+5, 35, 52, 0, now.Location()),
+				End:   time.Date(2025, 2, 4, 12+5, 35, 53, 0, now.Location()),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
