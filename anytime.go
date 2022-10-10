@@ -379,7 +379,14 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
 	})
 
-	date := gp.AnyWithName("date", dmyDate, myDate, mdyDate)
+	ymdDate := gp.Seq(year, month, dayOfMonth).Map(func(n *gp.Result) {
+		y := n.Child[0].Result.(int)
+		m := n.Child[1].Result.(time.Month)
+		d := n.Child[2].Result.(int)
+		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
+	})
+
+	date := gp.AnyWithName("date", ymdDate, dmyDate, myDate, mdyDate)
 
 	atTimeWithMaybeZone := gp.Seq(gp.Maybe("at"), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
 		t := n.Child[1].Result.(time.Time)
