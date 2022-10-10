@@ -386,6 +386,11 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
 	})
 
+	yearOnly := year.Map(func(n *gp.Result) {
+		y := n.Result.(int)
+		n.Result = time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
+	})
+
 	date := gp.AnyWithName("date", ymdDate, dmyDate, myDate, mdyDate)
 
 	atTimeWithMaybeZone := gp.Seq(gp.Maybe("at"), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
@@ -503,6 +508,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 
 	lastYear := gp.Seq("last", "year").Map(func(n *gp.Result) {
 		n.Result = truncateYear(ref.AddDate(-1, 0, 0))
+	})
+
+	thisYear := gp.Seq("this", "year").Map(func(n *gp.Result) {
+		n.Result = truncateYear(ref)
 	})
 
 	nextYear := gp.Seq("next", "year").Map(func(n *gp.Result) {
@@ -643,12 +652,12 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		xYearsAgo, xYearsFromToday,
 		lastSpecificMonthDay, nextSpecificMonthDay,
 		lastSpecificMonth, nextSpecificMonth,
-		lastYear, nextYear,
+		lastYear, thisYear, nextYear,
 		nextMo, prevMo,
 		lastWeekday, nextWeekday,
 		lastWeek, nextWeek,
 		colorMonth, monthNoYear,
-		weekdayNoDirection)
+		weekdayNoDirection, yearOnly)
 }
 
 // ParseRange parses a string such as "from april 20 at 5pm to may 5 at 9pm"
