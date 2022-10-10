@@ -696,6 +696,54 @@ func TestParseRange(t *testing.T) {
 				End:   time.Date(2025, 2, 4, 12+5, 35, 53, 0, now.Location()),
 			},
 		},
+		// 2022 jan 1 0:0:0
+		{
+			"2022 jan 1 0:0:0",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 1, 1, 0, 0, 1, 0, now.Location()),
+			},
+		},
+		// 2022 jan 1 0:0
+		{
+			"2022 jan 1 0:0",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+			},
+		},
+		// 2022 jan 1 0
+		{
+			"2022 jan 1 0",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+			},
+		},
+		// 2022 jan 1
+		{
+			"2022 jan 1",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 1, 2, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// 2022 jan
+		{
+			"2022 jan",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
+		// 2022
+		{
+			"2022",
+			Range{
+				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				End:   time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
