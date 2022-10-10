@@ -11,6 +11,7 @@ import (
 )
 
 var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.Local)
+var today = truncateDay(now)
 
 func dateAtTime(dateFrom time.Time, hour int, min int, sec int) time.Time {
 	t := dateFrom
@@ -556,24 +557,24 @@ func TestParseRange(t *testing.T) {
 		{
 			"yesterday",
 			Range{
-				Start: now.AddDate(0, 0, -1),
-				End:   now,
+				Start: today.AddDate(0, 0, -1),
+				End:   today,
 			},
 		},
 		// today
 		{
 			"today",
 			Range{
-				Start: now,
-				End:   now.AddDate(0, 0, 1),
+				Start: today,
+				End:   today.AddDate(0, 0, 1),
 			},
 		},
 		// tomorrow
 		{
 			"tomorrow",
 			Range{
-				Start: now.AddDate(0, 0, 1),
-				End:   now.AddDate(0, 0, 2),
+				Start: today.AddDate(0, 0, 1),
+				End:   today.AddDate(0, 0, 2),
 			},
 		},
 		// last week
@@ -677,7 +678,7 @@ func TestParseRange(t *testing.T) {
 			"3 feb 2025 at 5pm",
 			Range{
 				Start: time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
-				End:   time.Date(2025, 2, 4, 12+5+1, 0, 0, 0, now.Location()),
+				End:   time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()),
 			},
 		},
 		// absolute minute
@@ -685,7 +686,7 @@ func TestParseRange(t *testing.T) {
 			"3 feb 2025 at 5:35pm",
 			Range{
 				Start: time.Date(2025, 2, 3, 12+5, 35, 0, 0, now.Location()),
-				End:   time.Date(2025, 2, 4, 12+5, 36, 0, 0, now.Location()),
+				End:   time.Date(2025, 2, 3, 12+5, 36, 0, 0, now.Location()),
 			},
 		},
 		// absolute second
@@ -693,7 +694,7 @@ func TestParseRange(t *testing.T) {
 			"3 feb 2025 at 5:35:52pm",
 			Range{
 				Start: time.Date(2025, 2, 3, 12+5, 35, 52, 0, now.Location()),
-				End:   time.Date(2025, 2, 4, 12+5, 35, 53, 0, now.Location()),
+				End:   time.Date(2025, 2, 3, 12+5, 35, 53, 0, now.Location()),
 			},
 		},
 		// 2022 jan 1 0:0:0
