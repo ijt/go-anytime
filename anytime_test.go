@@ -118,6 +118,9 @@ func TestParse_goodTimes(t *testing.T) {
 		{`one year from today`, now.AddDate(1, 0, 0)},
 		{`two years ago`, now.AddDate(-2, 0, 0)},
 		{`2 years ago`, now.AddDate(-2, 0, 0)},
+		{`this year`, truncateYear(now)},
+		{`1999`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
+		{`2008`, time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location())},
 	}
 
 	for _, c := range cases {
