@@ -46,7 +46,17 @@ func TestParse_goodTimes(t *testing.T) {
 		{`1 hour from now`, now.Add(time.Hour)},
 
 		// times
-		{"5:35:52pm", dateAtTime(now, 12+5, 35, 52)},
+		{"5:35:52pm", dateAtTime(today, 12+5, 35, 52)},
+		{`10am`, dateAtTime(today, 10, 0, 0)},
+		{`10 am`, dateAtTime(today, 10, 0, 0)},
+		{`5pm`, dateAtTime(today, 12+5, 0, 0)},
+		{`10:25am`, dateAtTime(today, 10, 25, 0)},
+		{`1:05pm`, dateAtTime(today, 12+1, 5, 0)},
+		{`10:25:10am`, dateAtTime(today, 10, 25, 10)},
+		{`1:05:10pm`, dateAtTime(today, 12+1, 5, 10)},
+		{`10:25`, dateAtTime(today, 10, 25, 0)},
+		{`10:25:30`, dateAtTime(today, 10, 25, 30)},
+		{`17:25:30`, dateAtTime(today, 17, 25, 30)},
 
 		// dates with times
 		{"3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
@@ -449,23 +459,9 @@ func TestParse_bad(t *testing.T) {
 		// "next 2 months" is a date range, not a time or a date.
 		{`next 2 months`},
 
-		// Ambiguous 12-hour times:
-		// These are ambiguous because they don't include the date.
-		{`10am`},
-		{`10 am`},
-		{`5pm`},
-		{`10:25am`},
-		{`1:05pm`},
-		{`10:25:10am`},
-		{`1:05:10pm`},
-
-		// Ambiguous 24-hour times:
-		// These are ambiguous because they don't include the date.
+		// These are currently considered bad input, although they may
 		{`10`},
-		{`10:25`},
-		{`10:25:30`},
 		{`17`},
-		{`17:25:30`},
 
 		// Goofy input:
 		{`10:am`},
