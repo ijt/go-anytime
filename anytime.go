@@ -68,6 +68,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = truncateMonth(ref.AddDate(0, -1, 0))
 	})
 
+	thisMo := gp.Seq("this", "month").Map(func(n *gp.Result) {
+		n.Result = truncateMonth(ref)
+	})
+
 	nextMo := gp.Seq("next", "month").Map(func(n *gp.Result) {
 		n.Result = truncateMonth(ref.AddDate(0, 1, 0))
 	})
@@ -653,7 +657,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		lastSpecificMonthDay, nextSpecificMonthDay,
 		lastSpecificMonth, nextSpecificMonth,
 		lastYear, thisYear, nextYear,
-		nextMo, prevMo,
+		nextMo, thisMo, prevMo,
 		lastWeekday, nextWeekday,
 		lastWeek, nextWeek,
 		colorMonth, monthNoYear,
@@ -676,10 +680,63 @@ func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
 // RangeParser takes a reference time ref and returns a parser for date ranges.
 func RangeParser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	preposition := gp.AnyWithName("a preposition such as to or until", "to", "until", "til", "'til", "till")
-	return gp.Seq(gp.Maybe("from"), Parser(ref, options...), preposition, Parser(ref, options...)).Map(func(n *gp.Result) {
-		n.Result = Range{
-			Start: n.Child[1].Result.(time.Time),
-			End:   n.Child[3].Result.(time.Time),
+	toPart := gp.Seq(preposition, Parser(ref, options...)).Map(func(n *gp.Result) {
+		n.Result = n.Child[1].Result
+	})
+	return gp.Seq(gp.Maybe("from"), Parser(ref, options...), gp.Maybe(toPart)).Map(func(n *gp.Result) {
+		s := n.Child[1].Result.(time.Time)
+		c2 := n.Child[2].Result
+		if c2 != nil {
+			// This is an explicit range like "from A until B"
+			n.Result = Range{
+				Start: s,
+				End:   c2.(time.Time),
+			}
+			return
+		}
+
+		// This is an implicit range.
+		// How do we know the duration?
+		// Probably have to go back through and make all the date things
+		// return durations in addition to times. For now, let's see if we
+		// can get one or two examples by using the start time alone.
+
+		switch {
+		case s.Month() == 1:
+			n.Result = Range{
+				Start: s,
+				End:   s.AddDate(1, 0, 0),
+			}
+		case s.Day() == 1:
+			n.Result = Range{
+				Start: s,
+				End:   s.AddDate(0, 1, 0),
+			}
+		case s.Hour() == 0:
+			n.Result = Range{
+				Start: s,
+				End:   s.AddDate(0, 0, 1),
+			}
+		case s.Minute() == 0:
+			n.Result = Range{
+				Start: s,
+				End:   s.Add(time.Hour),
+			}
+		case s.Second() == 0:
+			n.Result = Range{
+				Start: s,
+				End:   s.Add(time.Minute),
+			}
+		case s.Nanosecond() == 0:
+			n.Result = Range{
+				Start: s,
+				End:   s.Add(time.Second),
+			}
+		default:
+			n.Result = Range{
+				Start: s,
+				End:   s,
+			}
 		}
 	})
 }
