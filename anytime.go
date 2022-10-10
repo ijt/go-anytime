@@ -267,7 +267,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		if n.Child[2].Token == "pm" {
 			h += 12
 		}
-		n.Result = time.Date(1, 1, 1, h, m, s, 0, ref.Location())
+		n.Result = time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location())
 	})
 
 	hour24MinuteSecond := gp.Seq(hour24, colonMinute, gp.Maybe(colonSecond)).Map(func(n *gp.Result) {
@@ -278,7 +278,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		if c2 != nil {
 			s = c2.(int)
 		}
-		n.Result = time.Date(1, 1, 1, h, m, s, 0, ref.Location())
+		n.Result = time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location())
 	})
 
 	hourMinuteSecond := gp.AnyWithName("h:m:s", hour12MinuteSecond, hour24MinuteSecond)
@@ -661,7 +661,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		lastWeekday, nextWeekday,
 		lastWeek, nextWeek,
 		colorMonth, monthNoYear,
-		weekdayNoDirection, yearOnly)
+		weekdayNoDirection, yearOnly,
+		hourMinuteSecond)
 }
 
 // ParseRange parses a string such as "from april 20 at 5pm to may 5 at 9pm"
