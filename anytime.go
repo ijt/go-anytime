@@ -751,8 +751,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = setTimeMaybe(d, n.Child[2].Result)
 	})
 
-	weekdayNoDirection := gp.Seq(weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		w := n.Child[0].Result.(time.Weekday)
+	weekdayNoDirection := gp.Seq(gp.Maybe("on"), weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+		w := n.Child[1].Result.(time.Weekday)
 		var t time.Time
 		switch o.defaultDirection {
 		case future:
@@ -763,7 +763,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
 		}
 		r := Range{t, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[1].Result)
+		n.Result = setTimeMaybe(r, n.Child[2].Result)
 	})
 
 	return gp.AnyWithName("natural date",
