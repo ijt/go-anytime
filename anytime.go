@@ -428,20 +428,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = Range{d0, dur}
 	})
 
-	mdyDate := gp.Seq(month, gp.Maybe(dayOfMonth), gp.Maybe(","), year).Map(func(n *gp.Result) {
+	mdyDate := gp.Seq(month, dayOfMonth, gp.Maybe(","), year).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(time.Month)
+		d := n.Child[1].Result.(int)
 		y := n.Child[3].Result.(int)
-		d0 := time.Date(y, m, 1, 0, 0, 0, 0, ref.Location())
-		dur := d0.AddDate(0, 1, 0).Sub(d0)
-		d := 1
-		c1 := n.Child[1].Result
-		if c1 != nil {
-			d = c1.(int)
-			dur = 24 * time.Hour
-		}
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			dur,
+			24 * time.Hour,
 		}
 	})
 
