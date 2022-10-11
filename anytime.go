@@ -12,11 +12,23 @@ import (
 
 // Range is a time range.
 type Range struct {
-	// Start is the start of the range.
-	Start time.Time
+	time.Time
+	Duration time.Duration
+}
 
-	// End is the end of the range.
-	End time.Time
+// RangeFromTimes returns a range given the start and end times.
+func RangeFromTimes(start, end time.Time) Range {
+	return Range{start, end.Sub(start)}
+}
+
+// Start is the start of the range.
+func (r Range) Start() time.Time {
+	return r.Time // not sure about the exact syntax here
+}
+
+// End is the end of the range.
+func (r Range) End() time.Time {
+	return r.Start().Add(r.Duration)
 }
 
 type direction int
@@ -56,6 +68,8 @@ func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
 }
 
 // Parser returns a parser of dates with a given reference time called ref.
+// The result is a Range so that we have a time scale to work with, mainly
+// for parsing implicit ranges within RangeParser().
 func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	var o opts
 	for _, optFunc := range options {
@@ -247,38 +261,53 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	colonMinuteColonSecond := gp.Seq(colonMinute, gp.Maybe(colonSecond)).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(int)
 		c1 := n.Child[1].Result
+		dur := time.Minute
 		s := 0
 		if c1 != nil {
 			s = c1.(int)
+			dur = time.Second
 		}
-		n.Result = time.Date(1, 1, 1, 0, m, s, 0, ref.Location())
+		n.Result = Range{
+			time.Date(1, 1, 1, 0, m, s, 0, ref.Location()),
+			dur,
+		}
 	})
 
 	hour12MinuteSecond := gp.Seq(hour12, gp.Maybe(colonMinuteColonSecond), amPM).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
 		c1 := n.Child[1].Result
+		dur := time.Hour
 		m := 0
 		s := 0
 		if c1 != nil {
-			ms := n.Child[1].Result.(time.Time)
+			ms := n.Child[1].Result.(Range)
 			m = ms.Minute()
 			s = ms.Second()
+			dur = ms.Duration
 		}
 		if n.Child[2].Token == "pm" {
 			h += 12
 		}
-		n.Result = time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location())
+		n.Result = Range{
+			time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location()),
+			dur,
+		}
 	})
 
 	hour24MinuteSecond := gp.Seq(hour24, colonMinute, gp.Maybe(colonSecond)).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
 		m := n.Child[1].Result.(int)
+		dur := time.Minute
 		s := 0
 		c2 := n.Child[2].Result
 		if c2 != nil {
 			s = c2.(int)
+			dur = time.Second
 		}
-		n.Result = time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location())
+		n.Result = Range{
+			time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location()),
+			dur,
+		}
 	})
 
 	hourMinuteSecond := gp.AnyWithName("h:m:s", hour12MinuteSecond, hour24MinuteSecond)
@@ -329,7 +358,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[2].Result.(int)
 		t := n.Child[3].Result.(time.Time)
 		y := n.Child[4].Result.(int)
-		n.Result = time.Date(y, m, d, t.Hour(), t.Minute(), t.Second(), 0, ref.Location())
+		n.Result = Range{
+			time.Date(y, m, d, t.Hour(), t.Minute(), t.Second(), 0, ref.Location()),
+			time.Second,
+		}
 	})
 
 	rubyDate := gp.Seq(weekday, month, dayOfMonth, hourMinuteSecond, zone, year).Map(func(n *gp.Result) {
@@ -338,7 +370,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		t := n.Child[3].Result.(time.Time)
 		z := n.Child[4].Result.(*time.Location)
 		y := n.Child[5].Result.(int)
-		n.Result = time.Date(y, m, d, t.Hour(), t.Minute(), t.Second(), 0, z)
+		n.Result = Range{
+			time.Date(y, m, d, t.Hour(), t.Minute(), t.Second(), 0, z),
+			time.Second,
+		}
 	})
 
 	rfc1123Z := gp.Seq(weekday, gp.Maybe(","), dayOfMonth, month, year, hourMinuteSecond, gp.Cut(), zone).Map(func(n *gp.Result) {
@@ -347,7 +382,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		y := n.Child[4].Result.(int)
 		t := n.Child[5].Result.(time.Time)
 		z := n.Child[7].Result.(*time.Location)
-		n.Result = time.Date(y, m, d, t.Hour(), t.Minute(), t.Second(), 0, z)
+		n.Result = Range{
+			time.Date(y, m, d, t.Hour(), t.Minute(), t.Second(), 0, z),
+			time.Second,
+		}
 	})
 
 	rfc3339 := gp.Regex(`[12]\d{3}-[01]\d-[0-3]\dt[0-2]\d:[0-5]\d:[0-6]\d(z|[-+][01]\d:\d\d)`).Map(func(n *gp.Result) {
@@ -355,44 +393,64 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		if err != nil {
 			panic(fmt.Sprintf("parsing time in RFC3339 format: %v", err))
 		}
-		n.Result = t
+		n.Result = Range{t, time.Second}
 	})
 
 	dmyDate := gp.Seq(dayOfMonth, gp.Maybe("of"), month, gp.Maybe(","), year).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		y := n.Child[4].Result.(int)
-		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
 	})
 
 	// "my" here stands for "month, year"
 	myDate := gp.Seq(month, gp.Maybe(","), year).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(time.Month)
 		y := n.Child[2].Result.(int)
-		n.Result = time.Date(y, m, 1, 0, 0, 0, 0, ref.Location())
+		d0 := time.Date(y, m, 1, 0, 0, 0, 0, ref.Location())
+		d1 := d0.AddDate(0, 1, 0)
+		dur := d1.Sub(d0)
+		n.Result = Range{d0, dur}
 	})
 
 	mdyDate := gp.Seq(month, gp.Maybe(dayOfMonth), gp.Maybe(","), year).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(time.Month)
+		y := n.Child[3].Result.(int)
+		d0 := time.Date(y, m, 1, 0, 0, 0, 0, ref.Location())
+		dur := d0.AddDate(0, 1, 0).Sub(d0)
 		d := 1
 		c1 := n.Child[1].Result
 		if c1 != nil {
 			d = c1.(int)
+			dur = 24 * time.Hour
 		}
-		y := n.Child[3].Result.(int)
-		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			dur,
+		}
 	})
 
 	ymdDate := gp.Seq(year, month, dayOfMonth).Map(func(n *gp.Result) {
 		y := n.Child[0].Result.(int)
 		m := n.Child[1].Result.(time.Month)
 		d := n.Child[2].Result.(int)
-		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
 	})
 
 	yearOnly := year.Map(func(n *gp.Result) {
 		y := n.Result.(int)
-		n.Result = time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
+		d0 := time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
+		dur := d0.AddDate(1, 0, 0).Sub(d0)
+		n.Result = Range{
+			d0,
+			dur,
+		}
 	})
 
 	date := gp.AnyWithName("date", ymdDate, dmyDate, myDate, mdyDate)
@@ -404,35 +462,42 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		if c2 != nil {
 			z = c2.(*time.Location)
 		}
-		n.Result = time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), 0, z)
+		n.Result = Range{
+			time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), 0, z),
+			time.Second,
+		}
 	})
 
 	lastWeekday := gp.Seq("last", weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := prevWeekdayFrom(ref, day)
-		n.Result = setTimeMaybe(d, n.Child[2].Result)
+		r := Range{d, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[2].Result)
 	})
 
 	nextWeekday := gp.Seq("next", weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := nextWeekdayFrom(ref, day)
-		n.Result = setTimeMaybe(d, n.Child[2].Result)
+		r := Range{d, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[2].Result)
 	})
 
 	lastSpecificMonthDay := gp.Seq("last", month, dayOfMonth, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
 		d := n.Child[2].Result.(int)
-		t := prevMonth(ref, m)
-		t = time.Date(t.Year(), t.Month(), d, 0, 0, 0, 0, ref.Location())
-		n.Result = setTimeMaybe(t, n.Child[3].Result)
+		pm := prevMonth(ref, m)
+		t := time.Date(pm.Year(), pm.Month(), d, 0, 0, 0, 0, ref.Location())
+		r := Range{t, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[3].Result)
 	})
 
 	nextSpecificMonthDay := gp.Seq("next", month, dayOfMonth, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
 		d := n.Child[2].Result.(int)
-		t := nextMonth(ref, m)
-		t = time.Date(t.Year(), t.Month(), d, 0, 0, 0, 0, ref.Location())
-		n.Result = setTimeMaybe(t, n.Child[3].Result)
+		nm := nextMonth(ref, m)
+		t := time.Date(nm.Year(), nm.Month(), d, 0, 0, 0, 0, ref.Location())
+		r := Range{t, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[3].Result)
 	})
 
 	todayTime := gp.Seq("today", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
@@ -472,7 +537,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	tomorrow := gp.Any(timeTomorrow, tomorrowTime)
 
 	dateTime := gp.Seq(date, gp.Maybe(","), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		d := n.Child[0].Result.(time.Time)
+		d := n.Child[0].Result.(Range)
 		n.Result = setTimeMaybe(d, n.Child[2].Result)
 	})
 
@@ -482,14 +547,20 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		y := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		d := n.Child[4].Result.(int)
-		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
 	})
 
 	dmyNumbers := gp.Seq(dayOfMonthNum, slash, monthNum, slash, year).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		y := n.Child[4].Result.(int)
-		n.Result = time.Date(y, m, d, 0, 0, 0, 0, ref.Location())
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
 	})
 
 	dateAsNumbers := gp.AnyWithName("date as numbers", ymdNumbers, dmyNumbers)
@@ -501,13 +572,19 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		if c1 != nil {
 			z = c1.(*time.Location)
 		}
-		n.Result = time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, z)
+		n.Result = Range{
+			time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, z),
+			24 * time.Hour,
+		}
 	})
 
 	dateZone := gp.Seq(date, zone).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(time.Time)
 		z := n.Child[1].Result.(*time.Location)
-		n.Result = time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, z)
+		n.Result = Range{
+			time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, z),
+			24 * time.Hour,
+		}
 	})
 
 	lastYear := gp.Seq("last", "year").Map(func(n *gp.Result) {
@@ -525,15 +602,19 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	yearsLabel := gp.Regex(`years?`)
 
 	xYearsAgo := gp.Seq(number, yearsLabel, "ago").Map(func(n *gp.Result) {
-		y := n.Child[0].Result.(int)
-		n.Result = ref.AddDate(-y, 0, 0)
+		dy := n.Child[0].Result.(int)
+		y := ref.AddDate(-dy, 0, 0)
+		dur := y.AddDate(1, 0, 0).Sub(y)
+		n.Result = Range{y, dur}
 	})
 
 	fromNowOrToday := gp.Any("hence", gp.Seq("from", gp.Any("now", "today")))
 
 	xYearsFromToday := gp.Seq(number, yearsLabel, fromNowOrToday).Map(func(n *gp.Result) {
-		y := n.Child[0].Result.(int)
-		n.Result = ref.AddDate(y, 0, 0)
+		dy := n.Child[0].Result.(int)
+		y := ref.AddDate(dy, 0, 0)
+		dur := y.AddDate(1, 0, 0).Sub(y)
+		n.Result = Range{y, dur}
 	})
 
 	daysLabel := gp.Regex(`days?`)
@@ -541,13 +622,15 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	xDaysAgo := gp.Seq(number, daysLabel, "ago", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, -delta)
-		n.Result = setTimeMaybe(d, n.Child[4].Result)
+		r := Range{d, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[4].Result)
 	})
 
 	xDaysFromNow := gp.Seq(number, daysLabel, fromNowOrToday, gp.Cut(), gp.Maybe(atTimeWithMaybeZone), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, delta)
-		n.Result = setTimeMaybe(d, n.Child[4].Result)
+		r := Range{d, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[4].Result)
 	})
 
 	weeksLabel := gp.Regex(`weeks?`)
@@ -555,39 +638,53 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	xWeeksAgo := gp.Seq(number, weeksLabel, "ago", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, -7*delta)
-		n.Result = setTimeMaybe(d, n.Child[4].Result)
+		r := Range{d, 7 * 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[4].Result)
 	})
 
 	xWeeksFromNow := gp.Seq(number, weeksLabel, fromNowOrToday, gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, 7*delta)
-		n.Result = setTimeMaybe(d, n.Child[4].Result)
+		r := Range{d, 7 * 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[4].Result)
 	})
 
 	minutesLabel := gp.Regex(`minutes?`)
 
 	xMinutesAgo := gp.Seq(number, minutesLabel, "ago").Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(int)
-		n.Result = ref.Add(-time.Duration(m) * time.Minute)
+		n.Result = Range{
+			ref.Add(-time.Duration(m) * time.Minute),
+			time.Minute,
+		}
 	})
 
 	fromNow := gp.Any("hence", gp.Seq("from", "now"))
 
 	xMinutesFromNow := gp.Seq(number, minutesLabel, fromNow).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(int)
-		n.Result = ref.Add(time.Duration(m) * time.Minute)
+		n.Result = Range{
+			ref.Add(time.Duration(m) * time.Minute),
+			time.Minute,
+		}
 	})
 
 	hoursLabel := gp.Regex(`hours?`)
 
 	xHoursAgo := gp.Seq(number, hoursLabel, "ago").Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
-		n.Result = ref.Add(-time.Duration(h) * time.Hour)
+		n.Result = Range{
+			ref.Add(-time.Duration(h) * time.Hour),
+			time.Hour,
+		}
 	})
 
 	xHoursFromNow := gp.Seq(number, hoursLabel, fromNow).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
-		n.Result = ref.Add(time.Duration(h) * time.Hour)
+		n.Result = Range{
+			ref.Add(time.Duration(h) * time.Hour),
+			time.Hour,
+		}
 	})
 
 	color := gp.AnyWithName("color",
@@ -615,7 +712,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	})
 
 	monthNoYear := gp.Seq(month, gp.Maybe(dayOfMonth), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		var d time.Time
+		var d Range
 		m := n.Child[0].Result.(time.Month)
 		switch o.defaultDirection {
 		case future:
@@ -640,7 +737,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		default:
 			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
 		}
-		n.Result = setTimeMaybe(t, n.Child[1].Result)
+		r := Range{t, 24 * time.Hour}
+		n.Result = setTimeMaybe(r, n.Child[1].Result)
 	})
 
 	return gp.AnyWithName("natural date",
@@ -685,78 +783,40 @@ func RangeParser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[1].Result
 	})
 	return gp.Seq(gp.Maybe("from"), Parser(ref, options...), gp.Maybe(toPart)).Map(func(n *gp.Result) {
-		s := n.Child[1].Result.(time.Time)
+		s := n.Child[1].Result.(Range)
 		c2 := n.Child[2].Result
 		if c2 != nil {
 			// This is an explicit range like "from A until B"
-			n.Result = Range{
-				Start: s,
-				End:   c2.(time.Time),
-			}
+			e := c2.(Range)
+			dur := e.Sub(s.Time)
+			n.Result = Range{s.Time, dur}
 			return
 		}
-
-		// This is an implicit range.
-		// How do we know the duration?
-		// Probably have to go back through and make all the date things
-		// return durations in addition to times. For now, let's see if we
-		// can get one or two examples by using the start time alone.
-
-		switch {
-		case s.Month() == 1:
-			n.Result = Range{
-				Start: s,
-				End:   s.AddDate(1, 0, 0),
-			}
-		case s.Day() == 1:
-			n.Result = Range{
-				Start: s,
-				End:   s.AddDate(0, 1, 0),
-			}
-		case s.Hour() == 0:
-			n.Result = Range{
-				Start: s,
-				End:   s.AddDate(0, 0, 1),
-			}
-		case s.Minute() == 0:
-			n.Result = Range{
-				Start: s,
-				End:   s.Add(time.Hour),
-			}
-		case s.Second() == 0:
-			n.Result = Range{
-				Start: s,
-				End:   s.Add(time.Minute),
-			}
-		case s.Nanosecond() == 0:
-			n.Result = Range{
-				Start: s,
-				End:   s.Add(time.Second),
-			}
-		default:
-			n.Result = Range{
-				Start: s,
-				End:   s,
-			}
-		}
+		n.Result = s
 	})
 }
 
-func setTimeMaybe(datePart time.Time, timePart any) time.Time {
+func setTimeMaybe(datePart Range, timePart any) Range {
 	d := datePart
 	if timePart == nil {
 		return d
 	}
-	t := timePart.(time.Time)
-	return time.Date(d.Year(), d.Month(), d.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
+	t := timePart.(Range)
+	return Range{
+		time.Date(d.Year(), d.Month(), d.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()),
+		t.Duration,
+	}
 }
 
-func setDayMaybe(t time.Time, dayAsAny any) time.Time {
+func setDayMaybe(t Range, dayAsAny any) Range {
 	if dayAsAny == nil {
 		return t
 	}
 	d := dayAsAny.(int)
-	return time.Date(t.Year(), t.Month(), d, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
+	return Range{
+		time.Date(t.Year(), t.Month(), d, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()),
+		24 * time.Hour,
+	}
 }
 
 func fixedZoneHM(h, m int) *time.Location {
@@ -781,7 +841,7 @@ func prevWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 	if d <= 0 {
 		d += 7
 	}
-	return truncateDay(t.AddDate(0, 0, -int(d)))
+	return truncateDay(t.AddDate(0, 0, -int(d))).Time
 }
 
 // nextWeekdayFrom returns the next week day relative to time t.
@@ -791,64 +851,74 @@ func nextWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 	if d <= 0 {
 		d += 7
 	}
-	return truncateDay(t.AddDate(0, 0, int(d)))
+	return truncateDay(t.AddDate(0, 0, int(d))).Time
 }
 
 // nextMonthDayTime returns the next month relative to time t, with given day of month and time of day.
 func nextMonthDayTime(t time.Time, month time.Month, day int, hour int, min int, sec int) time.Time {
-	t = nextMonth(t, month)
-	return time.Date(t.Year(), t.Month(), day, hour, min, sec, 0, t.Location())
+	nm := nextMonth(t, month)
+	return time.Date(nm.Year(), nm.Month(), day, hour, min, sec, 0, t.Location())
 }
 
 // prevMonthDayTime returns the previous month relative to time t, with given day of month and time of day.
 func prevMonthDayTime(t time.Time, month time.Month, day int, hour int, min int, sec int) time.Time {
-	t = prevMonth(t, month)
-	return time.Date(t.Year(), t.Month(), day, hour, min, sec, 0, t.Location())
+	pm := prevMonth(t, month)
+	return time.Date(pm.Year(), pm.Month(), day, hour, min, sec, 0, t.Location())
 }
 
 // nextMonth returns the next month relative to time t.
-func nextMonth(t time.Time, month time.Month) time.Time {
+func nextMonth(t time.Time, month time.Month) Range {
 	y := t.Year()
 	if month-t.Month() <= 0 {
 		y++
 	}
-	_, _, day := t.Date()
-	return time.Date(y, month, day, 0, 0, 0, 0, t.Location())
+	d := time.Date(y, month, 1, 0, 0, 0, 0, t.Location())
+	dur := d.AddDate(0, 1, 0).Sub(d)
+	return Range{d, dur}
 }
 
 // prevMonth returns the next month relative to time t.
-func prevMonth(t time.Time, month time.Month) time.Time {
+func prevMonth(t time.Time, month time.Month) Range {
 	y := t.Year()
 	if t.Month()-month <= 0 {
 		y--
 	}
-	_, _, day := t.Date()
-	return time.Date(y, month, day, 0, 0, 0, 0, t.Location())
+	d := time.Date(y, month, 1, 0, 0, 0, 0, t.Location())
+	dur := d.AddDate(0, 1, 0).Sub(d)
+	return Range{d, dur}
 }
 
 // truncateDay returns a date truncated to the day.
-func truncateDay(t time.Time) time.Time {
+func truncateDay(t time.Time) Range {
 	y, m, d := t.Date()
-	return time.Date(y, m, d, 0, 0, 0, 0, t.Location())
+	s := time.Date(y, m, d, 0, 0, 0, 0, t.Location())
+	e := s.AddDate(0, 0, 1)
+	return Range{s, e.Sub(s)}
 }
 
 // truncateWeek returns a date truncated to the week.
-func truncateWeek(t time.Time) time.Time {
+func truncateWeek(t time.Time) Range {
 	for t.Weekday() != time.Sunday {
 		t = t.AddDate(0, 0, -1)
 	}
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	s := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	e := s.AddDate(0, 0, 7)
+	return Range{s, e.Sub(s)}
 }
 
 // truncateMonth returns a date truncated to the month.
-func truncateMonth(t time.Time) time.Time {
+func truncateMonth(t time.Time) Range {
 	y, m, _ := t.Date()
-	return time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
+	s := time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
+	e := s.AddDate(0, 1, 0)
+	return Range{s, e.Sub(s)}
 }
 
 // truncateYear returns a date truncated to the year.
-func truncateYear(t time.Time) time.Time {
-	return time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location())
+func truncateYear(t time.Time) Range {
+	s := time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location())
+	e := s.AddDate(1, 0, 0)
+	return Range{s, e.Sub(s)}
 }
 
 // setTime takes the date from d and the time from the remaining args and
