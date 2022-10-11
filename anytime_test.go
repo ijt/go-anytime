@@ -11,7 +11,7 @@ import (
 )
 
 var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.Local)
-var today = truncateDay(now)
+var today = truncateDay(now).Time
 
 func dateAtTime(dateFrom time.Time, hour int, min int, sec int) time.Time {
 	t := dateFrom
@@ -124,8 +124,8 @@ func TestParse_goodTimes(t *testing.T) {
 		{`one month hence`, now.AddDate(0, 1, 0)},
 		{`1 month from now`, now.AddDate(0, 1, 0)},
 		{`2 months from now`, now.AddDate(0, 2, 0)},
-		{`last january`, prevMonth(now, time.January)},
-		{`next january`, nextMonth(now, time.January)},
+		{`last january`, prevMonth(now, time.January).Time},
+		{`next january`, nextMonth(now, time.January).Time},
 
 		// years
 		{`one year ago`, now.AddDate(-1, 0, 0)},
@@ -133,7 +133,7 @@ func TestParse_goodTimes(t *testing.T) {
 		{`one year from today`, now.AddDate(1, 0, 0)},
 		{`two years ago`, now.AddDate(-2, 0, 0)},
 		{`2 years ago`, now.AddDate(-2, 0, 0)},
-		{`this year`, truncateYear(now)},
+		{`this year`, truncateYear(now).Time},
 		{`1999`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
 		{`2008`, time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location())},
 	}
@@ -155,8 +155,8 @@ func TestParse_goodDays(t *testing.T) {
 		WantTime time.Time
 	}{
 		// years
-		{`last year`, truncateYear(now.AddDate(-1, 0, 0))},
-		{`next year`, truncateYear(now.AddDate(1, 0, 0))},
+		{`last year`, truncateYear(now.AddDate(-1, 0, 0)).Time},
+		{`next year`, truncateYear(now.AddDate(1, 0, 0)).Time},
 
 		// today
 		{`today`, now},
@@ -168,8 +168,8 @@ func TestParse_goodDays(t *testing.T) {
 		{`tomorrow`, now.AddDate(0, 0, 1)},
 
 		// weeks
-		{`last week`, truncateWeek(now.AddDate(0, 0, -7))},
-		{`next week`, truncateWeek(now.AddDate(0, 0, 7))},
+		{`last week`, truncateWeek(now.AddDate(0, 0, -7)).Time},
+		{`next week`, truncateWeek(now.AddDate(0, 0, 7)).Time},
 
 		// past weekdays
 		{`last sunday`, prevWeekdayFrom(now, time.Sunday)},
@@ -190,10 +190,10 @@ func TestParse_goodDays(t *testing.T) {
 		{`next saturday`, nextWeekdayFrom(now, time.Saturday)},
 
 		// months
-		{`last january`, prevMonth(now, time.January)},
-		{`next january`, nextMonth(now, time.January)},
-		{`last month`, truncateMonth(now.AddDate(0, -1, 0))},
-		{`next month`, truncateMonth(now.AddDate(0, 1, 0))},
+		{`last january`, prevMonth(now, time.January).Time},
+		{`next january`, nextMonth(now, time.January).Time},
+		{`last month`, truncateMonth(now.AddDate(0, -1, 0)).Time},
+		{`next month`, truncateMonth(now.AddDate(0, 1, 0)).Time},
 
 		// absolute dates
 		{"january 2017", time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location())},
@@ -226,7 +226,7 @@ func TestParse_goodDays(t *testing.T) {
 
 		// color month
 		// http://www.jdawiseman.com/papers/trivia/futures.html
-		{"white october", nextMonth(now, time.October)},
+		{"white october", nextMonth(now, time.October).Time},
 		{"red october", nextMonth(now, time.October).AddDate(1, 0, 0)},
 		{"green october", nextMonth(now, time.October).AddDate(2, 0, 0)},
 		{"blue october", nextMonth(now, time.October).AddDate(3, 0, 0)},
@@ -244,7 +244,7 @@ func TestParse_goodDays(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			want := truncateDay(c.WantTime)
+			want := truncateDay(c.WantTime).Time
 			assert.Equal(t, want, v)
 		})
 	}
@@ -329,7 +329,7 @@ func TestParse_monthOnly(t *testing.T) {
 				t.Errorf("Parse(..., DefaultToFuture) error = %v", err)
 				return
 			}
-			futureDate := nextMonth(now, tt.month)
+			futureDate := nextMonth(now, tt.month).Time
 			if !reflect.DeepEqual(got, futureDate) {
 				t.Errorf("Parse(..., DefaultToFuture) got = %v, want %v", got, futureDate)
 			}
@@ -340,7 +340,7 @@ func TestParse_monthOnly(t *testing.T) {
 				t.Errorf("Parse(..., DefaultToFuture) error = %v", err)
 				return
 			}
-			pastDate := prevMonth(now, tt.month)
+			pastDate := prevMonth(now, tt.month).Time
 			if !reflect.DeepEqual(got, pastDate) {
 				t.Errorf("Parse(..., DefaultToFuture) got = %v, want %v", got, pastDate)
 			}
@@ -353,7 +353,7 @@ func TestParse_future(t *testing.T) {
 		input      string
 		wantOutput time.Time
 	}{
-		{"january", nextMonth(now, time.January)},
+		{"january", nextMonth(now, time.January).Time},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
@@ -510,7 +510,7 @@ func Test_truncateWeek(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := truncateWeek(tt.args.t); !reflect.DeepEqual(got, tt.want) {
+			if got := truncateWeek(tt.args.t).Time; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("truncateWeek() = %v, want %v", got, tt.want)
 			}
 		})
@@ -525,225 +525,225 @@ func TestParseRange(t *testing.T) {
 		// from A to B
 		{
 			"from 3 feb 2022 to 6 oct 2022",
-			Range{
-				Start: time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// A to B
 		{
 			"3 feb 2022 to 6 oct 2022",
-			Range{
-				Start: time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// from A until B
 		{
 			"from 3 feb 2022 until 6 oct 2022",
-			Range{
-				Start: time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		{
 			"from tuesday at 5pm -12:00 until thursday 23:52 +14:00",
-			Range{
-				Start: setLocation(setTime(nextWeekdayFrom(now, time.Tuesday), 12+5, 0, 0, 0), fixedZone(-12)),
-				End:   setLocation(setTime(nextWeekdayFrom(now, time.Thursday), 23, 52, 0, 0), fixedZone(14)),
-			},
+			RangeFromTimes(
+				setLocation(setTime(nextWeekdayFrom(now, time.Tuesday), 12+5, 0, 0, 0), fixedZone(-12)),
+				setLocation(setTime(nextWeekdayFrom(now, time.Thursday), 23, 52, 0, 0), fixedZone(14)),
+			),
 		},
 		// yesterday
 		{
 			"yesterday",
-			Range{
-				Start: today.AddDate(0, 0, -1),
-				End:   today,
-			},
+			RangeFromTimes(
+				today.AddDate(0, 0, -1),
+				today,
+			),
 		},
 		// today
 		{
 			"today",
-			Range{
-				Start: today,
-				End:   today.AddDate(0, 0, 1),
-			},
+			RangeFromTimes(
+				today,
+				today.AddDate(0, 0, 1),
+			),
 		},
 		// tomorrow
 		{
 			"tomorrow",
-			Range{
-				Start: today.AddDate(0, 0, 1),
-				End:   today.AddDate(0, 0, 2),
-			},
+			RangeFromTimes(
+				today.AddDate(0, 0, 1),
+				today.AddDate(0, 0, 2),
+			),
 		},
 		// last week
 		{
 			"last week",
-			Range{
-				Start: time.Date(2022, 9, 18, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 9, 18, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// this week
 		{
 			"this week",
-			Range{
-				Start: time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// next week
 		{
 			"next week",
-			Range{
-				Start: time.Date(2022, 10, 3, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 10, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// last month
 		{
 			"last month",
-			Range{
-				Start: time.Date(2022, 8, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 8, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// this month
 		{
 			"this month",
-			Range{
-				Start: time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// next month
 		{
 			"next month",
-			Range{
-				Start: time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// last year
 		{
 			"last year",
-			Range{
-				Start: time.Date(2021, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2021, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// this year
 		{
 			"this year",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// next year
 		{
 			"next year",
-			Range{
-				Start: time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// absolute year
 		{
 			"2025",
-			Range{
-				Start: time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// absolute month
 		{
 			"feb 2025",
-			Range{
-				Start: time.Date(2025, 2, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2025, 2, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// absolute day
 		{
 			"3 feb 2025",
-			Range{
-				Start: time.Date(2025, 2, 3, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2025, 2, 4, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2025, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2025, 2, 4, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// absolute hour
 		{
 			"3 feb 2025 at 5pm",
-			Range{
-				Start: time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
-				End:   time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
+				time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()),
+			),
 		},
 		// absolute minute
 		{
 			"3 feb 2025 at 5:35pm",
-			Range{
-				Start: time.Date(2025, 2, 3, 12+5, 35, 0, 0, now.Location()),
-				End:   time.Date(2025, 2, 3, 12+5, 36, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2025, 2, 3, 12+5, 35, 0, 0, now.Location()),
+				time.Date(2025, 2, 3, 12+5, 36, 0, 0, now.Location()),
+			),
 		},
 		// absolute second
 		{
 			"3 feb 2025 at 5:35:52pm",
-			Range{
-				Start: time.Date(2025, 2, 3, 12+5, 35, 52, 0, now.Location()),
-				End:   time.Date(2025, 2, 3, 12+5, 35, 53, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2025, 2, 3, 12+5, 35, 52, 0, now.Location()),
+				time.Date(2025, 2, 3, 12+5, 35, 53, 0, now.Location()),
+			),
 		},
 		// 2022 jan 1 0:0:0
 		{
 			"2022 jan 1 0:0:0",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 1, 1, 0, 0, 1, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 0, 0, 1, 0, now.Location()),
+			),
 		},
 		// 2022 jan 1 0:0
 		{
 			"2022 jan 1 0:0",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+			),
 		},
 		// 2022 jan 1 0
 		{
 			"2022 jan 1 0",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+			),
 		},
 		// 2022 jan 1
 		{
 			"2022 jan 1",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 1, 2, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 2, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// 2022 jan
 		{
 			"2022 jan",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 		// 2022
 		{
 			"2022",
-			Range{
-				Start: time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				End:   time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
-			},
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+			),
 		},
 	}
 	for _, tt := range tests {
