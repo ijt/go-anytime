@@ -713,9 +713,17 @@ func TestParseRange(t *testing.T) {
 				time.Date(2022, 1, 1, 0, 1, 0, 0, now.Location()),
 			),
 		},
-		// 2022 jan 1 0
+		// 2022 jan 1 12am
 		{
-			"2022 jan 1 0",
+			"2022 jan 1 12am",
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+			),
+		},
+		// 2022 jan 1 0am
+		{
+			"2022 jan 1 0am",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
