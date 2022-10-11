@@ -271,6 +271,11 @@ func TestParse_futurePast(t *testing.T) {
 			prevWeekdayFrom(now, time.Thursday),
 		},
 		{
+			"on thursday",
+			nextWeekdayFrom(now, time.Thursday),
+			prevWeekdayFrom(now, time.Thursday),
+		},
+		{
 			"december 20 at 9pm",
 			nextMonthDayTime(now, time.December, 20, 21, 0, 0),
 			prevMonthDayTime(now, time.December, 20, 21, 0, 0),
