@@ -476,7 +476,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 		n.Result = Range{
 			setLocation(t.Time, z),
-			time.Second,
+			t.Duration,
 		}
 	})
 
