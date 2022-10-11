@@ -597,7 +597,7 @@ func TestParseRange(t *testing.T) {
 		{
 			"next week",
 			RangeFromTimes(
-				time.Date(2022, 10, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()),
 			),
 		},
