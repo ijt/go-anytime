@@ -1,4 +1,4 @@
-// Package anytime provides natural date time parsing.
+// Package anytime parses dates, times and ranges without requiring a format.
 package anytime
 
 import (
