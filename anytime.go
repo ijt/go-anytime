@@ -90,12 +90,16 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = truncateMonth(ref.AddDate(0, 1, 0))
 	})
 
-	lastWeek := gp.Seq("last", "week").Map(func(n *gp.Result) {
-		n.Result = truncateWeek(ref.AddDate(0, 0, -7))
+	lastWeekParser := gp.Seq("last", "week").Map(func(n *gp.Result) {
+		n.Result = lastWeek(ref)
 	})
 
-	nextWeek := gp.Seq("next", "week").Map(func(n *gp.Result) {
-		n.Result = truncateWeek(ref.AddDate(0, 0, 7))
+	thisWeekParser := gp.Seq("this", "week").Map(func(n *gp.Result) {
+		n.Result = thisWeek(ref)
+	})
+
+	nextWeekParser := gp.Seq("next", "week").Map(func(n *gp.Result) {
+		n.Result = nextWeek(ref)
 	})
 
 	one := gp.Bind("one", 1)
@@ -763,10 +767,24 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		lastYear, thisYear, nextYear,
 		nextMo, thisMo, prevMo,
 		lastWeekday, nextWeekday,
-		lastWeek, nextWeek,
+		lastWeekParser, thisWeekParser, nextWeekParser,
 		colorMonth, monthNoYear,
 		weekdayNoDirection, yearOnly,
 		hourMinuteSecond)
+}
+
+func thisWeek(ref time.Time) Range {
+	return truncateWeek(ref)
+}
+
+func lastWeek(ref time.Time) Range {
+	minus7 := ref.AddDate(0, 0, -7)
+	return truncateWeek(minus7)
+}
+
+func nextWeek(ref time.Time) Range {
+	plus7 := ref.AddDate(0, 0, 7)
+	return truncateWeek(plus7)
 }
 
 // ParseRange parses a string such as "from april 20 at 5pm to may 5 at 9pm"
