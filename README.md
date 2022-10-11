@@ -1,6 +1,7 @@
 # Go Anytime
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/ijt/go-anytime)](https://goreportcard.com/report/github.com/ijt/go-anytime)
+[![codecov](https://codecov.io/gh/ijt/go-anytime/branch/main/graph/badge.svg?token=GA1TIU7OHK)](https://codecov.io/gh/ijt/go-anytime)
 [![GoDoc](https://godoc.org/github.com/ijt/go-anytime?status.svg)](https://godoc.org/github.com/ijt/go-anytime)
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 
