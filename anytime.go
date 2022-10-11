@@ -477,15 +477,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	lastWeekday := gp.Seq("last", weekday).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := prevWeekdayFrom(ref, day)
-		r := Range{d, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[2].Result)
+		n.Result = Range{d, 24 * time.Hour}
 	})
 
 	nextWeekday := gp.Seq("next", weekday).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := nextWeekdayFrom(ref, day)
-		r := Range{d, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[2].Result)
+		n.Result = Range{d, 24 * time.Hour}
 	})
 
 	lastSpecificMonthDay := gp.Seq("last", month, dayOfMonth).Map(func(n *gp.Result) {
@@ -493,8 +491,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[2].Result.(int)
 		pm := prevMonth(ref, m)
 		t := time.Date(pm.Year(), pm.Month(), d, 0, 0, 0, 0, ref.Location())
-		r := Range{t, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[3].Result)
+		n.Result = Range{t, 24 * time.Hour}
 	})
 
 	nextSpecificMonthDay := gp.Seq("next", month, dayOfMonth).Map(func(n *gp.Result) {
@@ -502,8 +499,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[2].Result.(int)
 		nm := nextMonth(ref, m)
 		t := time.Date(nm.Year(), nm.Month(), d, 0, 0, 0, 0, ref.Location())
-		r := Range{t, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[3].Result)
+		n.Result = Range{t, 24 * time.Hour}
 	})
 
 	lastYear := gp.Seq("last", "year").Map(func(n *gp.Result) {
