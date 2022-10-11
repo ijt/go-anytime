@@ -759,3 +759,32 @@ func TestParseRange(t *testing.T) {
 		})
 	}
 }
+
+func Test_nextWeek(t *testing.T) {
+	type args struct {
+		ref time.Time
+	}
+	tests := []struct {
+		name string
+		args args
+		want Range
+	}{
+		{
+			name: "2022-9-30",
+			args: args{
+				ref: now,
+			},
+			want: Range{
+				Time:     time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
+				Duration: 7 * 24 * time.Hour,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := nextWeek(tt.args.ref); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("nextWeek() = \n%v\nwant\n%v", got, tt.want)
+			}
+		})
+	}
+}
