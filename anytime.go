@@ -474,7 +474,9 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	date := gp.AnyWithName("date", ymdDate, dmyDate, mdyDate, myDate, ymDate)
+	date := gp.Seq(gp.Maybe("on"), gp.AnyWithName("date", ymdDate, dmyDate, mdyDate, myDate, ymDate)).Map(func(n *gp.Result) {
+		n.Result = n.Child[1].Result
+	})
 
 	atTimeWithMaybeZone := gp.Seq(gp.Maybe("at"), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
 		t := n.Child[1].Result.(Range)
