@@ -21,6 +21,7 @@ func RangeFromTimes(start, end time.Time) Range {
 	return Range{start, end.Sub(start)}
 }
 
+// String returns a string with the time and duration of the range.
 func (r Range) String() string {
 	return fmt.Sprintf("{time: %v, duration: %v}", r.Time, r.Duration)
 }
