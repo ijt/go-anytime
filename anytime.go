@@ -291,17 +291,23 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		dur := time.Hour
 		m := 0
 		s := 0
+		ap := n.Child[2].Token
+		t, err := time.Parse("3pm", fmt.Sprintf("%d%s", h, ap))
+		if err != nil {
+			panic(err)
+		}
 		if c1 != nil {
 			ms := n.Child[1].Result.(Range)
 			m = ms.Minute()
 			s = ms.Second()
+			t, err = time.Parse("3:4:5pm", fmt.Sprintf("%d:%d:%d%s", h, m, s, ap))
+			if err != nil {
+				panic(err)
+			}
 			dur = ms.Duration
 		}
-		if n.Child[2].Token == "pm" {
-			h += 12
-		}
 		n.Result = Range{
-			time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location()),
+			time.Date(ref.Year(), ref.Month(), ref.Day(), t.Hour(), t.Minute(), t.Second(), 0, ref.Location()),
 			dur,
 		}
 	})
