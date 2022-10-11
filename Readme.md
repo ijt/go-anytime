@@ -66,3 +66,6 @@ Here are some examples of expressions that can be parsed by `anytime.ParseRange(
 - 3 feb 2022 to 6 oct 2022
 - from 3 feb 2022 until 6 oct 2022
 - from tuesday at 5pm -12:00 until thursday 23:52 +14:00
+- last year
+- today
+- next week
