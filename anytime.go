@@ -81,6 +81,9 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		optFunc(&o)
 	}
 
+	sep := gp.Maybe(gp.AnyWithName("separator", "/", "-", ","))
+	comma := gp.Maybe(",")
+
 	now := gp.Bind("now", Range{ref, time.Nanosecond})
 
 	prevMo := gp.Seq("last", "month").Map(func(n *gp.Result) {
@@ -191,7 +194,15 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[0].Result
 	})
 
-	month := gp.AnyWithName("month", longMonth, shortMonthMaybeDot)
+	monthNum := gp.Regex(`[01]?\d\b`).Map(func(n *gp.Result) {
+		m, err := strconv.Atoi(n.Token)
+		if err != nil {
+			panic(fmt.Sprintf("parsing month number: %v", err))
+		}
+		n.Result = time.Month(m)
+	})
+
+	month := gp.AnyWithName("month", longMonth, shortMonthMaybeDot, monthNum)
 
 	lastSpecificMonth := gp.Seq("last", month).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
@@ -201,14 +212,6 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	nextSpecificMonth := gp.Seq("next", month).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
 		n.Result = nextMonth(ref, m)
-	})
-
-	monthNum := gp.Regex(`[01]?\d\b`).Map(func(n *gp.Result) {
-		m, err := strconv.Atoi(n.Token)
-		if err != nil {
-			panic(fmt.Sprintf("parsing month number: %v", err))
-		}
-		n.Result = time.Month(m)
 	})
 
 	dayOfMonthNum := gp.Regex(`[0-3]?\d`).Map(func(n *gp.Result) {
@@ -395,7 +398,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	rfc1123Z := gp.Seq(weekday, gp.Maybe(","), dayOfMonth, month, year, hourMinuteSecond, gp.Cut(), zone).Map(func(n *gp.Result) {
+	rfc1123Z := gp.Seq(weekday, comma, dayOfMonth, month, year, hourMinuteSecond, gp.Cut(), zone).Map(func(n *gp.Result) {
 		d := n.Child[2].Result.(int)
 		m := n.Child[3].Result.(time.Month)
 		y := n.Child[4].Result.(int)
@@ -415,7 +418,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = Range{t, time.Second}
 	})
 
-	dmyDate := gp.Seq(dayOfMonth, gp.Maybe("of"), month, gp.Maybe(","), year).Map(func(n *gp.Result) {
+	dmyDate := gp.Seq(dayOfMonth, gp.Maybe(gp.Any("of", sep)), month, sep, year).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		y := n.Child[4].Result.(int)
@@ -444,20 +447,20 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = Range{d0, dur}
 	})
 
-	mdyDate := gp.Seq(month, dayOfMonth, gp.Maybe(","), year).Map(func(n *gp.Result) {
+	mdyDate := gp.Seq(month, sep, dayOfMonth, sep, year).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(time.Month)
-		d := n.Child[1].Result.(int)
-		y := n.Child[3].Result.(int)
+		d := n.Child[2].Result.(int)
+		y := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
 			24 * time.Hour,
 		}
 	})
 
-	ymdDate := gp.Seq(year, month, dayOfMonth).Map(func(n *gp.Result) {
+	ymdDate := gp.Seq(year, sep, month, sep, dayOfMonth).Map(func(n *gp.Result) {
 		y := n.Child[0].Result.(int)
-		m := n.Child[1].Result.(time.Month)
-		d := n.Child[2].Result.(int)
+		m := n.Child[2].Result.(time.Month)
+		d := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
 			24 * time.Hour,
@@ -655,9 +658,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = setTimeMaybe(d, n.Child[2].Result)
 	})
 
-	slash := gp.Any("/", "-")
-
-	ymdNumbers := gp.Seq(year, slash, monthNum, slash, dayOfMonthNum).Map(func(n *gp.Result) {
+	ymdNumbers := gp.Seq(year, sep, monthNum, sep, dayOfMonthNum).Map(func(n *gp.Result) {
 		y := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		d := n.Child[4].Result.(int)
@@ -667,7 +668,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	dmyNumbers := gp.Seq(dayOfMonthNum, slash, monthNum, slash, year).Map(func(n *gp.Result) {
+	dmyNumbers := gp.Seq(dayOfMonthNum, sep, monthNum, sep, year).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		y := n.Child[4].Result.(int)
