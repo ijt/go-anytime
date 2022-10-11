@@ -742,7 +742,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	})
 
 	return gp.AnyWithName("natural date",
-		now, today, yesterday, tomorrow,
+		now,
 		ansiC, rubyDate, rfc1123Z, rfc3339,
 		dateZone, dateTime,
 		dateAsNumbersMaybeZone,
