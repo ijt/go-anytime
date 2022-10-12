@@ -3,7 +3,6 @@ package anytime
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -81,8 +80,6 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	for _, optFunc := range options {
 		optFunc(&o)
 	}
-
-	gp.EnableLogging(os.Stdout)
 
 	sep := gp.Maybe(gp.AnyWithName("separator", "/", "-", ","))
 	sladash := gp.AnyWithName("slash or dash", "/", "-")
