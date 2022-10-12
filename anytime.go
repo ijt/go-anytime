@@ -834,7 +834,6 @@ func prevWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 }
 
 // nextWeekdayFrom returns the next week day relative to time t.
-// TODO: test this with t = some sunday, day = time.Sunday.
 func nextWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 	d := day - t.Weekday()
 	if d <= 0 {

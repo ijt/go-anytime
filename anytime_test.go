@@ -871,3 +871,25 @@ func Test_prevWeekdayFrom(t *testing.T) {
 		})
 	}
 }
+
+func Test_nextWeekdayFrom(t *testing.T) {
+	tests := []struct {
+		day  time.Weekday
+		want time.Time
+	}{
+		{time.Friday, time.Date(2022, 9, 30, 0, 0, 0, 0, now.Location())},
+		{time.Saturday, time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location())},
+		{time.Sunday, time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location())},
+		{time.Monday, time.Date(2022, 10, 3, 0, 0, 0, 0, now.Location())},
+		{time.Tuesday, time.Date(2022, 10, 4, 0, 0, 0, 0, now.Location())},
+		{time.Wednesday, time.Date(2022, 10, 5, 0, 0, 0, 0, now.Location())},
+		{time.Thursday, time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location())},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s", tt.day), func(t *testing.T) {
+			if got := nextWeekdayFrom(now, tt.day); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("prevWeekdayFrom() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
