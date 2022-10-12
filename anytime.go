@@ -273,6 +273,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[1].Result
 	})
 
+	// TODO: remove the Maybe around the ":" if it works.
 	colonMinute := gp.Seq(gp.Maybe(":"), minute).Map(func(n *gp.Result) {
 		n.Result = n.Child[1].Result
 	})
