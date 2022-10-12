@@ -26,16 +26,6 @@ func (r Range) String() string {
 	return fmt.Sprintf("{time: %v, duration: %v}", r.Time, r.Duration)
 }
 
-// Start is the start of the range.
-func (r Range) Start() time.Time {
-	return r.Time // not sure about the exact syntax here
-}
-
-// End is the end of the range.
-func (r Range) End() time.Time {
-	return r.Start().Add(r.Duration)
-}
-
 type direction int
 
 const (
