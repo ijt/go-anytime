@@ -559,8 +559,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = setDayMaybe(d, n.Child[1].Result)
 	})
 
-	weekdayNoDirection := gp.Seq(gp.Maybe("on"), weekday).Map(func(n *gp.Result) {
-		w := n.Child[1].Result.(time.Weekday)
+	weekdayNoDirection := gp.Seq(weekday).Map(func(n *gp.Result) {
+		w := n.Child[0].Result.(time.Weekday)
 		var t time.Time
 		switch o.defaultDirection {
 		case future:
@@ -639,11 +639,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		monthsAgo, monthsFromNow,
 		xYearsAgo, xYearsFromToday)
 
-	onDate := gp.Seq(gp.Maybe("on"), date).Map(func(n *gp.Result) {
+	on := gp.Regex(`\bon\b`)
+	onDate := gp.Seq(gp.Maybe(on), date).Map(func(n *gp.Result) {
 		n.Result = n.Child[1].Result
 	})
 
-	atTimeWithMaybeZone := gp.Seq(gp.Maybe("at"), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
+	at := gp.Regex(`\b(at|@)\b`)
+	atTimeWithMaybeZone := gp.Seq(gp.Maybe(at), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
 		t := n.Child[1].Result.(Range)
 		z := ref.Location()
 		c2 := n.Child[2].Result
