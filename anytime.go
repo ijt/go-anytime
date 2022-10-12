@@ -3,6 +3,7 @@ package anytime
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -80,6 +81,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	for _, optFunc := range options {
 		optFunc(&o)
 	}
+
+	gp.EnableLogging(os.Stdout)
 
 	sep := gp.Maybe(gp.AnyWithName("separator", "/", "-", ","))
 	comma := gp.Maybe(",")
@@ -202,7 +205,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = time.Month(m)
 	})
 
-	month := gp.AnyWithName("month", longMonth, shortMonthMaybeDot, monthNum)
+	month := gp.AnyWithName("month", longMonth, shortMonthMaybeDot)
 
 	lastSpecificMonth := gp.Seq("last", month).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
@@ -658,6 +661,11 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = setTimeMaybe(d, n.Child[2].Result)
 	})
 
+	timeDate := gp.Seq(atTimeWithMaybeZone, onDate).Map(func(n *gp.Result) {
+		d := n.Child[1].Result.(Range)
+		n.Result = setTimeMaybe(d, n.Child[0].Result)
+	})
+
 	ymdNumbers := gp.Seq(year, sep, monthNum, sep, dayOfMonthNum).Map(func(n *gp.Result) {
 		y := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
@@ -744,7 +752,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	return gp.AnyWithName("natural date",
 		now,
 		ansiC, rubyDate, rfc1123Z, rfc3339,
-		dateZone, dateTime,
+		dateZone, timeDate, dateTime,
 		dateAsNumbersMaybeZone,
 		xMinutesAgo, xMinutesFromNow,
 		xHoursAgo, xHoursFromNow,
