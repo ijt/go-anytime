@@ -85,6 +85,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	gp.EnableLogging(os.Stdout)
 
 	sep := gp.Maybe(gp.AnyWithName("separator", "/", "-", ","))
+	sladash := gp.AnyWithName("slash or dash", "/", "-")
 	comma := gp.Maybe(",")
 
 	now := gp.Bind("now", Range{ref, time.Nanosecond})
@@ -471,6 +472,16 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
+	ymdNumDate := gp.Seq(year, sladash, monthNum, sladash, dayOfMonthNum).Map(func(n *gp.Result) {
+		y := n.Child[0].Result.(int)
+		m := n.Child[2].Result.(time.Month)
+		d := n.Child[4].Result.(int)
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
+	})
+
 	yearOnly := year.Map(func(n *gp.Result) {
 		y := n.Result.(int)
 		d0 := time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
@@ -627,6 +638,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	date := gp.AnyWithName("date",
 		yesterday, today, tomorrow,
 		ymdDate, dmyDate, mdyDate, myDate, ymDate,
+		ymdNumDate,
 		lastSpecificMonthDay, nextSpecificMonthDay,
 		lastSpecificMonth, nextSpecificMonth,
 		lastYear, thisYear, nextYear,
