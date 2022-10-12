@@ -261,8 +261,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[1].Result
 	})
 
-	// TODO: remove the Maybe around the ":" if it works.
-	colonMinute := gp.Seq(gp.Maybe(":"), minute).Map(func(n *gp.Result) {
+	colonMinute := gp.Seq(":", minute).Map(func(n *gp.Result) {
 		n.Result = n.Child[1].Result
 	})
 
@@ -334,7 +333,11 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = h
 	})
 
-	zoneOffset := gp.Seq(zoneHour, gp.Maybe(colonMinute)).Map(func(n *gp.Result) {
+	maybeColonMinute := gp.Seq(gp.Maybe(":"), minute).Map(func(n *gp.Result) {
+		n.Result = n.Child[1].Result
+	})
+
+	zoneOffset := gp.Seq(zoneHour, gp.Maybe(maybeColonMinute)).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
 		c1 := n.Child[1].Result
 		m := 0
@@ -822,7 +825,6 @@ func fixedZone(offsetHours int) *time.Location {
 }
 
 // prevWeekdayFrom returns the previous week day relative to time t.
-// TODO: test this with t = some sunday, day = time.Sunday.
 func prevWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 	d := t.Weekday() - day
 	if d <= 0 {
@@ -832,7 +834,6 @@ func prevWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 }
 
 // nextWeekdayFrom returns the next week day relative to time t.
-// TODO: test this with t = some sunday, day = time.Sunday.
 func nextWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 	d := day - t.Weekday()
 	if d <= 0 {
