@@ -817,3 +817,35 @@ func Test_nextWeek(t *testing.T) {
 		})
 	}
 }
+
+func TestRange_String(t *testing.T) {
+	type fields struct {
+		Time     time.Time
+		Duration time.Duration
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "zeros",
+			fields: fields{
+				Time:     time.Time{},
+				Duration: 0,
+			},
+			want: "{time: 0001-01-01 00:00:00 +0000 UTC, duration: 0s}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Range{
+				Time:     tt.fields.Time,
+				Duration: tt.fields.Duration,
+			}
+			if got := r.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
