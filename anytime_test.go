@@ -59,6 +59,7 @@ func TestParse_goodTimes(t *testing.T) {
 		{`17:25:30`, dateAtTime(today, 17, 25, 30)},
 
 		// dates with times
+		{"on 3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{"3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{`3 days ago at 11:25am`, dateAtTime(now.Add(-3*24*time.Hour), 11, 25, 0)},
 		{`3 days from now at 14:26`, dateAtTime(now.Add(3*24*time.Hour), 14, 26, 0)},
@@ -266,6 +267,11 @@ func TestParse_futurePast(t *testing.T) {
 		},
 		{
 			"thursday",
+			nextWeekdayFrom(now, time.Thursday),
+			prevWeekdayFrom(now, time.Thursday),
+		},
+		{
+			"on thursday",
 			nextWeekdayFrom(now, time.Thursday),
 			prevWeekdayFrom(now, time.Thursday),
 		},
@@ -807,6 +813,38 @@ func Test_nextWeek(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := nextWeek(tt.args.ref); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("nextWeek() = \n%v\nwant\n%v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRange_String(t *testing.T) {
+	type fields struct {
+		Time     time.Time
+		Duration time.Duration
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "zeros",
+			fields: fields{
+				Time:     time.Time{},
+				Duration: 0,
+			},
+			want: "{time: 0001-01-01 00:00:00 +0000 UTC, duration: 0s}",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := Range{
+				Time:     tt.fields.Time,
+				Duration: tt.fields.Duration,
+			}
+			if got := r.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
 			}
 		})
 	}

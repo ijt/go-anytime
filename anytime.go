@@ -26,16 +26,6 @@ func (r Range) String() string {
 	return fmt.Sprintf("{time: %v, duration: %v}", r.Time, r.Duration)
 }
 
-// Start is the start of the range.
-func (r Range) Start() time.Time {
-	return r.Time // not sure about the exact syntax here
-}
-
-// End is the end of the range.
-func (r Range) End() time.Time {
-	return r.Start().Add(r.Duration)
-}
-
 type direction int
 
 const (
@@ -80,6 +70,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	for _, optFunc := range options {
 		optFunc(&o)
 	}
+
+	sep := gp.Maybe(gp.AnyWithName("separator", "/", "-", ","))
+	sladash := gp.AnyWithName("slash or dash", "/", "-")
+	comma := gp.Maybe(",")
 
 	now := gp.Bind("now", Range{ref, time.Nanosecond})
 
@@ -191,6 +185,14 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[0].Result
 	})
 
+	monthNum := gp.Regex(`[01]?\d\b`).Map(func(n *gp.Result) {
+		m, err := strconv.Atoi(n.Token)
+		if err != nil {
+			panic(fmt.Sprintf("parsing month number: %v", err))
+		}
+		n.Result = time.Month(m)
+	})
+
 	month := gp.AnyWithName("month", longMonth, shortMonthMaybeDot)
 
 	lastSpecificMonth := gp.Seq("last", month).Map(func(n *gp.Result) {
@@ -201,14 +203,6 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	nextSpecificMonth := gp.Seq("next", month).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
 		n.Result = nextMonth(ref, m)
-	})
-
-	monthNum := gp.Regex(`[01]?\d\b`).Map(func(n *gp.Result) {
-		m, err := strconv.Atoi(n.Token)
-		if err != nil {
-			panic(fmt.Sprintf("parsing month number: %v", err))
-		}
-		n.Result = time.Month(m)
 	})
 
 	dayOfMonthNum := gp.Regex(`[0-3]?\d`).Map(func(n *gp.Result) {
@@ -267,6 +261,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[1].Result
 	})
 
+	// TODO: remove the Maybe around the ":" if it works.
 	colonMinute := gp.Seq(gp.Maybe(":"), minute).Map(func(n *gp.Result) {
 		n.Result = n.Child[1].Result
 	})
@@ -395,7 +390,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	rfc1123Z := gp.Seq(weekday, gp.Maybe(","), dayOfMonth, month, year, hourMinuteSecond, gp.Cut(), zone).Map(func(n *gp.Result) {
+	rfc1123Z := gp.Seq(weekday, comma, dayOfMonth, month, year, hourMinuteSecond, gp.Cut(), zone).Map(func(n *gp.Result) {
 		d := n.Child[2].Result.(int)
 		m := n.Child[3].Result.(time.Month)
 		y := n.Child[4].Result.(int)
@@ -415,7 +410,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = Range{t, time.Second}
 	})
 
-	dmyDate := gp.Seq(dayOfMonth, gp.Maybe("of"), month, gp.Maybe(","), year).Map(func(n *gp.Result) {
+	dmyDate := gp.Seq(dayOfMonth, gp.Maybe(gp.Any("of", sep)), month, sep, year).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(int)
 		m := n.Child[2].Result.(time.Month)
 		y := n.Child[4].Result.(int)
@@ -444,20 +439,40 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = Range{d0, dur}
 	})
 
-	mdyDate := gp.Seq(month, dayOfMonth, gp.Maybe(","), year).Map(func(n *gp.Result) {
+	mdyDate := gp.Seq(month, sep, dayOfMonth, sep, year).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(time.Month)
-		d := n.Child[1].Result.(int)
-		y := n.Child[3].Result.(int)
+		d := n.Child[2].Result.(int)
+		y := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
 			24 * time.Hour,
 		}
 	})
 
-	ymdDate := gp.Seq(year, month, dayOfMonth).Map(func(n *gp.Result) {
+	ymdDate := gp.Seq(year, sep, month, sep, dayOfMonth).Map(func(n *gp.Result) {
 		y := n.Child[0].Result.(int)
-		m := n.Child[1].Result.(time.Month)
-		d := n.Child[2].Result.(int)
+		m := n.Child[2].Result.(time.Month)
+		d := n.Child[4].Result.(int)
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
+	})
+
+	ymdNumDate := gp.Seq(year, sladash, monthNum, sladash, dayOfMonthNum).Map(func(n *gp.Result) {
+		y := n.Child[0].Result.(int)
+		m := n.Child[2].Result.(time.Month)
+		d := n.Child[4].Result.(int)
+		n.Result = Range{
+			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
+			24 * time.Hour,
+		}
+	})
+
+	dmyNumDate := gp.Seq(dayOfMonthNum, sep, monthNum, sep, year).Map(func(n *gp.Result) {
+		d := n.Child[0].Result.(int)
+		m := n.Child[2].Result.(time.Month)
+		y := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
 			24 * time.Hour,
@@ -474,139 +489,32 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	date := gp.AnyWithName("date", ymdDate, dmyDate, mdyDate, myDate, ymDate)
-
-	atTimeWithMaybeZone := gp.Seq(gp.Maybe("at"), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
-		t := n.Child[1].Result.(Range)
-		z := ref.Location()
-		c2 := n.Child[2].Result
-		if c2 != nil {
-			z = c2.(*time.Location)
-		}
-		n.Result = Range{
-			setLocation(t.Time, z),
-			t.Duration,
-		}
-	})
-
-	lastWeekday := gp.Seq("last", weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	lastWeekday := gp.Seq("last", weekday).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := prevWeekdayFrom(ref, day)
-		r := Range{d, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[2].Result)
+		n.Result = Range{d, 24 * time.Hour}
 	})
 
-	nextWeekday := gp.Seq("next", weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	nextWeekday := gp.Seq("next", weekday).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := nextWeekdayFrom(ref, day)
-		r := Range{d, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[2].Result)
+		n.Result = Range{d, 24 * time.Hour}
 	})
 
-	lastSpecificMonthDay := gp.Seq("last", month, dayOfMonth, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	lastSpecificMonthDay := gp.Seq("last", month, dayOfMonth).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
 		d := n.Child[2].Result.(int)
 		pm := prevMonth(ref, m)
 		t := time.Date(pm.Year(), pm.Month(), d, 0, 0, 0, 0, ref.Location())
-		r := Range{t, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[3].Result)
+		n.Result = Range{t, 24 * time.Hour}
 	})
 
-	nextSpecificMonthDay := gp.Seq("next", month, dayOfMonth, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	nextSpecificMonthDay := gp.Seq("next", month, dayOfMonth).Map(func(n *gp.Result) {
 		m := n.Child[1].Result.(time.Month)
 		d := n.Child[2].Result.(int)
 		nm := nextMonth(ref, m)
 		t := time.Date(nm.Year(), nm.Month(), d, 0, 0, 0, 0, ref.Location())
-		r := Range{t, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[3].Result)
-	})
-
-	todayTime := gp.Seq("today", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		d := truncateDay(ref)
-		n.Result = setTimeMaybe(d, n.Child[2].Result)
-	})
-
-	timeToday := gp.Seq(atTimeWithMaybeZone, "today").Map(func(n *gp.Result) {
-		d := truncateDay(ref)
-		n.Result = setTimeMaybe(d, n.Child[0].Result)
-	})
-
-	today := gp.Any(timeToday, todayTime)
-
-	yesterdayTime := gp.Seq("yesterday", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		d := truncateDay(ref.AddDate(0, 0, -1))
-		n.Result = setTimeMaybe(d, n.Child[2].Result)
-	})
-
-	timeYesterday := gp.Seq(atTimeWithMaybeZone, "yesterday").Map(func(n *gp.Result) {
-		d := truncateDay(ref.AddDate(0, 0, -1))
-		n.Result = setTimeMaybe(d, n.Child[0].Result)
-	})
-
-	yesterday := gp.Any(timeYesterday, yesterdayTime)
-
-	tomorrowTime := gp.Seq("tomorrow", gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		d := truncateDay(ref.AddDate(0, 0, 1))
-		n.Result = setTimeMaybe(d, n.Child[1].Result)
-	})
-
-	timeTomorrow := gp.Seq(atTimeWithMaybeZone, "tomorrow").Map(func(n *gp.Result) {
-		d := truncateDay(ref.AddDate(0, 0, 1))
-		n.Result = setTimeMaybe(d, n.Child[0].Result)
-	})
-
-	tomorrow := gp.Any(timeTomorrow, tomorrowTime)
-
-	dateTime := gp.Seq(date, gp.Maybe(","), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		d := n.Child[0].Result.(Range)
-		n.Result = setTimeMaybe(d, n.Child[2].Result)
-	})
-
-	slash := gp.Any("/", "-")
-
-	ymdNumbers := gp.Seq(year, slash, monthNum, slash, dayOfMonthNum).Map(func(n *gp.Result) {
-		y := n.Child[0].Result.(int)
-		m := n.Child[2].Result.(time.Month)
-		d := n.Child[4].Result.(int)
-		n.Result = Range{
-			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
-		}
-	})
-
-	dmyNumbers := gp.Seq(dayOfMonthNum, slash, monthNum, slash, year).Map(func(n *gp.Result) {
-		d := n.Child[0].Result.(int)
-		m := n.Child[2].Result.(time.Month)
-		y := n.Child[4].Result.(int)
-		n.Result = Range{
-			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
-		}
-	})
-
-	dateAsNumbers := gp.AnyWithName("date as numbers", ymdNumbers, dmyNumbers)
-
-	dateAsNumbersMaybeZone := gp.Seq(dateAsNumbers, gp.Maybe(zone)).Map(func(n *gp.Result) {
-		d := n.Child[0].Result.(Range)
-		c1 := n.Child[1].Result
-		z := d.Location()
-		if c1 != nil {
-			z = c1.(*time.Location)
-		}
-		n.Result = Range{
-			time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, z),
-			24 * time.Hour,
-		}
-	})
-
-	dateZone := gp.Seq(date, zone).Map(func(n *gp.Result) {
-		d := n.Child[0].Result.(Range)
-		z := n.Child[1].Result.(*time.Location)
-		n.Result =
-			Range{
-				setLocation(d.Time, z),
-				d.Duration,
-			}
+		n.Result = Range{t, 24 * time.Hour}
 	})
 
 	lastYear := gp.Seq("last", "year").Map(func(n *gp.Result) {
@@ -620,6 +528,63 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	nextYear := gp.Seq("next", "year").Map(func(n *gp.Result) {
 		n.Result = truncateYear(ref.AddDate(1, 0, 0))
 	})
+
+	color := gp.AnyWithName("color",
+		"white", "red", "green", "blue", "gold", "purple", "orange", "pink",
+		"silver", "copper")
+
+	colorMonth := gp.Seq(color, month).Map(func(n *gp.Result) {
+		c := n.Child[0].Token
+		m := n.Child[1].Result.(time.Month)
+		color2delta := map[string]int{
+			"white":  0,
+			"red":    1,
+			"green":  2,
+			"blue":   3,
+			"gold":   4,
+			"purple": 5,
+			"orange": 6,
+			"pink":   7,
+			"silver": 8,
+			"copper": 9,
+		}
+		delta := color2delta[c]
+		t := nextMonth(ref, m)
+		dur := t.AddDate(0, 1, 0).Sub(t.Time)
+		n.Result = Range{t.AddDate(delta, 0, 0), dur}
+	})
+
+	monthNoYear := gp.Seq(month, gp.Maybe(dayOfMonth)).Map(func(n *gp.Result) {
+		var d Range
+		m := n.Child[0].Result.(time.Month)
+		switch o.defaultDirection {
+		case future:
+			d = nextMonth(ref, m)
+		case past:
+			d = prevMonth(ref, m)
+		default:
+			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
+		}
+		n.Result = setDayMaybe(d, n.Child[1].Result)
+	})
+
+	weekdayNoDirection := gp.Seq(weekday).Map(func(n *gp.Result) {
+		w := n.Child[0].Result.(time.Weekday)
+		var t time.Time
+		switch o.defaultDirection {
+		case future:
+			t = nextWeekdayFrom(ref, w)
+		case past:
+			t = prevWeekdayFrom(ref, w)
+		default:
+			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
+		}
+		n.Result = Range{t, 24 * time.Hour}
+	})
+
+	yesterday := gp.Bind("yesterday", truncateDay(ref.AddDate(0, 0, -1)))
+	today := gp.Bind("today", truncateDay(ref))
+	tomorrow := gp.Bind("tomorrow", truncateDay(ref.AddDate(0, 0, 1)))
 
 	yearsLabel := gp.Regex(`years?`)
 
@@ -641,34 +606,86 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 
 	daysLabel := gp.Regex(`days?`)
 
-	xDaysAgo := gp.Seq(number, daysLabel, "ago", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	xDaysAgo := gp.Seq(number, daysLabel, "ago").Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, -delta)
-		r := Range{d, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[4].Result)
+		n.Result = Range{d, 24 * time.Hour}
 	})
 
-	xDaysFromNow := gp.Seq(number, daysLabel, fromNowOrToday, gp.Cut(), gp.Maybe(atTimeWithMaybeZone), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	xDaysFromNow := gp.Seq(number, daysLabel, fromNowOrToday).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, delta)
-		r := Range{d, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[4].Result)
+		n.Result = Range{d, 24 * time.Hour}
 	})
 
 	weeksLabel := gp.Regex(`weeks?`)
 
-	xWeeksAgo := gp.Seq(number, weeksLabel, "ago", gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	xWeeksAgo := gp.Seq(number, weeksLabel, "ago").Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, -7*delta)
-		r := Range{d, 7 * 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[4].Result)
+		n.Result = Range{d, 7 * 24 * time.Hour}
 	})
 
-	xWeeksFromNow := gp.Seq(number, weeksLabel, fromNowOrToday, gp.Cut(), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	xWeeksFromNow := gp.Seq(number, weeksLabel, fromNowOrToday).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, 7*delta)
-		r := Range{d, 7 * 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[4].Result)
+		n.Result = Range{d, 7 * 24 * time.Hour}
+	})
+
+	date := gp.AnyWithName("date",
+		yesterday, today, tomorrow,
+		ymdDate, dmyDate, mdyDate, myDate, ymDate,
+		ymdNumDate, dmyNumDate,
+		lastSpecificMonthDay, nextSpecificMonthDay,
+		lastSpecificMonth, nextSpecificMonth,
+		lastYear, thisYear, nextYear,
+		nextMo, thisMo, prevMo,
+		lastWeekday, nextWeekday,
+		lastWeekParser, thisWeekParser, nextWeekParser,
+		colorMonth, monthNoYear,
+		weekdayNoDirection, yearOnly,
+		xDaysAgo, xDaysFromNow,
+		xWeeksAgo, xWeeksFromNow,
+		monthsAgo, monthsFromNow,
+		xYearsAgo, xYearsFromToday)
+
+	on := gp.Regex(`\bon\b`)
+	onDate := gp.Seq(gp.Maybe(on), date).Map(func(n *gp.Result) {
+		n.Result = n.Child[1].Result
+	})
+
+	at := gp.Regex(`\b(at|@)\b`)
+	atTimeWithMaybeZone := gp.Seq(gp.Maybe(at), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
+		t := n.Child[1].Result.(Range)
+		z := ref.Location()
+		c2 := n.Child[2].Result
+		if c2 != nil {
+			z = c2.(*time.Location)
+		}
+		n.Result = Range{
+			setLocation(t.Time, z),
+			t.Duration,
+		}
+	})
+
+	onDateAtTime := gp.Seq(onDate, comma, atTimeWithMaybeZone).Map(func(n *gp.Result) {
+		d := n.Child[0].Result.(Range)
+		n.Result = setTimeMaybe(d, n.Child[2].Result)
+	})
+
+	atTimeOnDate := gp.Seq(atTimeWithMaybeZone, onDate).Map(func(n *gp.Result) {
+		d := n.Child[1].Result.(Range)
+		n.Result = setTimeMaybe(d, n.Child[0].Result)
+	})
+
+	onDateZone := gp.Seq(onDate, zone).Map(func(n *gp.Result) {
+		d := n.Child[0].Result.(Range)
+		z := n.Child[1].Result.(*time.Location)
+		n.Result =
+			Range{
+				setLocation(d.Time, z),
+				d.Duration,
+			}
 	})
 
 	minutesLabel := gp.Regex(`minutes?`)
@@ -709,80 +726,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	color := gp.AnyWithName("color",
-		"white", "red", "green", "blue", "gold", "purple", "orange", "pink",
-		"silver", "copper")
-
-	colorMonth := gp.Seq(color, month).Map(func(n *gp.Result) {
-		c := n.Child[0].Token
-		m := n.Child[1].Result.(time.Month)
-		color2delta := map[string]int{
-			"white":  0,
-			"red":    1,
-			"green":  2,
-			"blue":   3,
-			"gold":   4,
-			"purple": 5,
-			"orange": 6,
-			"pink":   7,
-			"silver": 8,
-			"copper": 9,
-		}
-		delta := color2delta[c]
-		t := nextMonth(ref, m)
-		dur := t.AddDate(0, 1, 0).Sub(t.Time)
-		n.Result = Range{t.AddDate(delta, 0, 0), dur}
-	})
-
-	monthNoYear := gp.Seq(month, gp.Maybe(dayOfMonth), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		var d Range
-		m := n.Child[0].Result.(time.Month)
-		switch o.defaultDirection {
-		case future:
-			d = nextMonth(ref, m)
-		case past:
-			d = prevMonth(ref, m)
-		default:
-			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
-		}
-		d = setDayMaybe(d, n.Child[1].Result)
-		n.Result = setTimeMaybe(d, n.Child[2].Result)
-	})
-
-	weekdayNoDirection := gp.Seq(weekday, gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
-		w := n.Child[0].Result.(time.Weekday)
-		var t time.Time
-		switch o.defaultDirection {
-		case future:
-			t = nextWeekdayFrom(ref, w)
-		case past:
-			t = prevWeekdayFrom(ref, w)
-		default:
-			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
-		}
-		r := Range{t, 24 * time.Hour}
-		n.Result = setTimeMaybe(r, n.Child[1].Result)
-	})
-
 	return gp.AnyWithName("natural date",
-		now, today, yesterday, tomorrow,
+		now,
 		ansiC, rubyDate, rfc1123Z, rfc3339,
-		dateZone, dateTime,
-		dateAsNumbersMaybeZone,
+		onDateZone, atTimeOnDate, onDateAtTime,
+		onDate, atTimeWithMaybeZone,
 		xMinutesAgo, xMinutesFromNow,
 		xHoursAgo, xHoursFromNow,
-		xDaysAgo, xDaysFromNow,
-		xWeeksAgo, xWeeksFromNow,
-		monthsAgo, monthsFromNow,
-		xYearsAgo, xYearsFromToday,
-		lastSpecificMonthDay, nextSpecificMonthDay,
-		lastSpecificMonth, nextSpecificMonth,
-		lastYear, thisYear, nextYear,
-		nextMo, thisMo, prevMo,
-		lastWeekday, nextWeekday,
-		lastWeekParser, thisWeekParser, nextWeekParser,
-		colorMonth, monthNoYear,
-		weekdayNoDirection, yearOnly,
 		hourMinuteSecond)
 }
 
