@@ -656,7 +656,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	dateTime := gp.Seq(onDate, gp.Maybe(","), gp.Maybe(atTimeWithMaybeZone)).Map(func(n *gp.Result) {
+	dateTime := gp.Seq(onDate, comma, atTimeWithMaybeZone).Map(func(n *gp.Result) {
 		d := n.Child[0].Result.(Range)
 		n.Result = setTimeMaybe(d, n.Child[2].Result)
 	})
@@ -753,6 +753,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		now,
 		ansiC, rubyDate, rfc1123Z, rfc3339,
 		dateZone, timeDate, dateTime,
+		onDate, atTimeWithMaybeZone,
 		dateAsNumbersMaybeZone,
 		xMinutesAgo, xMinutesFromNow,
 		xHoursAgo, xHoursFromNow,
