@@ -825,7 +825,6 @@ func fixedZone(offsetHours int) *time.Location {
 }
 
 // prevWeekdayFrom returns the previous week day relative to time t.
-// TODO: test this with t = some sunday, day = time.Sunday.
 func prevWeekdayFrom(t time.Time, day time.Weekday) time.Time {
 	d := t.Weekday() - day
 	if d <= 0 {
