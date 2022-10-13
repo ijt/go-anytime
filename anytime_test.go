@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	gp "github.com/ijt/goparsify"
 	"github.com/tj/assert"
 )
 
@@ -248,6 +249,18 @@ func TestParse_goodDays(t *testing.T) {
 			}
 			want := truncateDay(c.WantTime).Time
 			assert.Equal(t, want, v)
+
+			// Run the parser at a lower level and make sure the token it
+			// returns matches the input string.
+			dp := Parser(now, DefaultToFuture)
+			p := gp.Parsify(dp)
+			ps := gp.NewState(c.Input)
+			ret := gp.Result{}
+			p(ps, &ret)
+			ps.WS(ps)
+			if ret.Token != c.Input {
+				t.Errorf("parsed token = %q, want %q", ret.Token, c.Input)
+			}
 		})
 	}
 }
