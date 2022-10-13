@@ -148,6 +148,18 @@ func TestParse_goodTimes(t *testing.T) {
 				t.Fatal(err)
 			}
 			assert.Equal(t, c.WantTime, v)
+
+			// Run the parser at a lower level and make sure the token it
+			// returns matches the input string.
+			dp := Parser(now, DefaultToFuture)
+			p := gp.Parsify(dp)
+			ps := gp.NewState(c.Input)
+			ret := gp.Result{}
+			p(ps, &ret)
+			ps.WS(ps)
+			if ret.Token != c.Input {
+				t.Errorf("parsed token = %q, want %q", ret.Token, c.Input)
+			}
 		})
 	}
 }
