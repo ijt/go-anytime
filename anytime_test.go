@@ -807,6 +807,16 @@ func TestParseRange(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ParseRange() got =\n%v\nwant\n%v", got, tt.want)
 			}
+
+			// Run the parser at a lower level and make sure the token it
+			// returns matches the input string.
+			rp := RangeParser(now, DefaultToFuture)
+			input := strings.ToLower(tt.input)
+			node, _ := runParser(input, rp)
+			want := strings.TrimSpace(input)
+			if node.Token != want {
+				t.Errorf("parsed token = %q, want %q", node.Token, want)
+			}
 		})
 	}
 }
