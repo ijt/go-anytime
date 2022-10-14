@@ -153,15 +153,11 @@ func TestParse_goodTimes(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			dp := Parser(now, DefaultToFuture)
-			p := gp.Parsify(dp)
-			ps := gp.NewState(c.Input)
-			ret := gp.Result{}
-			p(ps, &ret)
-			ps.WS(ps)
-
-			want := strings.TrimSpace(c.Input)
-			if ret.Token != want {
-				t.Errorf("parsed token = %q, want %q", ret.Token, want)
+			input := strings.ToLower(c.Input)
+			node, _ := runParser(input, dp)
+			want := strings.TrimSpace(input)
+			if node.Token != want {
+				t.Errorf("parsed token = %q, want %q", node.Token, want)
 			}
 		})
 	}
@@ -268,14 +264,11 @@ func TestParse_goodDays(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			dp := Parser(now, DefaultToFuture)
-			p := gp.Parsify(dp)
-			ps := gp.NewState(c.Input)
-			ret := gp.Result{}
-			p(ps, &ret)
-			ps.WS(ps)
+			input := strings.ToLower(c.Input)
+			node, _ := runParser(input, dp)
 			wantTok := strings.TrimSpace(input)
-			if ret.Token != wantTok {
-				t.Errorf("parsed token = %q, want %q", ret.Token, wantTok)
+			if node.Token != wantTok {
+				t.Errorf("parsed token = %q, want %q", node.Token, wantTok)
 			}
 		})
 	}
@@ -921,4 +914,11 @@ func Test_nextWeekdayFrom(t *testing.T) {
 			}
 		})
 	}
+}
+
+func runParser(input string, parser gp.Parser) (gp.Result, *gp.State) {
+	ps := gp.NewState(input)
+	result := gp.Result{}
+	parser(ps, &result)
+	return result, ps
 }
