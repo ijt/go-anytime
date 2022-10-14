@@ -54,7 +54,7 @@ func DefaultToPast(o *opts) {
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
 	s = strings.ToLower(s)
 	p := Parser(ref, opts...)
-	result, err := gp.Run(p, s, gp.UnicodeWhitespace)
+	result, _, err := gp.Run(p, s, gp.UnicodeWhitespace)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("running parser: %w", err)
 	}
@@ -758,7 +758,7 @@ func nextWeek(ref time.Time) Range {
 func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
 	s = strings.ToLower(s)
 	p := RangeParser(ref, opts...)
-	result, err := gp.Run(p, s, gp.UnicodeWhitespace)
+	result, _, err := gp.Run(p, s, gp.UnicodeWhitespace)
 	if err != nil {
 		return Range{}, fmt.Errorf("running range parser: %w", err)
 	}
