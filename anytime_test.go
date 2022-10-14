@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -157,8 +158,10 @@ func TestParse_goodTimes(t *testing.T) {
 			ret := gp.Result{}
 			p(ps, &ret)
 			ps.WS(ps)
-			if ret.Token != c.Input {
-				t.Errorf("parsed token = %q, want %q", ret.Token, c.Input)
+
+			want := strings.TrimSpace(c.Input)
+			if ret.Token != want {
+				t.Errorf("parsed token = %q, want %q", ret.Token, want)
 			}
 		})
 	}
@@ -270,8 +273,9 @@ func TestParse_goodDays(t *testing.T) {
 			ret := gp.Result{}
 			p(ps, &ret)
 			ps.WS(ps)
-			if ret.Token != c.Input {
-				t.Errorf("parsed token = %q, want %q", ret.Token, c.Input)
+			wantTok := strings.TrimSpace(input)
+			if ret.Token != wantTok {
+				t.Errorf("parsed token = %q, want %q", ret.Token, wantTok)
 			}
 		})
 	}
