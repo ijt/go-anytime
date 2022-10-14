@@ -8,6 +8,8 @@ github.com/ijt/goparsify v0.0.0-20221014014738-73840772a434 h1:JCD5isgUORXKMwhDx
 github.com/ijt/goparsify v0.0.0-20221014014738-73840772a434/go.mod h1:0c0Ez5P1jFdxA4px9pkIW80h8pQAybaSQtpErDzG3nM=
 github.com/ijt/goparsify v0.0.0-20221014124929-fbde3764fa38 h1:GCiTCqIFScbuMT7r932Zi5Jp6YeDMTIT2byeidMUTQE=
 github.com/ijt/goparsify v0.0.0-20221014124929-fbde3764fa38/go.mod h1:0c0Ez5P1jFdxA4px9pkIW80h8pQAybaSQtpErDzG3nM=
+github.com/ijt/goparsify v0.0.0-20221014172814-db4df1500775 h1:NYT44EJjvO4H3yVnP2jfL6FHwDMDeaLPz40kvy50rQQ=
+github.com/ijt/goparsify v0.0.0-20221014172814-db4df1500775/go.mod h1:0c0Ez5P1jFdxA4px9pkIW80h8pQAybaSQtpErDzG3nM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
