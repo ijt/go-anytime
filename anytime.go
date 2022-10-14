@@ -768,7 +768,7 @@ func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
 
 // RangeParser takes a reference time ref and returns a parser for date ranges.
 func RangeParser(ref time.Time, options ...func(o *opts)) gp.Parser {
-	preposition := gp.AnyWithName("a preposition such as to or until", "to", "until", "til", "'til", "till")
+	preposition := gp.AnyWithName("a preposition such as to or until", "to", "until", "through", "til", "'til", "till")
 	toPart := gp.Seq(preposition, Parser(ref, options...)).Map(func(n *gp.Result) {
 		n.Result = n.Child[1].Result
 	})
