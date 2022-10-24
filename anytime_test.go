@@ -1031,6 +1031,19 @@ func TestReplaceTimesByFunc(t *testing.T) {
 			want:    "market",
 			wantErr: false,
 		},
+		{
+			name: "month doesn't get mistaken for mon-day followed by th",
+			args: args{
+				s:   "month",
+				ref: time.Time{},
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "month",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
