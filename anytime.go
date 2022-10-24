@@ -50,6 +50,7 @@ func DefaultToPast(o *opts) {
 }
 
 func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, options ...func(o *opts)) (string, error) {
+	s = strings.ToLower(s)
 	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
 		r := n.Result.(Range)
 		n.Result = f(r.Time)
