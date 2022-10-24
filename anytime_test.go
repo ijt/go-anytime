@@ -967,6 +967,19 @@ func TestReplaceTimesByFunc(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "issue 14 example without prefix",
+			args: args{
+				s:   "on Tuesday at 11am UTC",
+				ref: time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "2022-10-25 11:00:00 +0000 UTC",
+			wantErr: false,
+		},
+		{
 			name: "issue 14 example",
 			args: args{
 				s:   "Let's meet on Tuesday at 11am UTC",
