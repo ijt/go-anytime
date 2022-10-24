@@ -215,7 +215,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = Range{s, dur}
 	})
 
-	shortWeekday := gp.AnyWithName("short weekday", "mon", "tue", "wed", "thu", "fri", "sat", "sun")
+	shortWeekdays := []string{"mon", "tue", "wed", "thu", "fri", "sat", "sun"}
+	var shortWeekdayParsers []gp.Parserish
+	for _, swd := range shortWeekdays {
+		shortWeekdayName := gp.Regex(`\b` + swd + `\b`)
+		shortWeekdayParsers = append(shortWeekdayParsers, shortWeekdayName)
+	}
+	shortWeekday := gp.AnyWithName("short weekday", shortWeekdayParsers...)
 
 	longWeekday := gp.AnyWithName("long weekday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
