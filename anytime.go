@@ -16,6 +16,14 @@ type Range struct {
 	Duration time.Duration
 }
 
+func (r Range) Start() time.Time {
+	return r.Time
+}
+
+func (r Range) End() time.Time {
+	return r.Time.Add(r.Duration)
+}
+
 // RangeFromTimes returns a range given the start and end times.
 func RangeFromTimes(start, end time.Time) Range {
 	return Range{start, end.Sub(start)}
@@ -49,7 +57,71 @@ func DefaultToPast(o *opts) {
 	o.defaultDirection = past
 }
 
-// Parse parses a string assumed to contain a date and possibly a time
+// ReplaceTimesByFunc replaces all dates, times and datetimes found in the given
+// string s by calling the func f. The ref and options arguments are the same as
+// in Parse.
+func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, options ...func(o *opts)) (string, error) {
+	s = strings.ToLower(s)
+	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
+		r := n.Result.(Range)
+		n.Result = f(r.Time)
+	})
+	word := gp.Regex(`\S+`).Map(func(n *gp.Result) {
+		n.Result = n.Token
+	})
+	p := gp.Many(gp.AnyWithName("time or word", tyme, word)).Map(func(n *gp.Result) {
+		var results []string
+		for _, c := range n.Child {
+			r := c.Result.(string)
+			results = append(results, r)
+		}
+		n.Result = strings.Join(results, " ")
+	})
+	result, _, err := gp.Run(p, s)
+	if err != nil {
+		return "", fmt.Errorf("parsing: %w", err)
+	}
+	s2 := result.(string)
+	return s2, nil
+}
+
+// ReplaceRangesByFunc replaces all ranges found in the given string s by
+// calling the func f. The ref and options arguments are the same as in
+// ParseRange. Ranges like "today" that can also be parsed as non-ranges
+// are skipped over.
+func ReplaceRangesByFunc(s string, ref time.Time, f func(Range) string, options ...func(o *opts)) (string, error) {
+	s = strings.ToLower(s)
+	rangeParser := RangeParser(ref, options...).Map(func(n *gp.Result) {
+		r := n.Result.(Range)
+		_, err := Parse(n.Token, ref, options...)
+		if err == nil {
+			// This "range" is also parseable as a regular date, so leave it
+			// alone.
+			n.Result = n.Token
+			return
+		}
+		n.Result = f(r)
+	})
+	wordParser := gp.Regex(`\S+`).Map(func(n *gp.Result) {
+		n.Result = n.Token
+	})
+	p := gp.Many(gp.AnyWithName("range or word", rangeParser, wordParser)).Map(func(n *gp.Result) {
+		var results []string
+		for _, c := range n.Child {
+			r := c.Result.(string)
+			results = append(results, r)
+		}
+		n.Result = strings.Join(results, " ")
+	})
+	result, _, err := gp.Run(p, s)
+	if err != nil {
+		return "", fmt.Errorf("parsing: %w", err)
+	}
+	s2 := result.(string)
+	return s2, nil
+}
+
+// Parse parses a string assumed to contain a date, a time, or a datetime
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
 	s = strings.ToLower(s)

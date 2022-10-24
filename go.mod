@@ -3,7 +3,7 @@ module github.com/ijt/go-anytime
 go 1.19
 
 require (
-	github.com/ijt/goparsify v0.0.0-20221014172814-db4df1500775
+	github.com/ijt/goparsify v0.0.0-20221024170958-31de98bdd429
 	github.com/tj/assert v0.0.0-20190920132354-ee03d75cd160
 )
 

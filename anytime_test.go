@@ -61,6 +61,7 @@ func TestParse_goodTimes(t *testing.T) {
 		{`17:25:30`, dateAtTime(today, 17, 25, 30)},
 
 		// dates with times
+		{"on Tuesday at 11am UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Tuesday), 11, 0, 0), time.UTC)},
 		{"on 3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{"3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{`3 days ago at 11:25am`, dateAtTime(now.Add(-3*24*time.Hour), 11, 25, 0)},
@@ -939,4 +940,172 @@ func runParser(input string, parser gp.Parser) (gp.Result, *gp.State) {
 	result := gp.Result{}
 	parser(ps, &result)
 	return result, ps
+}
+
+func TestReplaceTimesByFunc(t *testing.T) {
+	type args struct {
+		s       string
+		ref     time.Time
+		f       func(time.Time) string
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				s:       "",
+				ref:     time.Time{},
+				f:       nil,
+				options: nil,
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "issue 14 example without prefix",
+			args: args{
+				s:   "on Tuesday at 11am UTC",
+				ref: time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "2022-10-25 11:00:00 +0000 UTC",
+			wantErr: false,
+		},
+		{
+			name: "issue 14 example",
+			args: args{
+				s:   "Let's meet on Tuesday at 11am UTC if that works for you",
+				ref: time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC if that works for you",
+			wantErr: false,
+		},
+		{
+			name: "two dates",
+			args: args{
+				s:   "Let's meet on Tuesday at 11am UTC or monday if you like",
+				ref: time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC or 2022-10-31 00:00:00 +0000 UTC if you like",
+			wantErr: false,
+		},
+		{
+			name: "one range shows up as two dates",
+			args: args{
+				s:   "from 3 feb 2022 to 6 oct 2022",
+				ref: now,
+				f: func(t time.Time) string {
+					return "DATE"
+				},
+				options: nil,
+			},
+			want:    "from DATE to DATE",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ReplaceTimesByFunc(tt.args.s, tt.args.ref, tt.args.f, tt.args.options...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReplaceTimesByFunc() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ReplaceTimesByFunc() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestReplaceRangesByFunc(t *testing.T) {
+	type args struct {
+		s       string
+		ref     time.Time
+		f       func(Range) string
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				s:       "",
+				ref:     now,
+				f:       nil,
+				options: nil,
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "two dates without a connecting preposition get left alone",
+			args: args{
+				s:       "Let's meet on Tuesday at 11am UTC or monday if you like",
+				ref:     time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f:       nil,
+				options: nil,
+			},
+			want:    "let's meet on tuesday at 11am utc or monday if you like",
+			wantErr: false,
+		},
+		{
+			name: "one range shows up as a range",
+			args: args{
+				s:   "from 3 feb 2022 to 6 oct 2022",
+				ref: now,
+				f: func(r Range) string {
+					ymd := "2006/01/02"
+					return fmt.Sprintf("%s - %s", r.Start().Format(ymd), r.End().Format(ymd))
+				},
+				options: nil,
+			},
+			want:    "2022/02/03 - 2022/10/06",
+			wantErr: false,
+		},
+		{
+			name: "stuff then range then stuff then range then stuff",
+			args: args{
+				s:   "twas brillig from 3 feb 2022 to 6 oct 2022 and the slithy toves from april until may did gyre and gimble in the wabe",
+				ref: now,
+				f: func(r Range) string {
+					return "RANGE"
+				},
+				options: nil,
+			},
+			want:    "twas brillig RANGE and the slithy toves RANGE did gyre and gimble in the wabe",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ReplaceRangesByFunc(tt.args.s, tt.args.ref, tt.args.f, tt.args.options...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReplaceRangesByFunc() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ReplaceRangesByFunc() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
