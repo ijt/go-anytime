@@ -62,7 +62,7 @@ func TestParse_goodTimes(t *testing.T) {
 		{`17:25:30`, dateAtTime(today, 17, 25, 30)},
 
 		// dates with times
-		{"on Friday at noon UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Tuesday), 12, 0, 0), time.UTC)},
+		{"on Friday at noon UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Friday), 12, 0, 0), time.UTC)},
 		{"on Tuesday at 11am UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Tuesday), 11, 0, 0), time.UTC)},
 		{"on 3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{"3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
