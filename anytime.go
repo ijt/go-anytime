@@ -49,7 +49,7 @@ func DefaultToPast(o *opts) {
 	o.defaultDirection = past
 }
 
-// Parse parses a string assumed to contain a date and possibly a time
+// Parse parses a string assumed to contain a date, a time, or a datetime
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
 	s = strings.ToLower(s)
