@@ -245,7 +245,15 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = t.Month()
 	})
 
-	shortMonth := gp.AnyWithName("month", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec").Map(func(n *gp.Result) {
+	shortMonthNames := []string{
+		"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec",
+	}
+	var shortMonthParsers []gp.Parserish
+	for _, mo := range shortMonthNames {
+		shortMonth := gp.Regex(`\b` + mo + `\b`)
+		shortMonthParsers = append(shortMonthParsers, shortMonth)
+	}
+	shortMonth := gp.AnyWithName("month", shortMonthParsers...).Map(func(n *gp.Result) {
 		t, err := time.Parse("Jan", n.Token)
 		if err != nil {
 			panic(fmt.Sprintf("identifying month: %v", err))
