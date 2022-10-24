@@ -976,7 +976,7 @@ func TestReplaceTimesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "Let's meet 2022-10-25 12:00:00 +0000 UTC",
+			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC",
 			wantErr: false,
 		},
 	}
