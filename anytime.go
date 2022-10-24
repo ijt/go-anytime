@@ -352,6 +352,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
+	noon := gp.Regex(`\bnoon\b`).Map(func(n *gp.Result) {
+		n.Result = Range{
+			time.Date(ref.Year(), ref.Month(), ref.Day(), 12, 0, 0, 0, ref.Location()),
+			time.Hour,
+		}
+	})
+
 	hour12MinuteSecond := gp.Seq(hour12, gp.Maybe(colonMinuteColonSecond), amPM).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
 		c1 := n.Child[1].Result
@@ -729,8 +736,10 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[1].Result
 	})
 
+	tyme := gp.AnyWithName("time", hourMinuteSecond, noon)
+
 	at := gp.Regex(`\b(at|@)\b`)
-	atTimeWithMaybeZone := gp.Seq(gp.Maybe(at), hourMinuteSecond, gp.Maybe(zone)).Map(func(n *gp.Result) {
+	atTimeWithMaybeZone := gp.Seq(gp.Maybe(at), tyme, gp.Maybe(zone)).Map(func(n *gp.Result) {
 		t := n.Child[1].Result.(Range)
 		z := ref.Location()
 		c2 := n.Child[2].Result
