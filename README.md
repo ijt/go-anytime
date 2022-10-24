@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/ijt/go-anytime/branch/main/graph/badge.svg?token=GA1TIU7OHK)](https://codecov.io/gh/ijt/go-anytime)
 [![GoDoc](https://godoc.org/github.com/ijt/go-anytime?status.svg)](https://godoc.org/github.com/ijt/go-anytime)
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Awesome](https://cdn.rawgit.com/avelino/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/avelino/awesome-go#date-and-time)
 
 Natural date time parsing for Go. This package was originally forked from
 [github.com/tj/go-naturaldate](https://github.com/tj/go-naturaldate) but has diverged so much that it needed a new name
