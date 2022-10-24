@@ -49,6 +49,30 @@ func DefaultToPast(o *opts) {
 	o.defaultDirection = past
 }
 
+func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, options ...func(o *opts)) (string, error) {
+	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
+		r := n.Result.(Range)
+		n.Result = f(r.Time)
+	})
+	word := gp.Regex(`\S+`).Map(func(n *gp.Result) {
+		n.Result = n.Token
+	})
+	p := gp.Many(gp.AnyWithName("time or word", tyme, word)).Map(func(n *gp.Result) {
+		var results []string
+		for _, c := range n.Child {
+			r := c.Result.(string)
+			results = append(results, r)
+		}
+		n.Result = strings.Join(results, " ")
+	})
+	result, _, err := gp.Run(p, s)
+	if err != nil {
+		return "", fmt.Errorf("parsing: %w", err)
+	}
+	s2 := result.(string)
+	return s2, nil
+}
+
 // Parse parses a string assumed to contain a date, a time, or a datetime
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {

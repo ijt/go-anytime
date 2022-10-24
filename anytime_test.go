@@ -940,3 +940,55 @@ func runParser(input string, parser gp.Parser) (gp.Result, *gp.State) {
 	parser(ps, &result)
 	return result, ps
 }
+
+func TestReplaceTimesByFunc(t *testing.T) {
+	type args struct {
+		s       string
+		ref     time.Time
+		f       func(time.Time) string
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				s:       "",
+				ref:     time.Time{},
+				f:       nil,
+				options: nil,
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "issue 14 example",
+			args: args{
+				s:   "Let's meet on Tuesday at 11am UTC",
+				ref: time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "Let's meet 2022-10-25 12:00:00 +0000 UTC",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ReplaceTimesByFunc(tt.args.s, tt.args.ref, tt.args.f, tt.args.options...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReplaceTimesByFunc() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ReplaceTimesByFunc() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
