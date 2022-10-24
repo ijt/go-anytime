@@ -1082,6 +1082,19 @@ func TestReplaceRangesByFunc(t *testing.T) {
 			want:    "2022/02/03 - 2022/10/06",
 			wantErr: false,
 		},
+		{
+			name: "stuff then range then stuff then range then stuff",
+			args: args{
+				s:   "twas brillig from 3 feb 2022 to 6 oct 2022 and the slithy toves from april until may did gyre and gimble in the wabe",
+				ref: now,
+				f: func(r Range) string {
+					return "RANGE"
+				},
+				options: nil,
+			},
+			want:    "twas brillig RANGE and the slithy toves RANGE did gyre and gimble in the wabe",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
