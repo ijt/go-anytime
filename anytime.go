@@ -49,6 +49,9 @@ func DefaultToPast(o *opts) {
 	o.defaultDirection = past
 }
 
+// ReplaceTimesByFunc replaces all dates, times and datetimes found in the given
+// string s by calling the func f. The ref and options argument are the same as
+// in Parse.
 func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, options ...func(o *opts)) (string, error) {
 	s = strings.ToLower(s)
 	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
