@@ -50,7 +50,7 @@ func DefaultToPast(o *opts) {
 }
 
 // ReplaceTimesByFunc replaces all dates, times and datetimes found in the given
-// string s by calling the func f. The ref and options argument are the same as
+// string s by calling the func f. The ref and options arguments are the same as
 // in Parse.
 func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, options ...func(o *opts)) (string, error) {
 	s = strings.ToLower(s)
@@ -75,6 +75,10 @@ func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, optio
 	}
 	s2 := result.(string)
 	return s2, nil
+}
+
+func ReplaceRangesByFunc(s string, ref time.Time, f func(Range) string, options ...func(o *opts)) (string, error) {
+	return s, nil
 }
 
 // Parse parses a string assumed to contain a date, a time, or a datetime

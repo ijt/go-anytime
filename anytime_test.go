@@ -1019,3 +1019,42 @@ func TestReplaceTimesByFunc(t *testing.T) {
 		})
 	}
 }
+
+func TestReplaceRangesByFunc(t *testing.T) {
+	type args struct {
+		s       string
+		ref     time.Time
+		f       func(Range) string
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				s:       "",
+				ref:     now,
+				f:       nil,
+				options: nil,
+			},
+			want:    "",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ReplaceRangesByFunc(tt.args.s, tt.args.ref, tt.args.f, tt.args.options...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReplaceRangesByFunc() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ReplaceRangesByFunc() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
