@@ -1005,6 +1005,19 @@ func TestReplaceTimesByFunc(t *testing.T) {
 			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC or 2022-10-31 00:00:00 +0000 UTC if you like",
 			wantErr: false,
 		},
+		{
+			name: "one range shows up as two dates",
+			args: args{
+				s:   "from 3 feb 2022 to 6 oct 2022",
+				ref: now,
+				f: func(t time.Time) string {
+					return "DATE"
+				},
+				options: nil,
+			},
+			want:    "from DATE to DATE",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1042,6 +1055,31 @@ func TestReplaceRangesByFunc(t *testing.T) {
 				options: nil,
 			},
 			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "two dates without a connecting preposition get left alone",
+			args: args{
+				s:       "Let's meet on Tuesday at 11am UTC or monday if you like",
+				ref:     time.Date(2022, time.Month(10), 24, 0, 0, 0, 0, time.UTC),
+				f:       nil,
+				options: nil,
+			},
+			want:    "let's meet on tuesday at 11am utc or monday if you like",
+			wantErr: false,
+		},
+		{
+			name: "one range shows up as a range",
+			args: args{
+				s:   "from 3 feb 2022 to 6 oct 2022",
+				ref: now,
+				f: func(r Range) string {
+					ymd := "2006/01/02"
+					return fmt.Sprintf("%s - %s", r.Start().Format(ymd), r.End().Format(ymd))
+				},
+				options: nil,
+			},
+			want:    "2022/02/03 - 2022/10/06",
 			wantErr: false,
 		},
 	}

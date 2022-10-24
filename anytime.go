@@ -16,6 +16,14 @@ type Range struct {
 	Duration time.Duration
 }
 
+func (r Range) Start() time.Time {
+	return r.Time
+}
+
+func (r Range) End() time.Time {
+	return r.Time.Add(r.Duration)
+}
+
 // RangeFromTimes returns a range given the start and end times.
 func RangeFromTimes(start, end time.Time) Range {
 	return Range{start, end.Sub(start)}
