@@ -141,8 +141,10 @@ func TestParse_goodTimes(t *testing.T) {
 		{`two years ago`, now.AddDate(-2, 0, 0)},
 		{`2 years ago`, now.AddDate(-2, 0, 0)},
 		{`this year`, truncateYear(now).Time},
-		{`1999`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
-		{`2008`, time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location())},
+		{`1999AD`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
+		{`1999 AD`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
+		{`2008CE`, time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location())},
+		{`2008 CE`, time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location())},
 	}
 
 	for _, c := range cases {
@@ -494,6 +496,10 @@ func TestParse_bad(t *testing.T) {
 		// These are currently considered bad input, although they may
 		{`10`},
 		{`17`},
+
+		// Bare years don't have enough context to be confidently parsed as dates.
+		{`1999`},
+		{`2008`},
 
 		// Goofy input:
 		{`10:am`},
@@ -1042,6 +1048,32 @@ func TestReplaceTimesByFunc(t *testing.T) {
 				options: nil,
 			},
 			want:    "month",
+			wantErr: false,
+		},
+		{
+			name: "1000 widgets",
+			args: args{
+				s:   "1000 widgets",
+				ref: time.Time{},
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    "1000 widgets",
+			wantErr: false,
+		},
+		{
+			name: "1000AD",
+			args: args{
+				s:   "1000AD",
+				ref: time.Time{},
+				f: func(t time.Time) string {
+					return t.String()
+				},
+				options: nil,
+			},
+			want:    time.Date(1000, time.Month(1), 1, 0, 0, 0, 0, time.UTC).String(),
 			wantErr: false,
 		},
 	}
