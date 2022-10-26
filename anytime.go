@@ -580,10 +580,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		s = strings.TrimSuffix(s, "ad")
 		s = strings.TrimSuffix(s, "ce")
 		s = strings.TrimSpace(s)
-		y, err := strconv.Atoi(s)
-		if err != nil {
-			panic(fmt.Sprintf("parsing year: %v", err))
-		}
+		y, _ := strconv.Atoi(s)
 		d0 := time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
 		dur := d0.AddDate(1, 0, 0).Sub(d0)
 		n.Result = Range{
