@@ -575,8 +575,15 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 	})
 
-	yearOnly := year.Map(func(n *gp.Result) {
-		y := n.Result.(int)
+	yearEra := gp.Regex(`[12]\d{3}\s*(ad|ce)\b`).Map(func(n *gp.Result) {
+		s := n.Token
+		s = strings.TrimSuffix(s, "ad")
+		s = strings.TrimSuffix(s, "ce")
+		s = strings.TrimSpace(s)
+		y, err := strconv.Atoi(s)
+		if err != nil {
+			panic(fmt.Sprintf("parsing year: %v", err))
+		}
 		d0 := time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
 		dur := d0.AddDate(1, 0, 0).Sub(d0)
 		n.Result = Range{
@@ -739,7 +746,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		lastWeekday, nextWeekday,
 		lastWeekParser, thisWeekParser, nextWeekParser,
 		colorMonth, monthNoYear,
-		weekdayNoDirection, yearOnly,
+		weekdayNoDirection, yearEra,
 		xDaysAgo, xDaysFromNow,
 		xWeeksAgo, xWeeksFromNow,
 		monthsAgo, monthsFromNow,
