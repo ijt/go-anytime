@@ -711,7 +711,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// absolute year
 		{
-			"2025",
+			"2025ad",
 			RangeFromTimes(
 				time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()),
@@ -807,7 +807,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// 2022
 		{
-			"2022",
+			"2022ce",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
