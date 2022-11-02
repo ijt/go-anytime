@@ -1244,3 +1244,37 @@ func TestPartitionTimes(t *testing.T) {
 		})
 	}
 }
+
+func TestPartitionTimesByFuncs(t *testing.T) {
+	type args struct {
+		s       string
+		ref     time.Time
+		ntf     func(nonTimeChunk string)
+		tf      func(timeChunk string, t time.Time)
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "check for empty string underlying time",
+			args: args{
+				s:   "2022/11/2",
+				ref: time.Time{},
+				ntf: nil,
+				tf: func(chunk string, t time.Time) {
+					if chunk == "" {
+						panic("empty chunk for time")
+					}
+				},
+				options: nil,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			PartitionTimesByFuncs(tt.args.s, tt.args.ref, tt.args.ntf, tt.args.tf, tt.args.options...)
+		})
+	}
+}
