@@ -135,15 +135,24 @@ func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
 
 	var parts []any
 	p := gp.Many(gp.AnyWithName("time or word", tyme, word)).Map(func(n *gp.Result) {
+		var strParts []string
 		for _, c := range n.Child {
 			switch v := c.Result.(type) {
 			case string:
-				parts = append(parts, v)
+				strParts = append(strParts, v)
 			case time.Time:
+				if len(strParts) > 0 {
+					parts = append(parts, strings.Join(strParts, " "))
+					strParts = nil
+				}
 				parts = append(parts, v)
 			default:
 				panic(fmt.Sprintf("unexpected type %T in child list", v))
 			}
+		}
+		if len(strParts) > 0 {
+			parts = append(parts, strings.Join(strParts, " "))
+			strParts = nil
 		}
 	})
 	_, _, err := gp.Run(p, s)
