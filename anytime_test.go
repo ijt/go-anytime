@@ -1229,7 +1229,7 @@ func TestPartitionTimes(t *testing.T) {
 		{
 			name: "2022/11/2 vs 2023/12/30",
 			args: args{
-				s:       "a 2022/11/2 b",
+				s:       "2022/11/2 vs 2023/12/30",
 				ref:     time.Time{},
 				options: nil,
 			},
