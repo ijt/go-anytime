@@ -1167,3 +1167,80 @@ func TestReplaceRangesByFunc(t *testing.T) {
 		})
 	}
 }
+
+func TestPartitionTimes(t *testing.T) {
+	d1 := time.Date(2022, 11, 2, 0, 0, 0, 0, time.UTC)
+	d2 := time.Date(2023, 12, 30, 0, 0, 0, 0, time.UTC)
+	type args struct {
+		s       string
+		ref     time.Time
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name string
+		args args
+		want []any
+	}{
+		{
+			name: "empty",
+			args: args{
+				s:       "",
+				ref:     time.Time{},
+				options: nil,
+			},
+			want: nil,
+		},
+		{
+			name: "a",
+			args: args{
+				s:       "a",
+				ref:     time.Time{},
+				options: nil,
+			},
+			want: []any{"a"},
+		},
+		{
+			name: "a b",
+			args: args{
+				s:       "a b",
+				ref:     time.Time{},
+				options: nil,
+			},
+			want: []any{"a b"},
+		},
+		{
+			name: "2022/11/2",
+			args: args{
+				s:       "2022/11/2",
+				ref:     time.Time{},
+				options: nil,
+			},
+			want: []any{d1},
+		},
+		{
+			name: "a 2022/11/2 b",
+			args: args{
+				s:       "a 2022/11/2 b",
+				ref:     time.Time{},
+				options: nil,
+			},
+			want: []any{"a", d1, "b"},
+		},
+		{
+			name: "2022/11/2 vs 2023/12/30",
+			args: args{
+				s:       "2022/11/2 vs 2023/12/30",
+				ref:     time.Time{},
+				options: nil,
+			},
+			want: []any{d1, "vs", d2},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := PartitionTimes(tt.args.s, tt.args.ref, tt.args.options...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PartitionTimes() = %#v, want %#v", got, tt.want)
+			}
+		})
+	}
+}

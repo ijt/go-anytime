@@ -121,6 +121,44 @@ func ReplaceRangesByFunc(s string, ref time.Time, f func(Range) string, options 
 	return s2, nil
 }
 
+// PartitionTimes returns a slice whose pieces are non-time pieces of s and time
+// pieces of s, in order.
+func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
+	s = strings.ToLower(s)
+	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
+		r := n.Result.(Range)
+		n.Result = r.Time
+	})
+	word := gp.Regex(`\S+`).Map(func(n *gp.Result) {
+		n.Result = n.Token
+	})
+
+	var parts []any
+	p := gp.Many(gp.AnyWithName("time or word", tyme, word)).Map(func(n *gp.Result) {
+		var strParts []string
+		for _, c := range n.Child {
+			switch v := c.Result.(type) {
+			case string:
+				strParts = append(strParts, v)
+			case time.Time:
+				if len(strParts) > 0 {
+					parts = append(parts, strings.Join(strParts, " "))
+					strParts = nil
+				}
+				parts = append(parts, v)
+			default:
+				panic(fmt.Sprintf("unexpected type %T in child list", v))
+			}
+		}
+		if len(strParts) > 0 {
+			parts = append(parts, strings.Join(strParts, " "))
+			strParts = nil
+		}
+	})
+	_, _, _ = gp.Run(p, s)
+	return parts
+}
+
 // Parse parses a string assumed to contain a date, a time, or a datetime
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
