@@ -155,10 +155,7 @@ func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
 			strParts = nil
 		}
 	})
-	_, _, err := gp.Run(p, s)
-	if err != nil {
-		return nil
-	}
+	_, _, _ = gp.Run(p, s)
 	return parts
 }
 
