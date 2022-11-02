@@ -124,6 +124,22 @@ func ReplaceRangesByFunc(s string, ref time.Time, f func(Range) string, options 
 // PartitionTimes returns a slice whose pieces are non-time pieces of s and time
 // pieces of s, in order.
 func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
+	var parts []any
+	PartitionTimesByFuncs(s, ref,
+		func(nonTimeChunk string) {
+			parts = append(parts, nonTimeChunk)
+		},
+		func(timeChunk string, t time.Time) {
+			parts = append(parts, t)
+		},
+		options...)
+	return parts
+}
+
+// PartitionTimesByFuncs partitions the given string s into time and non-time
+// parts, calling ntf on the non-time parts and tf on the time parts in
+// succession.
+func PartitionTimesByFuncs(s string, ref time.Time, ntf func(nonTimeChunk string), tf func(timeChunk string, t time.Time), options ...func(o *opts)) {
 	s = strings.ToLower(s)
 	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
 		r := n.Result.(Range)
@@ -132,8 +148,6 @@ func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
 	word := gp.Regex(`\S+`).Map(func(n *gp.Result) {
 		n.Result = n.Token
 	})
-
-	var parts []any
 	p := gp.Many(gp.AnyWithName("time or word", tyme, word)).Map(func(n *gp.Result) {
 		var strParts []string
 		for _, c := range n.Child {
@@ -142,21 +156,20 @@ func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
 				strParts = append(strParts, v)
 			case time.Time:
 				if len(strParts) > 0 {
-					parts = append(parts, strings.Join(strParts, " "))
+					ntf(strings.Join(strParts, " "))
 					strParts = nil
 				}
-				parts = append(parts, v)
+				tf(c.Token, v)
 			default:
 				panic(fmt.Sprintf("unexpected type %T in child list", v))
 			}
 		}
 		if len(strParts) > 0 {
-			parts = append(parts, strings.Join(strParts, " "))
+			ntf(strings.Join(strParts, " "))
 			strParts = nil
 		}
 	})
 	_, _, _ = gp.Run(p, s)
-	return parts
 }
 
 // Parse parses a string assumed to contain a date, a time, or a datetime
@@ -873,7 +886,9 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		onDate, atTimeWithMaybeZone,
 		xMinutesAgo, xMinutesFromNow,
 		xHoursAgo, xHoursFromNow,
-		hourMinuteSecond)
+		hourMinuteSecond).Map(func(n *gp.Result) {
+		pass()
+	})
 }
 
 func thisWeek(ref time.Time) Range {
