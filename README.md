@@ -12,7 +12,7 @@ to avoid confusion. Here are the largest differences:
 
 1. The `go-anytime` module is written in terms of the [github.com/ijt/goparsify](https://github.com/ijt/goparsify) parser combinator module, rather than the [github.com/pointlander/peg](https://github.com/pointlander/peg) parsing module. That made its development and debugging easier, and also means that its parsers can be use within other parsers that use `ijt/goparsify`.
 2. Ranges can be parsed using `ParseRange` or `RangeParser`, for example `"from 3 feb 2022 until 6 oct 2022"`.
-3. Dates/times and ranges can be replaced in strings using the funcs `ReplaceTimesByFunc` and `ReplaceRangesByFunc`.
+3. Dates/times and ranges can be replaced in strings using the funcs `ReplaceTimesByFunc`, `ReplaceRangesByFunc`, and `ReplaceDateRangesByFunc`.
 4. Strings can be partitioned into time and non-time parts using the funcs `PartitionTimes` and `PartitionTimesByFuncs`.
 
 ## Examples
