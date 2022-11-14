@@ -12,7 +12,7 @@ import (
 	"github.com/tj/assert"
 )
 
-var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.Local)
+var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.UTC)
 var today = truncateDay(now).Time
 
 func dateAtTime(dateFrom time.Time, hour int, min int, sec int) time.Time {
@@ -1313,7 +1313,7 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "2022-09-25 00:00:00 -0600 MDT to 2022-10-02 00:00:00 -0600 MDT",
+			want:    "2022-09-25 00:00:00 +0000 UTC to 2022-10-02 00:00:00 +0000 UTC",
 			wantErr: false,
 		},
 		{
@@ -1326,7 +1326,7 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "2022-09-18 00:00:00 -0600 MDT to 2022-09-25 00:00:00 -0600 MDT 2022-09-01 00:00:00 -0600 MDT to 2022-10-01 00:00:00 -0600 MDT 2022-10-01 00:00:00 -0600 MDT to 2022-11-01 00:00:00 -0600 MDT 2022-10-02 00:00:00 -0600 MDT to 2022-10-09 00:00:00 -0600 MDT",
+			want:    "2022-09-18 00:00:00 +0000 UTC to 2022-09-25 00:00:00 +0000 UTC 2022-09-01 00:00:00 +0000 UTC to 2022-10-01 00:00:00 +0000 UTC 2022-10-01 00:00:00 +0000 UTC to 2022-11-01 00:00:00 +0000 UTC 2022-10-02 00:00:00 +0000 UTC to 2022-10-09 00:00:00 +0000 UTC",
 			wantErr: false,
 		},
 		{
@@ -1339,7 +1339,7 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "2022-09-18 00:00:00 -0600 MDT to 2022-09-25 00:00:00 -0600 MDT today 2022-10-02 00:00:00 -0600 MDT to 2022-10-09 00:00:00 -0600 MDT now",
+			want:    "2022-09-18 00:00:00 +0000 UTC to 2022-09-25 00:00:00 +0000 UTC today 2022-10-02 00:00:00 +0000 UTC to 2022-10-09 00:00:00 +0000 UTC now",
 			wantErr: false,
 		},
 	}
