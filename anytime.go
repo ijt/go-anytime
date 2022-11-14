@@ -57,6 +57,40 @@ func DefaultToPast(o *opts) {
 	o.defaultDirection = past
 }
 
+// ReplaceDateRangesByFunc replaces all ranges with duration over one day in the
+// given string s by running func f on each found range and the source string
+// that defines it.
+func ReplaceDateRangesByFunc(s string, ref time.Time, f func(source string, r Range) string, options ...func(o *opts)) (string, error) {
+	s = strings.ToLower(s)
+	rangeParser := RangeParser(ref, options...).Map(func(n *gp.Result) {
+		r := n.Result.(Range)
+		if r.Duration <= 24*time.Hour {
+			// This time range is no more than one day, so it's not really a date
+			// range.
+			n.Result = n.Token
+			return
+		}
+		n.Result = f(n.Token, r)
+	})
+	wordParser := gp.Regex(`\S+`).Map(func(n *gp.Result) {
+		n.Result = n.Token
+	})
+	p := gp.Many(gp.AnyWithName("range or word", rangeParser, wordParser)).Map(func(n *gp.Result) {
+		var results []string
+		for _, c := range n.Child {
+			r := c.Result.(string)
+			results = append(results, r)
+		}
+		n.Result = strings.Join(results, " ")
+	})
+	result, _, err := gp.Run(p, s)
+	if err != nil {
+		return "", fmt.Errorf("parsing date ranges: %w", err)
+	}
+	s2 := result.(string)
+	return s2, nil
+}
+
 // ReplaceTimesByFunc replaces all dates, times and datetimes found in the given
 // string s by calling the func f. The ref and options arguments are the same as
 // in Parse.
