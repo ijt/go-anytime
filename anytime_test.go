@@ -1278,3 +1278,81 @@ func TestPartitionTimesByFuncs(t *testing.T) {
 		})
 	}
 }
+
+func TestReplaceDateRangesByFunc(t *testing.T) {
+	type args struct {
+		s       string
+		ref     time.Time
+		f       func(source string, r Range) string
+		options []func(o *opts)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "empty",
+			args: args{
+				s:       "",
+				ref:     time.Time{},
+				f:       nil,
+				options: nil,
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "this week",
+			args: args{
+				s:   "this week",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%s to %s", r.Start(), r.End())
+				},
+				options: nil,
+			},
+			want:    "2022-09-25 00:00:00 -0600 MDT to 2022-10-02 00:00:00 -0600 MDT",
+			wantErr: false,
+		},
+		{
+			name: "several ranges in a row",
+			args: args{
+				s:   "last week this month next month next week",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%s to %s", r.Start(), r.End())
+				},
+				options: nil,
+			},
+			want:    "2022-09-18 00:00:00 -0600 MDT to 2022-09-25 00:00:00 -0600 MDT 2022-09-01 00:00:00 -0600 MDT to 2022-10-01 00:00:00 -0600 MDT 2022-10-01 00:00:00 -0600 MDT to 2022-11-01 00:00:00 -0600 MDT 2022-10-02 00:00:00 -0600 MDT to 2022-10-09 00:00:00 -0600 MDT",
+			wantErr: false,
+		},
+		{
+			name: "days and smaller get skipped",
+			args: args{
+				s:   "last week today next week now",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%s to %s", r.Start(), r.End())
+				},
+				options: nil,
+			},
+			want:    "2022-09-18 00:00:00 -0600 MDT to 2022-09-25 00:00:00 -0600 MDT today 2022-10-02 00:00:00 -0600 MDT to 2022-10-09 00:00:00 -0600 MDT now",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ReplaceDateRangesByFunc(tt.args.s, tt.args.ref, tt.args.f, tt.args.options...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReplaceDateRangesByFunc() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ReplaceDateRangesByFunc() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
