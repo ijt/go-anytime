@@ -656,7 +656,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	})
 
 	yearEra := gp.Regex(`(?i)[12]\d{3}\s*(ad|ce)\b`).Map(func(n *gp.Result) {
-		s := n.Token
+		s := strings.ToLower(n.Token)
 		s = strings.TrimSuffix(s, "ad")
 		s = strings.TrimSuffix(s, "ce")
 		s = strings.TrimSpace(s)
