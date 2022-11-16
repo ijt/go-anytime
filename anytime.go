@@ -948,11 +948,11 @@ func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
 
 // RangeParser takes a reference time ref and returns a parser for date ranges.
 func RangeParser(ref time.Time, options ...func(o *opts)) gp.Parser {
-	preposition := gp.AnyWithName("a preposition such as to or until", "to", "until", "through", "til", "'til", "till")
+	preposition := gp.AnyWithName("a preposition such as to or until", I("to"), I("until"), I("through"), I("til"), I("'til"), I("till"))
 	toPart := gp.Seq(preposition, Parser(ref, options...)).Map(func(n *gp.Result) {
 		n.Result = n.Child[1].Result
 	})
-	return gp.Seq(gp.Maybe("from"), Parser(ref, options...), gp.Maybe(toPart)).Map(func(n *gp.Result) {
+	return gp.Seq(gp.Maybe(I("from")), Parser(ref, options...), gp.Maybe(toPart)).Map(func(n *gp.Result) {
 		s := n.Child[1].Result.(Range)
 		c2 := n.Child[2].Result
 		if c2 != nil {
