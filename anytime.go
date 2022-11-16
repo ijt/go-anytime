@@ -61,7 +61,6 @@ func DefaultToPast(o *opts) {
 // given string s by running func f on each found range and the source string
 // that defines it.
 func ReplaceDateRangesByFunc(s string, ref time.Time, f func(source string, r Range) string, options ...func(o *opts)) (string, error) {
-	s = strings.ToLower(s)
 	rangeParser := RangeParser(ref, options...).Map(func(n *gp.Result) {
 		r := n.Result.(Range)
 		if r.Duration <= 24*time.Hour {
@@ -95,7 +94,6 @@ func ReplaceDateRangesByFunc(s string, ref time.Time, f func(source string, r Ra
 // string s by calling the func f. The ref and options arguments are the same as
 // in Parse.
 func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, options ...func(o *opts)) (string, error) {
-	s = strings.ToLower(s)
 	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
 		r := n.Result.(Range)
 		n.Result = f(r.Time)
@@ -124,7 +122,6 @@ func ReplaceTimesByFunc(s string, ref time.Time, f func(time.Time) string, optio
 // ParseRange. Ranges like "today" that can also be parsed as non-ranges
 // are skipped over.
 func ReplaceRangesByFunc(s string, ref time.Time, f func(Range) string, options ...func(o *opts)) (string, error) {
-	s = strings.ToLower(s)
 	rangeParser := RangeParser(ref, options...).Map(func(n *gp.Result) {
 		r := n.Result.(Range)
 		_, err := Parse(n.Token, ref, options...)
@@ -174,7 +171,6 @@ func PartitionTimes(s string, ref time.Time, options ...func(o *opts)) []any {
 // parts, calling ntf on the non-time parts and tf on the time parts in
 // succession.
 func PartitionTimesByFuncs(s string, ref time.Time, ntf func(nonTimeChunk string), tf func(timeChunk string, t time.Time), options ...func(o *opts)) {
-	s = strings.ToLower(s)
 	tyme := Parser(ref, options...).Map(func(n *gp.Result) {
 		r := n.Result.(Range)
 		n.Result = r.Time
@@ -209,7 +205,6 @@ func PartitionTimesByFuncs(s string, ref time.Time, ntf func(nonTimeChunk string
 // Parse parses a string assumed to contain a date, a time, or a datetime
 // in one of various formats.
 func Parse(s string, ref time.Time, opts ...func(o *opts)) (time.Time, error) {
-	s = strings.ToLower(s)
 	p := Parser(ref, opts...)
 	result, _, err := gp.Run(p, s, gp.UnicodeWhitespace)
 	if err != nil {
@@ -942,7 +937,6 @@ func nextWeek(ref time.Time) Range {
 // ParseRange parses a string such as "from april 20 at 5pm to may 5 at 9pm"
 // and returns a Range.
 func ParseRange(s string, ref time.Time, opts ...func(o *opts)) (Range, error) {
-	s = strings.ToLower(s)
 	p := RangeParser(ref, opts...)
 	result, _, err := gp.Run(p, s, gp.UnicodeWhitespace)
 	if err != nil {

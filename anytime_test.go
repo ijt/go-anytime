@@ -158,9 +158,8 @@ func TestParse_goodTimes(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			dp := Parser(now, DefaultToFuture)
-			input := strings.ToLower(c.Input)
-			node, _ := runParser(input, dp)
-			want := strings.TrimSpace(input)
+			node, _ := runParser(c.Input, dp)
+			want := strings.TrimSpace(c.Input)
 			if node.Token != want {
 				t.Errorf("parsed token = %q, want %q", node.Token, want)
 			}
@@ -269,9 +268,8 @@ func TestParse_goodDays(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			dp := Parser(now, DefaultToFuture)
-			input := strings.ToLower(c.Input)
-			node, _ := runParser(input, dp)
-			wantTok := strings.TrimSpace(input)
+			node, _ := runParser(c.Input, dp)
+			wantTok := strings.TrimSpace(c.Input)
 			if node.Token != wantTok {
 				t.Errorf("parsed token = %q, want %q", node.Token, wantTok)
 			}
@@ -828,9 +826,8 @@ func TestParseRange(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			rp := RangeParser(now, DefaultToFuture)
-			input := strings.ToLower(tt.input)
-			node, _ := runParser(input, rp)
-			want := strings.TrimSpace(input)
+			node, _ := runParser(tt.input, rp)
+			want := strings.TrimSpace(tt.input)
 			if node.Token != want {
 				t.Errorf("parsed token = %q, want %q", node.Token, want)
 			}
