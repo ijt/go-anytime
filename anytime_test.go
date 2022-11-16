@@ -131,6 +131,7 @@ func TestParse_goodTimes(t *testing.T) {
 		{`One month hence`, now.AddDate(0, 1, 0)},
 		{`1 month from now`, now.AddDate(0, 1, 0)},
 		{`2 months from now`, now.AddDate(0, 2, 0)},
+		{`Last January`, prevMonth(now, time.January).Time},
 		{`Last january`, prevMonth(now, time.January).Time},
 		{`Next january`, nextMonth(now, time.January).Time},
 
@@ -192,10 +193,11 @@ func TestParse_goodDays(t *testing.T) {
 		// past weekdays
 		{`Last sunday`, prevWeekdayFrom(now, time.Sunday)},
 		{`Last monday`, prevWeekdayFrom(now, time.Monday)},
+		{`Last Monday`, prevWeekdayFrom(now, time.Monday)},
 		{`Last tuesday`, prevWeekdayFrom(now, time.Tuesday)},
 		{`Last wednesday`, prevWeekdayFrom(now, time.Wednesday)},
-		{`Last thursday`, prevWeekdayFrom(now, time.Thursday)},
-		{`Last friday`, prevWeekdayFrom(now, time.Friday)},
+		{`Last Thursday`, prevWeekdayFrom(now, time.Thursday)},
+		{`Last Friday`, prevWeekdayFrom(now, time.Friday)},
 		{`Last saturday`, prevWeekdayFrom(now, time.Saturday)},
 
 		// future weekdays
