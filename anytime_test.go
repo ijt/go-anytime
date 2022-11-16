@@ -1004,7 +1004,7 @@ func TestReplaceTimesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC if that works for you",
+			want:    "Let's meet 2022-10-25 11:00:00 +0000 UTC if that works for you",
 			wantErr: false,
 		},
 		{
@@ -1017,7 +1017,7 @@ func TestReplaceTimesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC or 2022-10-31 00:00:00 +0000 UTC if you like",
+			want:    "Let's meet 2022-10-25 11:00:00 +0000 UTC or 2022-10-31 00:00:00 +0000 UTC if you like",
 			wantErr: false,
 		},
 		{
@@ -1130,7 +1130,7 @@ func TestReplaceRangesByFunc(t *testing.T) {
 				f:       nil,
 				options: nil,
 			},
-			want:    "let's meet on tuesday at 11am utc or monday if you like",
+			want:    "Let's meet on Tuesday at 11am UTC or monday if you like",
 			wantErr: false,
 		},
 		{
