@@ -12,6 +12,8 @@ github.com/ijt/goparsify v0.0.0-20221014172814-db4df1500775 h1:NYT44EJjvO4H3yVnP
 github.com/ijt/goparsify v0.0.0-20221014172814-db4df1500775/go.mod h1:0c0Ez5P1jFdxA4px9pkIW80h8pQAybaSQtpErDzG3nM=
 github.com/ijt/goparsify v0.0.0-20221024170958-31de98bdd429 h1:4AS1403QDfbGspErB+/DHMUKmp6SUunlWi22dR2+ck4=
 github.com/ijt/goparsify v0.0.0-20221024170958-31de98bdd429/go.mod h1:0c0Ez5P1jFdxA4px9pkIW80h8pQAybaSQtpErDzG3nM=
+github.com/ijt/goparsify v0.0.0-20221116220125-b325df4f0579 h1:XUfbs+hrqxxu6ztXZ51JTeAbuCCCjIkErTsupjuff3U=
+github.com/ijt/goparsify v0.0.0-20221116220125-b325df4f0579/go.mod h1:0c0Ez5P1jFdxA4px9pkIW80h8pQAybaSQtpErDzG3nM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

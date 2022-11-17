@@ -62,31 +62,31 @@ func TestParse_goodTimes(t *testing.T) {
 		{`17:25:30`, dateAtTime(today, 17, 25, 30)},
 
 		// dates with times
-		{"on Friday at noon UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Friday), 12, 0, 0), time.UTC)},
-		{"on Tuesday at 11am UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Tuesday), 11, 0, 0), time.UTC)},
-		{"on 3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
+		{"On Friday at noon UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Friday), 12, 0, 0), time.UTC)},
+		{"On Tuesday at 11am UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Tuesday), 11, 0, 0), time.UTC)},
+		{"On 3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{"3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
 		{`3 days ago at 11:25am`, dateAtTime(now.Add(-3*24*time.Hour), 11, 25, 0)},
 		{`3 days from now at 14:26`, dateAtTime(now.Add(3*24*time.Hour), 14, 26, 0)},
 		{`2 weeks ago at 8am`, dateAtTime(now.Add(-2*7*24*time.Hour), 8, 0, 0)},
-		{`today at 10am`, dateAtTime(now, 10, 0, 0)},
+		{`Today at 10am`, dateAtTime(now, 10, 0, 0)},
 		{`10am today`, dateAtTime(now, 10, 0, 0)},
-		{`yesterday 10am`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
+		{`Yesterday 10am`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
 		{`10am yesterday`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
-		{`yesterday at 10am`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
-		{`yesterday at 10:15am`, dateAtTime(now.AddDate(0, 0, -1), 10, 15, 0)},
-		{`tomorrow 10am`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
+		{`Yesterday at 10am`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
+		{`Yesterday at 10:15am`, dateAtTime(now.AddDate(0, 0, -1), 10, 15, 0)},
+		{`Tomorrow 10am`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
 		{`10am tomorrow`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
-		{`tomorrow at 10am`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
-		{`tomorrow at 10:15am`, dateAtTime(now.AddDate(0, 0, 1), 10, 15, 0)},
+		{`Tomorrow at 10am`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
+		{`Tomorrow at 10:15am`, dateAtTime(now.AddDate(0, 0, 1), 10, 15, 0)},
 		{`10:15am tomorrow`, dateAtTime(now.AddDate(0, 0, 1), 10, 15, 0)},
-		{"next dec 22nd at 3pm", timeInLocation(nextMonthDayTime(now, time.December, 22, 12+3, 0, 0), now.Location())},
-		{"next December 25th at 7:30am UTC-7", timeInLocation(nextMonthDayTime(now, time.December, 25, 7, 30, 0), fixedZone(-7))},
-		{`next December 23rd AT 5:25 PM`, nextMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
-		{`last December 23rd AT 5:25 PM`, prevMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
-		{`last sunday at 5:30pm`, dateAtTime(prevWeekdayFrom(now, time.Sunday), 12+5, 30, 0)},
-		{`next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday), 22, 45, 0)},
-		{`next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday), 22, 45, 0)},
+		{"Next dec 22nd at 3pm", timeInLocation(nextMonthDayTime(now, time.December, 22, 12+3, 0, 0), now.Location())},
+		{"Next December 25th at 7:30am UTC-7", timeInLocation(nextMonthDayTime(now, time.December, 25, 7, 30, 0), fixedZone(-7))},
+		{`Next December 23rd AT 5:25 PM`, nextMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
+		{`Last December 23rd AT 5:25 PM`, prevMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
+		{`Last sunday at 5:30pm`, dateAtTime(prevWeekdayFrom(now, time.Sunday), 12+5, 30, 0)},
+		{`Next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday), 22, 45, 0)},
+		{`Next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday), 22, 45, 0)},
 		{`November 3rd, 1986 at 4:30pm`, time.Date(1986, 11, 3, 12+4, 30, 0, 0, now.Location())},
 		{"September 17, 2012 at 10:09am UTC", time.Date(2012, 9, 17, 10, 9, 0, 0, time.UTC)},
 		{"September 17, 2012 at 10:09am UTC-8", time.Date(2012, 9, 17, 10, 9, 0, 0, fixedZone(-8))},
@@ -110,37 +110,38 @@ func TestParse_goodTimes(t *testing.T) {
 		{"1990-12-31T15:59:59-08:00", time.Date(1990, 12, 31, 15, 59, 59, 0, time.FixedZone("", -8*60*60))},
 
 		// days
-		{`one day ago`, now.Add(-24 * time.Hour)},
+		{`One day ago`, now.Add(-24 * time.Hour)},
 		{`1 day ago`, now.Add(-24 * time.Hour)},
 		{`3 days ago`, now.Add(-3 * 24 * time.Hour)},
-		{`three days ago`, now.Add(-3 * 24 * time.Hour)},
+		{`Three days ago`, now.Add(-3 * 24 * time.Hour)},
 		{`1 day from now`, now.Add(24 * time.Hour)},
 
 		// weeks
 		{`1 week ago`, now.Add(-7 * 24 * time.Hour)},
 		{`2 weeks ago`, now.Add(-2 * 7 * 24 * time.Hour)},
-		{`a week from now`, now.Add(7 * 24 * time.Hour)},
-		{`a week from today`, now.Add(7 * 24 * time.Hour)},
+		{`A week from now`, now.Add(7 * 24 * time.Hour)},
+		{`A week from today`, now.Add(7 * 24 * time.Hour)},
 
 		// months
-		{`a month ago`, now.AddDate(0, -1, 0)},
+		{`A month ago`, now.AddDate(0, -1, 0)},
 		{`1 month ago`, now.AddDate(0, -1, 0)},
 		{`2 months ago`, now.AddDate(0, -2, 0)},
 		{`12 months ago`, now.AddDate(0, -12, 0)},
-		{`a month from now`, now.AddDate(0, 1, 0)},
-		{`one month hence`, now.AddDate(0, 1, 0)},
+		{`A month from now`, now.AddDate(0, 1, 0)},
+		{`One month hence`, now.AddDate(0, 1, 0)},
 		{`1 month from now`, now.AddDate(0, 1, 0)},
 		{`2 months from now`, now.AddDate(0, 2, 0)},
-		{`last january`, prevMonth(now, time.January).Time},
-		{`next january`, nextMonth(now, time.January).Time},
+		{`Last January`, prevMonth(now, time.January).Time},
+		{`Last january`, prevMonth(now, time.January).Time},
+		{`Next january`, nextMonth(now, time.January).Time},
 
 		// years
-		{`one year ago`, now.AddDate(-1, 0, 0)},
-		{`one year from now`, now.AddDate(1, 0, 0)},
-		{`one year from today`, now.AddDate(1, 0, 0)},
-		{`two years ago`, now.AddDate(-2, 0, 0)},
+		{`One year ago`, now.AddDate(-1, 0, 0)},
+		{`One year from now`, now.AddDate(1, 0, 0)},
+		{`One year from today`, now.AddDate(1, 0, 0)},
+		{`Two years ago`, now.AddDate(-2, 0, 0)},
 		{`2 years ago`, now.AddDate(-2, 0, 0)},
-		{`this year`, truncateYear(now).Time},
+		{`This year`, truncateYear(now).Time},
 		{`1999AD`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
 		{`1999 AD`, time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location())},
 		{`2008CE`, time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location())},
@@ -158,9 +159,8 @@ func TestParse_goodTimes(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			dp := Parser(now, DefaultToFuture)
-			input := strings.ToLower(c.Input)
-			node, _ := runParser(input, dp)
-			want := strings.TrimSpace(input)
+			node, _ := runParser(c.Input, dp)
+			want := strings.TrimSpace(c.Input)
 			if node.Token != want {
 				t.Errorf("parsed token = %q, want %q", node.Token, want)
 			}
@@ -174,54 +174,55 @@ func TestParse_goodDays(t *testing.T) {
 		WantTime time.Time
 	}{
 		// years
-		{`last year`, truncateYear(now.AddDate(-1, 0, 0)).Time},
-		{`next year`, truncateYear(now.AddDate(1, 0, 0)).Time},
+		{`Last year`, truncateYear(now.AddDate(-1, 0, 0)).Time},
+		{`Next year`, truncateYear(now.AddDate(1, 0, 0)).Time},
 
 		// today
-		{`today`, now},
+		{`Today`, now},
 
 		// yesterday
-		{`yesterday`, now.AddDate(0, 0, -1)},
+		{`Yesterday`, now.AddDate(0, 0, -1)},
 
 		// tomorrow
-		{`tomorrow`, now.AddDate(0, 0, 1)},
+		{`Tomorrow`, now.AddDate(0, 0, 1)},
 
 		// weeks
-		{`last week`, truncateWeek(now.AddDate(0, 0, -7)).Time},
-		{`next week`, truncateWeek(now.AddDate(0, 0, 7)).Time},
+		{`Last week`, truncateWeek(now.AddDate(0, 0, -7)).Time},
+		{`Next week`, truncateWeek(now.AddDate(0, 0, 7)).Time},
 
 		// past weekdays
-		{`last sunday`, prevWeekdayFrom(now, time.Sunday)},
-		{`last monday`, prevWeekdayFrom(now, time.Monday)},
-		{`last tuesday`, prevWeekdayFrom(now, time.Tuesday)},
-		{`last wednesday`, prevWeekdayFrom(now, time.Wednesday)},
-		{`last thursday`, prevWeekdayFrom(now, time.Thursday)},
-		{`last friday`, prevWeekdayFrom(now, time.Friday)},
-		{`last saturday`, prevWeekdayFrom(now, time.Saturday)},
+		{`Last sunday`, prevWeekdayFrom(now, time.Sunday)},
+		{`Last monday`, prevWeekdayFrom(now, time.Monday)},
+		{`Last Monday`, prevWeekdayFrom(now, time.Monday)},
+		{`Last tuesday`, prevWeekdayFrom(now, time.Tuesday)},
+		{`Last wednesday`, prevWeekdayFrom(now, time.Wednesday)},
+		{`Last Thursday`, prevWeekdayFrom(now, time.Thursday)},
+		{`Last Friday`, prevWeekdayFrom(now, time.Friday)},
+		{`Last saturday`, prevWeekdayFrom(now, time.Saturday)},
 
 		// future weekdays
-		{`next sunday`, nextWeekdayFrom(now, time.Sunday)},
-		{`next monday`, nextWeekdayFrom(now, time.Monday)},
-		{`next tuesday`, nextWeekdayFrom(now, time.Tuesday)},
-		{`next wednesday`, nextWeekdayFrom(now, time.Wednesday)},
-		{`next thursday`, nextWeekdayFrom(now, time.Thursday)},
-		{`next friday`, nextWeekdayFrom(now, time.Friday)},
-		{`next saturday`, nextWeekdayFrom(now, time.Saturday)},
+		{`Next sunday`, nextWeekdayFrom(now, time.Sunday)},
+		{`Next monday`, nextWeekdayFrom(now, time.Monday)},
+		{`Next tuesday`, nextWeekdayFrom(now, time.Tuesday)},
+		{`Next wednesday`, nextWeekdayFrom(now, time.Wednesday)},
+		{`Next thursday`, nextWeekdayFrom(now, time.Thursday)},
+		{`Next friday`, nextWeekdayFrom(now, time.Friday)},
+		{`Next saturday`, nextWeekdayFrom(now, time.Saturday)},
 
 		// months
-		{`last january`, prevMonth(now, time.January).Time},
-		{`next january`, nextMonth(now, time.January).Time},
-		{`last month`, truncateMonth(now.AddDate(0, -1, 0)).Time},
-		{`next month`, truncateMonth(now.AddDate(0, 1, 0)).Time},
+		{`Last january`, prevMonth(now, time.January).Time},
+		{`Next january`, nextMonth(now, time.January).Time},
+		{`Last month`, truncateMonth(now.AddDate(0, -1, 0)).Time},
+		{`Next month`, truncateMonth(now.AddDate(0, 1, 0)).Time},
 
 		// absolute dates
-		{"january 2017", time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location())},
-		{"january, 2017", time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location())},
-		{"april 3 2017", time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location())},
-		{"april 3, 2017", time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location())},
-		{"oct 7, 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
-		{"oct 7 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
-		{"oct. 7, 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
+		{"January 2017", time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location())},
+		{"January, 2017", time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location())},
+		{"April 3 2017", time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location())},
+		{"April 3, 2017", time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location())},
+		{"Oct 7, 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
+		{"Oct 7 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
+		{"Oct. 7, 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
 		{"September 17, 2012 UTC+7", time.Date(2012, 9, 17, 10, 9, 0, 0, fixedZone(7))},
 		{"September 17, 2012", time.Date(2012, 9, 17, 10, 9, 0, 0, now.Location())},
 		{"7 oct 1970", time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location())},
@@ -245,16 +246,16 @@ func TestParse_goodDays(t *testing.T) {
 
 		// color month
 		// http://www.jdawiseman.com/papers/trivia/futures.html
-		{"white october", nextMonth(now, time.October).Time},
-		{"red october", nextMonth(now, time.October).AddDate(1, 0, 0)},
-		{"green october", nextMonth(now, time.October).AddDate(2, 0, 0)},
-		{"blue october", nextMonth(now, time.October).AddDate(3, 0, 0)},
-		{"gold october", nextMonth(now, time.October).AddDate(4, 0, 0)},
-		{"purple october", nextMonth(now, time.October).AddDate(5, 0, 0)},
-		{"orange october", nextMonth(now, time.October).AddDate(6, 0, 0)},
-		{"pink october", nextMonth(now, time.October).AddDate(7, 0, 0)},
-		{"silver october", nextMonth(now, time.October).AddDate(8, 0, 0)},
-		{"copper october", nextMonth(now, time.October).AddDate(9, 0, 0)},
+		{"White october", nextMonth(now, time.October).Time},
+		{"Red october", nextMonth(now, time.October).AddDate(1, 0, 0)},
+		{"Green october", nextMonth(now, time.October).AddDate(2, 0, 0)},
+		{"Blue october", nextMonth(now, time.October).AddDate(3, 0, 0)},
+		{"Gold october", nextMonth(now, time.October).AddDate(4, 0, 0)},
+		{"Purple october", nextMonth(now, time.October).AddDate(5, 0, 0)},
+		{"Orange october", nextMonth(now, time.October).AddDate(6, 0, 0)},
+		{"Pink october", nextMonth(now, time.October).AddDate(7, 0, 0)},
+		{"Silver october", nextMonth(now, time.October).AddDate(8, 0, 0)},
+		{"Copper october", nextMonth(now, time.October).AddDate(9, 0, 0)},
 	}
 
 	for _, c := range cases {
@@ -269,9 +270,8 @@ func TestParse_goodDays(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			dp := Parser(now, DefaultToFuture)
-			input := strings.ToLower(c.Input)
-			node, _ := runParser(input, dp)
-			wantTok := strings.TrimSpace(input)
+			node, _ := runParser(c.Input, dp)
+			wantTok := strings.TrimSpace(c.Input)
 			if node.Token != wantTok {
 				t.Errorf("parsed token = %q, want %q", node.Token, wantTok)
 			}
@@ -288,27 +288,27 @@ func TestParse_futurePast(t *testing.T) {
 		wantPast   time.Time
 	}{
 		{
-			"december 20",
+			"December 20",
 			nextMonthDayTime(now, time.December, 20, 0, 0, 0),
 			prevMonthDayTime(now, time.December, 20, 0, 0, 0),
 		},
 		{
-			"thursday",
+			"Thursday",
 			nextWeekdayFrom(now, time.Thursday),
 			prevWeekdayFrom(now, time.Thursday),
 		},
 		{
-			"on thursday",
+			"On thursday",
 			nextWeekdayFrom(now, time.Thursday),
 			prevWeekdayFrom(now, time.Thursday),
 		},
 		{
-			"december 20 at 9pm",
+			"December 20 at 9pm",
 			nextMonthDayTime(now, time.December, 20, 21, 0, 0),
 			prevMonthDayTime(now, time.December, 20, 21, 0, 0),
 		},
 		{
-			"thursday at 23:59",
+			"Thursday at 23:59",
 			setTime(nextWeekdayFrom(now, time.Thursday), 23, 59, 0, 0),
 			setTime(prevWeekdayFrom(now, time.Thursday), 23, 59, 0, 0),
 		},
@@ -341,14 +341,14 @@ func TestParse_monthOnly(t *testing.T) {
 		input string
 		month time.Month
 	}{
-		{"january", time.January},
-		{"february", time.February},
-		{"march", time.March},
-		{"april", time.April},
-		{"may", time.May},
-		{"june", time.June},
-		{"july", time.July},
-		{"august", time.August},
+		{"January", time.January},
+		{"February", time.February},
+		{"March", time.March},
+		{"April", time.April},
+		{"May", time.May},
+		{"June", time.June},
+		{"July", time.July},
+		{"August", time.August},
 		{"september", time.September},
 		{"october", time.October},
 		{"november", time.November},
@@ -525,7 +525,7 @@ func Test_truncateWeek(t *testing.T) {
 		want time.Time
 	}{
 		{
-			name: "sunday",
+			name: "Sunday",
 			args: args{
 				t: time.Date(2022, 10, 2, 23, 59, 59, 999999, time.UTC),
 			},
@@ -562,7 +562,7 @@ func TestParseRange(t *testing.T) {
 	}{
 		// from A to B
 		{
-			"from 3 feb 2022 to 6 oct 2022",
+			"From 3 feb 2022 to 6 oct 2022",
 			RangeFromTimes(
 				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
@@ -601,7 +601,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// yesterday
 		{
-			"yesterday",
+			"Yesterday",
 			RangeFromTimes(
 				today.AddDate(0, 0, -1),
 				today,
@@ -609,7 +609,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// today
 		{
-			"today",
+			"Today",
 			RangeFromTimes(
 				today,
 				today.AddDate(0, 0, 1),
@@ -617,21 +617,21 @@ func TestParseRange(t *testing.T) {
 		},
 		// tomorrow
 		{
-			"tomorrow",
+			"Tomorrow",
 			RangeFromTimes(
 				today.AddDate(0, 0, 1),
 				today.AddDate(0, 0, 2),
 			),
 		},
 		{
-			"from today until next thursday",
+			"From today until next thursday",
 			RangeFromTimes(
 				today,
 				nextWeekdayFrom(today, time.Thursday),
 			),
 		},
 		{
-			"from tomorrow until next tuesday",
+			"From tomorrow until next tuesday",
 			RangeFromTimes(
 				today.AddDate(0, 0, 1),
 				nextWeekdayFrom(today, time.Tuesday),
@@ -639,7 +639,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// last week
 		{
-			"last week",
+			"Last week",
 			RangeFromTimes(
 				time.Date(2022, 9, 18, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
@@ -647,7 +647,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// this week
 		{
-			"this week",
+			"This week",
 			RangeFromTimes(
 				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
@@ -663,7 +663,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// last month
 		{
-			"last month",
+			"Last month",
 			RangeFromTimes(
 				time.Date(2022, 8, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
@@ -671,7 +671,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// this month
 		{
-			"this month",
+			"This month",
 			RangeFromTimes(
 				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
@@ -679,7 +679,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// next month
 		{
-			"next month",
+			"Next month",
 			RangeFromTimes(
 				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()),
@@ -687,7 +687,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// last year
 		{
-			"last year",
+			"Last year",
 			RangeFromTimes(
 				time.Date(2021, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
@@ -695,7 +695,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// this year
 		{
-			"this year",
+			"This year",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
@@ -703,7 +703,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// next year
 		{
-			"next year",
+			"Next year",
 			RangeFromTimes(
 				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()),
@@ -711,7 +711,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// absolute year
 		{
-			"2025ad",
+			"2025Ad",
 			RangeFromTimes(
 				time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()),
@@ -719,7 +719,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// absolute month
 		{
-			"feb 2025",
+			"Feb 2025",
 			RangeFromTimes(
 				time.Date(2025, 2, 1, 0, 0, 0, 0, now.Location()),
 				time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()),
@@ -735,7 +735,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// absolute hour
 		{
-			"3 feb 2025 at 5pm",
+			"3 feb 2025 at 5PM",
 			RangeFromTimes(
 				time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
 				time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()),
@@ -751,7 +751,7 @@ func TestParseRange(t *testing.T) {
 		},
 		// absolute second
 		{
-			"3 feb 2025 at 5:35:52pm",
+			"3 Feb 2025 at 5:35:52pm",
 			RangeFromTimes(
 				time.Date(2025, 2, 3, 12+5, 35, 52, 0, now.Location()),
 				time.Date(2025, 2, 3, 12+5, 35, 53, 0, now.Location()),
@@ -813,6 +813,14 @@ func TestParseRange(t *testing.T) {
 				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
 			),
 		},
+		// 2022
+		{
+			"2022CE",
+			RangeFromTimes(
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+			),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
@@ -828,9 +836,8 @@ func TestParseRange(t *testing.T) {
 			// Run the parser at a lower level and make sure the token it
 			// returns matches the input string.
 			rp := RangeParser(now, DefaultToFuture)
-			input := strings.ToLower(tt.input)
-			node, _ := runParser(input, rp)
-			want := strings.TrimSpace(input)
+			node, _ := runParser(tt.input, rp)
+			want := strings.TrimSpace(tt.input)
 			if node.Token != want {
 				t.Errorf("parsed token = %q, want %q", node.Token, want)
 			}
@@ -997,7 +1004,7 @@ func TestReplaceTimesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC if that works for you",
+			want:    "Let's meet 2022-10-25 11:00:00 +0000 UTC if that works for you",
 			wantErr: false,
 		},
 		{
@@ -1010,7 +1017,7 @@ func TestReplaceTimesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "let's meet 2022-10-25 11:00:00 +0000 UTC or 2022-10-31 00:00:00 +0000 UTC if you like",
+			want:    "Let's meet 2022-10-25 11:00:00 +0000 UTC or 2022-10-31 00:00:00 +0000 UTC if you like",
 			wantErr: false,
 		},
 		{
@@ -1123,7 +1130,7 @@ func TestReplaceRangesByFunc(t *testing.T) {
 				f:       nil,
 				options: nil,
 			},
-			want:    "let's meet on tuesday at 11am utc or monday if you like",
+			want:    "Let's meet on Tuesday at 11am UTC or monday if you like",
 			wantErr: false,
 		},
 		{
