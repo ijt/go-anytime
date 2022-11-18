@@ -1083,6 +1083,19 @@ func TestReplaceTimesByFunc(t *testing.T) {
 			want:    time.Date(1000, time.Month(1), 1, 0, 0, 0, 0, time.UTC).String(),
 			wantErr: false,
 		},
+		{
+			name: "issue 38: want december 40 to only get december",
+			args: args{
+				s:   "december 40",
+				ref: now,
+				f: func(t time.Time) string {
+					return t.Format("Jan 2")
+				},
+				options: nil,
+			},
+			want:    "Dec 1 40",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
