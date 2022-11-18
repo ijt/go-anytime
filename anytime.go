@@ -284,14 +284,14 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	monthsAgo := gp.Seq(number, months, I("ago")).Map(func(n *gp.Result) {
 		num := n.Child[0].Result.(int)
 		s := ref.AddDate(0, -num, 0)
-		dur := s.AddDate(0, 1, 0).Sub(s)
+		dur := s.AddDate(0, 1, 0).Sub(s) - time.Second
 		n.Result = Range{s, dur}
 	})
 
 	monthsFromNow := gp.Seq(number, months, gp.Any(gp.Seq(I("from"), I("now")), I("hence"))).Map(func(n *gp.Result) {
 		num := n.Child[0].Result.(int)
 		s := ref.AddDate(0, num, 0)
-		dur := s.AddDate(0, 1, 0).Sub(s)
+		dur := s.AddDate(0, 1, 0).Sub(s) - time.Second
 		n.Result = Range{s, dur}
 	})
 
@@ -434,7 +434,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	colonMinuteColonSecond := gp.Seq(colonMinute, gp.Maybe(colonSecond)).Map(func(n *gp.Result) {
 		m := n.Child[0].Result.(int)
 		c1 := n.Child[1].Result
-		dur := time.Minute
+		dur := time.Minute - time.Second
 		s := 0
 		if c1 != nil {
 			s = c1.(int)
@@ -449,14 +449,14 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	noon := gp.Regex(`(?i)\bnoon\b`).Map(func(n *gp.Result) {
 		n.Result = Range{
 			time.Date(ref.Year(), ref.Month(), ref.Day(), 12, 0, 0, 0, ref.Location()),
-			time.Hour,
+			time.Hour - time.Second,
 		}
 	})
 
 	hour12MinuteSecond := gp.Seq(hour12, gp.Maybe(colonMinuteColonSecond), amPM).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
 		c1 := n.Child[1].Result
-		dur := time.Hour
+		dur := time.Hour - time.Second
 		m := 0
 		s := 0
 		ap := strings.ToLower(n.Child[2].Token)
@@ -483,7 +483,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	hour24MinuteSecond := gp.Seq(hour24, colonMinute, gp.Maybe(colonSecond)).Map(func(n *gp.Result) {
 		h := n.Child[0].Result.(int)
 		m := n.Child[1].Result.(int)
-		dur := time.Minute
+		dur := time.Minute - time.Second
 		s := 0
 		c2 := n.Child[2].Result
 		if c2 != nil {
@@ -592,7 +592,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		y := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
+			24*time.Hour - time.Second,
 		}
 	})
 
@@ -602,7 +602,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		y := n.Child[2].Result.(int)
 		d0 := time.Date(y, m, 1, 0, 0, 0, 0, ref.Location())
 		d1 := d0.AddDate(0, 1, 0)
-		dur := d1.Sub(d0)
+		dur := d1.Sub(d0) - time.Second
 		n.Result = Range{d0, dur}
 	})
 
@@ -611,7 +611,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		m := n.Child[1].Result.(time.Month)
 		d0 := time.Date(y, m, 1, 0, 0, 0, 0, ref.Location())
 		d1 := d0.AddDate(0, 1, 0)
-		dur := d1.Sub(d0)
+		dur := d1.Sub(d0) - time.Second
 		n.Result = Range{d0, dur}
 	})
 
@@ -621,7 +621,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		y := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
+			24*time.Hour - time.Second,
 		}
 	})
 
@@ -631,7 +631,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
+			24*time.Hour - time.Second,
 		}
 	})
 
@@ -641,7 +641,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
+			24*time.Hour - time.Second,
 		}
 	})
 
@@ -651,7 +651,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		y := n.Child[4].Result.(int)
 		n.Result = Range{
 			time.Date(y, m, d, 0, 0, 0, 0, ref.Location()),
-			24 * time.Hour,
+			24*time.Hour - time.Second,
 		}
 	})
 
@@ -662,7 +662,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		s = strings.TrimSpace(s)
 		y, _ := strconv.Atoi(s)
 		d0 := time.Date(y, 1, 1, 0, 0, 0, 0, ref.Location())
-		dur := d0.AddDate(1, 0, 0).Sub(d0)
+		dur := d0.AddDate(1, 0, 0).Sub(d0) - time.Second
 		n.Result = Range{
 			d0,
 			dur,
@@ -672,13 +672,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	lastWeekday := gp.Seq(I("last"), weekday).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := prevWeekdayFrom(ref, day)
-		n.Result = Range{d, 24 * time.Hour}
+		n.Result = Range{d, 24*time.Hour - time.Second}
 	})
 
 	nextWeekday := gp.Seq(I("next"), weekday).Map(func(n *gp.Result) {
 		day := n.Child[1].Result.(time.Weekday)
 		d := nextWeekdayFrom(ref, day)
-		n.Result = Range{d, 24 * time.Hour}
+		n.Result = Range{d, 24*time.Hour - time.Second}
 	})
 
 	lastSpecificMonthDay := gp.Seq(I("last"), month, dayOfMonth).Map(func(n *gp.Result) {
@@ -686,7 +686,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[2].Result.(int)
 		pm := prevMonth(ref, m)
 		t := time.Date(pm.Year(), pm.Month(), d, 0, 0, 0, 0, ref.Location())
-		n.Result = Range{t, 24 * time.Hour}
+		n.Result = Range{t, 24*time.Hour - time.Second}
 	})
 
 	nextSpecificMonthDay := gp.Seq(I("next"), month, dayOfMonth).Map(func(n *gp.Result) {
@@ -694,7 +694,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		d := n.Child[2].Result.(int)
 		nm := nextMonth(ref, m)
 		t := time.Date(nm.Year(), nm.Month(), d, 0, 0, 0, 0, ref.Location())
-		n.Result = Range{t, 24 * time.Hour}
+		n.Result = Range{t, 24*time.Hour - time.Second}
 	})
 
 	lastYear := gp.Seq(I("last"), I("year")).Map(func(n *gp.Result) {
@@ -730,7 +730,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		}
 		delta := color2delta[c]
 		t := nextMonth(ref, m)
-		dur := t.AddDate(0, 1, 0).Sub(t.Time)
+		dur := t.AddDate(0, 1, 0).Sub(t.Time) - time.Second
 		n.Result = Range{t.AddDate(delta, 0, 0), dur}
 	})
 
@@ -759,7 +759,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		default:
 			panic(fmt.Sprintf("invalid default direction: %q", o.defaultDirection))
 		}
-		n.Result = Range{t, 24 * time.Hour}
+		n.Result = Range{t, 24*time.Hour - time.Second}
 	})
 
 	yesterday := gp.Bind(I("yesterday"), truncateDay(ref.AddDate(0, 0, -1)))
@@ -771,7 +771,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	xYearsAgo := gp.Seq(number, yearsLabel, I("ago")).Map(func(n *gp.Result) {
 		dy := n.Child[0].Result.(int)
 		y := ref.AddDate(-dy, 0, 0)
-		dur := y.AddDate(1, 0, 0).Sub(y)
+		dur := y.AddDate(1, 0, 0).Sub(y) - time.Second
 		n.Result = Range{y, dur}
 	})
 
@@ -780,7 +780,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	xYearsFromToday := gp.Seq(number, yearsLabel, fromNowOrToday).Map(func(n *gp.Result) {
 		dy := n.Child[0].Result.(int)
 		y := ref.AddDate(dy, 0, 0)
-		dur := y.AddDate(1, 0, 0).Sub(y)
+		dur := y.AddDate(1, 0, 0).Sub(y) - time.Second
 		n.Result = Range{y, dur}
 	})
 
@@ -789,13 +789,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	xDaysAgo := gp.Seq(number, daysLabel, I("ago")).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, -delta)
-		n.Result = Range{d, 24 * time.Hour}
+		n.Result = Range{d, 24*time.Hour - time.Second}
 	})
 
 	xDaysFromNow := gp.Seq(number, daysLabel, fromNowOrToday).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, delta)
-		n.Result = Range{d, 24 * time.Hour}
+		n.Result = Range{d, 24*time.Hour - time.Second}
 	})
 
 	weeksLabel := gp.Regex(`(?i)weeks?`)
@@ -803,13 +803,13 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 	xWeeksAgo := gp.Seq(number, weeksLabel, I("ago")).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, -7*delta)
-		n.Result = Range{d, 7 * 24 * time.Hour}
+		n.Result = Range{d, 7*24*time.Hour - time.Second}
 	})
 
 	xWeeksFromNow := gp.Seq(number, weeksLabel, fromNowOrToday).Map(func(n *gp.Result) {
 		delta := n.Child[0].Result.(int)
 		d := ref.AddDate(0, 0, 7*delta)
-		n.Result = Range{d, 7 * 24 * time.Hour}
+		n.Result = Range{d, 7*24*time.Hour - time.Second}
 	})
 
 	date := gp.AnyWithName("date",
@@ -876,7 +876,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		m := n.Child[0].Result.(int)
 		n.Result = Range{
 			ref.Add(-time.Duration(m) * time.Minute),
-			time.Minute,
+			time.Minute - time.Second,
 		}
 	})
 
@@ -886,7 +886,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		m := n.Child[0].Result.(int)
 		n.Result = Range{
 			ref.Add(time.Duration(m) * time.Minute),
-			time.Minute,
+			time.Minute - time.Second,
 		}
 	})
 
@@ -896,7 +896,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		h := n.Child[0].Result.(int)
 		n.Result = Range{
 			ref.Add(-time.Duration(h) * time.Hour),
-			time.Hour,
+			time.Hour - time.Second,
 		}
 	})
 
@@ -904,7 +904,7 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		h := n.Child[0].Result.(int)
 		n.Result = Range{
 			ref.Add(time.Duration(h) * time.Hour),
-			time.Hour,
+			time.Hour - time.Second,
 		}
 	})
 
@@ -916,7 +916,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		xMinutesAgo, xMinutesFromNow,
 		xHoursAgo, xHoursFromNow,
 		hourMinuteSecond).Map(func(n *gp.Result) {
-		pass()
+		r := n.Result.(Range)
+		pass(r)
 	})
 }
 
@@ -1041,7 +1042,8 @@ func nextMonth(t time.Time, month time.Month) Range {
 		y++
 	}
 	d := time.Date(y, month, 1, 0, 0, 0, 0, t.Location())
-	dur := d.AddDate(0, 1, 0).Sub(d)
+	e := d.AddDate(0, 1, 0).Add(-time.Second)
+	dur := e.Sub(d)
 	return Range{d, dur}
 }
 
@@ -1052,7 +1054,8 @@ func prevMonth(t time.Time, month time.Month) Range {
 		y--
 	}
 	d := time.Date(y, month, 1, 0, 0, 0, 0, t.Location())
-	dur := d.AddDate(0, 1, 0).Sub(d)
+	e := d.AddDate(0, 1, 0).Add(-time.Second)
+	dur := e.Sub(d)
 	return Range{d, dur}
 }
 
@@ -1060,7 +1063,7 @@ func prevMonth(t time.Time, month time.Month) Range {
 func truncateDay(t time.Time) Range {
 	y, m, d := t.Date()
 	s := time.Date(y, m, d, 0, 0, 0, 0, t.Location())
-	e := s.AddDate(0, 0, 1)
+	e := s.AddDate(0, 0, 1).Add(-time.Second)
 	return Range{s, e.Sub(s)}
 }
 
@@ -1070,7 +1073,7 @@ func truncateWeek(t time.Time) Range {
 		t = t.AddDate(0, 0, -1)
 	}
 	s := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	e := s.AddDate(0, 0, 7)
+	e := s.AddDate(0, 0, 7).Add(-time.Second)
 	return Range{s, e.Sub(s)}
 }
 
@@ -1078,14 +1081,14 @@ func truncateWeek(t time.Time) Range {
 func truncateMonth(t time.Time) Range {
 	y, m, _ := t.Date()
 	s := time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
-	e := s.AddDate(0, 1, 0)
+	e := s.AddDate(0, 1, 0).Add(-time.Second)
 	return Range{s, e.Sub(s)}
 }
 
 // truncateYear returns a date truncated to the year.
 func truncateYear(t time.Time) Range {
 	s := time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location())
-	e := s.AddDate(1, 0, 0)
+	e := s.AddDate(1, 0, 0).Add(-time.Second)
 	return Range{s, e.Sub(s)}
 }
 
@@ -1101,7 +1104,7 @@ func setLocation(t time.Time, loc *time.Location) time.Time {
 }
 
 // pass is something to call so you can put a breakpoint in an empty func.
-func pass() {
+func pass(_ ...any) {
 }
 
 // I makes a gp.Insensitive parser from its string argument.
