@@ -3,6 +3,7 @@ package anytime
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -371,19 +372,16 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = nextMonth(ref, m)
 	})
 
-	dayOfMonthNum := gp.Regex(`[0-3]?\d`).Map(func(n *gp.Result) {
-		d, err := strconv.Atoi(n.Token)
+	dayOfMonthNum := gp.Regex(`[0-3]?\d(st|nd|rd|th)?\b`).Map(func(n *gp.Result) {
+		digits := nonDigitRx.ReplaceAllString(n.Token, "")
+		d, err := strconv.Atoi(digits)
 		if err != nil {
 			panic(fmt.Sprintf("parsing day of month: %v", err))
 		}
 		n.Result = d
 	})
 
-	dayOfMonthEnding := gp.Regex(`(st|nd|rd|th)`).Map(func(n *gp.Result) {
-		pass()
-	})
-
-	dayOfMonth := gp.Seq(dayOfMonthNum, gp.Maybe(dayOfMonthEnding)).Map(func(n *gp.Result) {
+	dayOfMonth := gp.Seq(dayOfMonthNum).Map(func(n *gp.Result) {
 		n.Result = n.Child[0].Result
 	})
 
@@ -1111,3 +1109,5 @@ func pass(_ ...any) {
 func I(s string) gp.Parser {
 	return gp.Insensitive(s)
 }
+
+var nonDigitRx = regexp.MustCompile(`\D+`)
