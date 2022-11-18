@@ -604,7 +604,7 @@ func TestParseRange(t *testing.T) {
 			"Yesterday",
 			RangeFromTimes(
 				today.AddDate(0, 0, -1),
-				today,
+				today.Add(-time.Second),
 			),
 		},
 		// today
@@ -612,7 +612,7 @@ func TestParseRange(t *testing.T) {
 			"Today",
 			RangeFromTimes(
 				today,
-				today.AddDate(0, 0, 1),
+				today.AddDate(0, 0, 1).Add(-time.Second),
 			),
 		},
 		// tomorrow
@@ -620,7 +620,7 @@ func TestParseRange(t *testing.T) {
 			"Tomorrow",
 			RangeFromTimes(
 				today.AddDate(0, 0, 1),
-				today.AddDate(0, 0, 2),
+				today.AddDate(0, 0, 2).Add(-time.Second),
 			),
 		},
 		{
@@ -642,7 +642,7 @@ func TestParseRange(t *testing.T) {
 			"Last week",
 			RangeFromTimes(
 				time.Date(2022, 9, 18, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// this week
@@ -650,7 +650,7 @@ func TestParseRange(t *testing.T) {
 			"This week",
 			RangeFromTimes(
 				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// next week
@@ -658,7 +658,7 @@ func TestParseRange(t *testing.T) {
 			"next week",
 			RangeFromTimes(
 				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// last month
@@ -666,7 +666,7 @@ func TestParseRange(t *testing.T) {
 			"Last month",
 			RangeFromTimes(
 				time.Date(2022, 8, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// this month
@@ -674,7 +674,7 @@ func TestParseRange(t *testing.T) {
 			"This month",
 			RangeFromTimes(
 				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// next month
@@ -682,7 +682,7 @@ func TestParseRange(t *testing.T) {
 			"Next month",
 			RangeFromTimes(
 				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// last year
@@ -690,7 +690,7 @@ func TestParseRange(t *testing.T) {
 			"Last year",
 			RangeFromTimes(
 				time.Date(2021, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// this year
@@ -698,7 +698,7 @@ func TestParseRange(t *testing.T) {
 			"This year",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// next year
@@ -706,7 +706,7 @@ func TestParseRange(t *testing.T) {
 			"Next year",
 			RangeFromTimes(
 				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// absolute year
@@ -714,7 +714,7 @@ func TestParseRange(t *testing.T) {
 			"2025Ad",
 			RangeFromTimes(
 				time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// absolute month
@@ -722,7 +722,7 @@ func TestParseRange(t *testing.T) {
 			"Feb 2025",
 			RangeFromTimes(
 				time.Date(2025, 2, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// absolute day
@@ -730,7 +730,7 @@ func TestParseRange(t *testing.T) {
 			"3 feb 2025",
 			RangeFromTimes(
 				time.Date(2025, 2, 3, 0, 0, 0, 0, now.Location()),
-				time.Date(2025, 2, 4, 0, 0, 0, 0, now.Location()),
+				time.Date(2025, 2, 4, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// absolute hour
@@ -738,7 +738,7 @@ func TestParseRange(t *testing.T) {
 			"3 feb 2025 at 5PM",
 			RangeFromTimes(
 				time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
-				time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()),
+				time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// absolute minute
@@ -746,7 +746,7 @@ func TestParseRange(t *testing.T) {
 			"3 feb 2025 at 5:35pm",
 			RangeFromTimes(
 				time.Date(2025, 2, 3, 12+5, 35, 0, 0, now.Location()),
-				time.Date(2025, 2, 3, 12+5, 36, 0, 0, now.Location()),
+				time.Date(2025, 2, 3, 12+5, 36, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// absolute second
@@ -770,7 +770,7 @@ func TestParseRange(t *testing.T) {
 			"2022 jan 1 0:0",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 1, 1, 0, 1, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 0, 1, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// 2022 jan 1 12am
@@ -778,7 +778,7 @@ func TestParseRange(t *testing.T) {
 			"2022 jan 1 12am",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// 2022 jan 1 0am
@@ -786,7 +786,7 @@ func TestParseRange(t *testing.T) {
 			"2022 jan 1 0am",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// 2022 jan 1
@@ -794,7 +794,7 @@ func TestParseRange(t *testing.T) {
 			"2022 jan 1",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 1, 2, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 1, 2, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// 2022 jan
@@ -802,7 +802,7 @@ func TestParseRange(t *testing.T) {
 			"2022 jan",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// 2022
@@ -810,7 +810,7 @@ func TestParseRange(t *testing.T) {
 			"2022ce",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 		// 2022
@@ -818,7 +818,7 @@ func TestParseRange(t *testing.T) {
 			"2022CE",
 			RangeFromTimes(
 				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
 			),
 		},
 	}
@@ -861,7 +861,7 @@ func Test_nextWeek(t *testing.T) {
 			},
 			want: Range{
 				Time:     time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
-				Duration: 7 * 24 * time.Hour,
+				Duration: 7*24*time.Hour - time.Second,
 			},
 		},
 	}
@@ -1320,7 +1320,7 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "2022-09-25 00:00:00 +0000 UTC to 2022-10-02 00:00:00 +0000 UTC",
+			want:    "2022-09-25 00:00:00 +0000 UTC to 2022-10-01 23:59:59 +0000 UTC",
 			wantErr: false,
 		},
 		{
@@ -1333,7 +1333,7 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "2022-09-18 00:00:00 +0000 UTC to 2022-09-25 00:00:00 +0000 UTC 2022-09-01 00:00:00 +0000 UTC to 2022-10-01 00:00:00 +0000 UTC 2022-10-01 00:00:00 +0000 UTC to 2022-11-01 00:00:00 +0000 UTC 2022-10-02 00:00:00 +0000 UTC to 2022-10-09 00:00:00 +0000 UTC",
+			want:    "2022-09-18 00:00:00 +0000 UTC to 2022-09-24 23:59:59 +0000 UTC 2022-09-01 00:00:00 +0000 UTC to 2022-09-30 23:59:59 +0000 UTC 2022-10-01 00:00:00 +0000 UTC to 2022-10-31 23:59:59 +0000 UTC 2022-10-02 00:00:00 +0000 UTC to 2022-10-08 23:59:59 +0000 UTC",
 			wantErr: false,
 		},
 		{
@@ -1346,7 +1346,7 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				},
 				options: nil,
 			},
-			want:    "2022-09-18 00:00:00 +0000 UTC to 2022-09-25 00:00:00 +0000 UTC today 2022-10-02 00:00:00 +0000 UTC to 2022-10-09 00:00:00 +0000 UTC now",
+			want:    "2022-09-18 00:00:00 +0000 UTC to 2022-09-24 23:59:59 +0000 UTC today 2022-10-02 00:00:00 +0000 UTC to 2022-10-08 23:59:59 +0000 UTC now",
 			wantErr: false,
 		},
 	}
