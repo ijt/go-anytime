@@ -82,8 +82,7 @@ func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Ran
 		p int
 	}
 	var timeStrsWithPos []stringsWithPos
-	for len(indexes) > 0 {
-		startEnd := indexes[0]
+	for _, startEnd := range indexes {
 		start := startEnd[0]
 		indexes = indexes[1:]
 		filename := fmt.Sprintf("input string starting at position %v", start+1)
