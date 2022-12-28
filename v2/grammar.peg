@@ -2,11 +2,9 @@
 package anytime
 }
 
-Input <- (.* NonAlphaNumeric)? locRange:LocatedRange (NonAlphaNumeric .*)? EOF {
+Input <- locRange:LocatedRange .* EOF {
     return locRange, nil
 }
-
-NonAlphaNumeric <- [^a-z0-9]i
 
 LocatedRange <- rangefn:Range {
     return LocatedRange{

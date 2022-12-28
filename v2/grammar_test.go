@@ -32,22 +32,6 @@ func TestParse_ok(t *testing.T) {
 			},
 		},
 		{
-			name: "now with leading verbiage",
-			args: args{
-				b: []byte("the time is now"),
-			},
-			want: LocatedRange{
-				RangeFn: func(ref time.Time, dir Direction) Range {
-					return Range{
-						start:    ref,
-						Duration: time.Second,
-					}
-				},
-				Pos:  12,
-				Text: []byte("now"),
-			},
-		},
-		{
 			name: "now with trailing verbiage",
 			args: args{
 				b: []byte("now is the time"),
@@ -60,22 +44,6 @@ func TestParse_ok(t *testing.T) {
 					}
 				},
 				Pos:  0,
-				Text: []byte("now"),
-			},
-		},
-		{
-			name: "now with leading and trailing verbiage",
-			args: args{
-				b: []byte("Do you think that now is the time?"),
-			},
-			want: LocatedRange{
-				RangeFn: func(ref time.Time, dir Direction) Range {
-					return Range{
-						start:    ref,
-						Duration: time.Second,
-					}
-				},
-				Pos:  18,
 				Text: []byte("now"),
 			},
 		},
@@ -116,6 +84,18 @@ func TestParse_fail(t *testing.T) {
 			name: "verbiage",
 			args: args{
 				b: []byte("not a date or a time"),
+			},
+		},
+		{
+			name: "now with leading verbiage",
+			args: args{
+				b: []byte("the time is now"),
+			},
+		},
+		{
+			name: "now with leading and trailing verbiage",
+			args: args{
+				b: []byte("Do you think that now is the time?"),
 			},
 		},
 	}
