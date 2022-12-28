@@ -3,6 +3,7 @@ package anytime
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -77,7 +78,7 @@ func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Ran
 		s string
 		p int
 	}
-	var timeStrs []stringWithPos
+	var timeStrsWithPos []stringWithPos
 	for len(indexes) > 0 {
 		startEnd := indexes[0]
 		start := startEnd[0]
@@ -90,8 +91,15 @@ func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Ran
 		locRange := locRangeAsAny.(LocatedRange)
 		r := locRange.RangeFn(ref, dir)
 		fr := f(string(locRange.Text), r)
-		timeStrs = append(timeStrs, stringWithPos{fr, start})
+		timeStrsWithPos = append(timeStrsWithPos, stringWithPos{fr, start})
 	}
 
-	return "", nil
+	if len(timeStrsWithPos) == 0 {
+		return s, nil
+	}
+	var timeStrs []string
+	for _, tsp := range timeStrsWithPos {
+		timeStrs = append(timeStrs, tsp.s)
+	}
+	return strings.Join(timeStrs, " "), nil
 }
