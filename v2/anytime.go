@@ -2,17 +2,11 @@ package anytime
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 )
 
 //go:generate pigeon -o grammar.go grammar.peg
-
-func toIfaceSlice(v interface{}) []interface{} {
-	if v == nil {
-		return nil
-	}
-	return v.([]interface{})
-}
 
 // LocatedRange is a Range with information about where it was found within the
 // input string.
@@ -75,18 +69,29 @@ const (
 	Past
 )
 
-type opts struct {
-	defaultDirection Direction
-}
+var candidateRx = regexp.MustCompile(`\b[a-zA-Z0-9]`)
 
-// DefaultToFuture sets the option to default to the Future in case of
-// ambiguous dates.
-func DefaultToFuture(o *opts) {
-	o.defaultDirection = Future
-}
+func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Range) string, dir Direction) (string, error) {
+	indexes := candidateRx.FindAllStringIndex(s, -1)
+	type stringWithPos struct {
+		s string
+		p int
+	}
+	var timeStrs []stringWithPos
+	for len(indexes) > 0 {
+		startEnd := indexes[0]
+		start := startEnd[0]
+		indexes = indexes[1:]
+		filename := fmt.Sprintf("input string starting at position %v", start+1)
+		locRangeAsAny, err := Parse(filename, []byte(s[start:]))
+		if err != nil {
+			break
+		}
+		locRange := locRangeAsAny.(LocatedRange)
+		r := locRange.RangeFn(ref, dir)
+		fr := f(string(locRange.Text), r)
+		timeStrs = append(timeStrs, stringWithPos{fr, start})
+	}
 
-// DefaultToPast sets the option to default to the past in case of
-// ambiguous dates.
-func DefaultToPast(o *opts) {
-	o.defaultDirection = Past
+	return "", nil
 }
