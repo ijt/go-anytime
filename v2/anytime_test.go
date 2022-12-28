@@ -71,6 +71,17 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			},
 			want: fmt.Sprintf("Without a doubt %v is the time", now.UnixMilli()),
 		},
+		{
+			name: "two nows",
+			args: args{
+				s:   "now now",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%v", r.Start().UnixMilli())
+				},
+			},
+			want: fmt.Sprintf("%v %v", now.UnixMilli(), now.UnixMilli()),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
