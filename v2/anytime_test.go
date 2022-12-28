@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
@@ -104,6 +105,17 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 				},
 			},
 			want: "nownow",
+		},
+		{
+			name: "verbiage now verbiage now verbiage",
+			args: args{
+				s:   "a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*(",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%v", r.Start().UnixMilli())
+				},
+			},
+			want: strings.ReplaceAll("a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*(", "now", fmt.Sprintf("%v", now.UnixMilli())),
 		},
 	}
 	for _, tt := range tests {
