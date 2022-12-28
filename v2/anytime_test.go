@@ -4,128 +4,44 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
-	"strings"
 	"testing"
 	"time"
 )
 
 func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
-	type args struct {
-		s   string
-		ref time.Time
-		f   func(source string, r Range) string
-		dir Direction
+	nowRx := regexp.MustCompile(`(?i)\bnow\b`)
+	f := func(source string, r Range) string {
+		return fmt.Sprintf("%v", r.Start().UnixMilli())
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name  string
+		input string
 	}{
-		{
-			name: "empty",
-			args: args{
-				s: "",
-			},
-			want: "",
-		},
-		{
-			name: "now",
-			args: args{
-				s:   "now",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: fmt.Sprintf("%v", now.UnixMilli()),
-		},
-		{
-			name: "NOW",
-			args: args{
-				s:   "NOW",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: fmt.Sprintf("%v", now.UnixMilli()),
-		},
-		{
-			name: "now with trailing verbiage",
-			args: args{
-				s:   "now is the time",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: fmt.Sprintf("%v is the time", now.UnixMilli()),
-		},
-		{
-			name: "now with leading verbiage",
-			args: args{
-				s:   "the time is now",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: fmt.Sprintf("the time is %v", now.UnixMilli()),
-		},
-		{
-			name: "now with leading and trailing verbiage",
-			args: args{
-				s:   "Without a doubt now is the time",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: fmt.Sprintf("Without a doubt %v is the time", now.UnixMilli()),
-		},
-		{
-			name: "two nows",
-			args: args{
-				s:   "now now",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: fmt.Sprintf("%v %v", now.UnixMilli(), now.UnixMilli()),
-		},
-		{
-			name: "two nows with no space between them",
-			args: args{
-				s:   "nownow",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: "nownow",
-		},
-		{
-			name: "verbiage now verbiage now verbiage",
-			args: args{
-				s:   "a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*(",
-				ref: now,
-				f: func(source string, r Range) string {
-					return fmt.Sprintf("%v", r.Start().UnixMilli())
-				},
-			},
-			want: strings.ReplaceAll("a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*(", "now", fmt.Sprintf("%v", now.UnixMilli())),
-		},
+		{"empty", ""},
+		{"one space", " "},
+		{"now", "now"},
+		{"space now", " now"},
+		{"now space", "now "},
+		{"space now space", " now "},
+		{"all caps now", "NOW"},
+		{"now verbiage", "now is the time"},
+		{"verbiage now", "the time is now"},
+		{"verbiage now verbiage", "Without a doubt now is the time."},
+		{"verbiage now punctuation verbiage", "If you don't know me by now, you will never know me."},
+		{"now now", "now now"},
+		{"nownow", "nownow"},
+		{"noise with two nows", "a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*("},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ReplaceAllRangesByFunc(tt.args.s, tt.args.ref, tt.args.f, tt.args.dir)
+			got, err := ReplaceAllRangesByFunc(tt.input, now, f, Future)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got != tt.want {
-				t.Errorf("got = %v, want %v", got, tt.want)
+			want := nowRx.ReplaceAllString(tt.input, fmt.Sprintf("%v", now.UnixMilli()))
+			if got != want {
+				t.Errorf("got = %v, want %v", got, want)
 			}
 		})
 	}
