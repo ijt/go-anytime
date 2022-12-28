@@ -3,6 +3,7 @@ package anytime
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -109,19 +110,30 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 
 func BenchmarkReplaceAllRangesByFunc(b *testing.B) {
 	now := time.UnixMilli(rand.Int63())
-	s := "now now"
+	s := `
+Do It Now
+by Berton Braley
+IF WITH PLEASURE you are viewing any work a man is doing,
+If you like him or you love him, tell him now;
+Don't withhold your approbation till the parson makes oration
+And he lies with snowy lilies on his brow;
+No matter how you shout it he won't really care about it;
+He won't know how many teardrops you have shed;
+If you think some praise is due him now's the time to slip it to him,
+For he cannot read his tombstone when he's dead.`
+	nowRx := regexp.MustCompile(`(?i)\bnow\b`)
+	want := nowRx.ReplaceAllString(s, fmt.Sprintf("%v", now.UnixMilli()))
 	f := func(source string, r Range) string {
 		return fmt.Sprintf("%v", r.Start().UnixMilli())
 	}
 	b.ResetTimer()
-	want := fmt.Sprintf("%v %v", now.UnixMilli(), now.UnixMilli())
 	for i := 0; i < b.N; i++ {
 		got, err := ReplaceAllRangesByFunc(s, now, f, Past)
 		if err != nil {
 			b.Fatal(err)
 		}
 		if got != want {
-			b.Errorf("got = %v, want %v", got, want)
+			b.Errorf("got = %v\n\nwant %v", got, want)
 		}
 	}
 }
