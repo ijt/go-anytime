@@ -2,7 +2,7 @@
 package anytime
 }
 
-Input <- locRange:LocatedRange .* EOF {
+Input <- locRange:LocatedRange (EOF / [^a-zA-Z0-9] .* EOF) {
     return locRange, nil
 }
 
