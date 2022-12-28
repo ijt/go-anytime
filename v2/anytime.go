@@ -105,12 +105,16 @@ func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Ran
 	if len(timeStrsWithPos) == 0 {
 		return s, nil
 	}
-	var timeStrs []string
-	timeStrs = append(timeStrs, s[0:timeStrsWithPos[0].p])
-	for _, tsp := range timeStrsWithPos {
-		timeStrs = append(timeStrs, tsp.newStr)
+	var parts []string
+	parts = append(parts, s[0:timeStrsWithPos[0].p])
+	for i, tsp := range timeStrsWithPos {
+		parts = append(parts, tsp.newStr)
 		startNonTime := tsp.p + len(tsp.oldStr)
-		timeStrs = append(timeStrs, s[startNonTime:])
+		endNonTime := len(s)
+		if i < len(timeStrsWithPos)-1 {
+			endNonTime = timeStrsWithPos[i+1].p
+		}
+		parts = append(parts, s[startNonTime:endNonTime])
 	}
-	return strings.Join(timeStrs, ""), nil
+	return strings.Join(parts, ""), nil
 }
