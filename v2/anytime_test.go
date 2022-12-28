@@ -38,6 +38,39 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			},
 			want: fmt.Sprintf("%v", now.UnixMilli()),
 		},
+		{
+			name: "now with trailing verbiage",
+			args: args{
+				s:   "now is the time",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%v", r.Start().UnixMilli())
+				},
+			},
+			want: fmt.Sprintf("%v is the time", now.UnixMilli()),
+		},
+		{
+			name: "now with leading verbiage",
+			args: args{
+				s:   "the time is now",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%v", r.Start().UnixMilli())
+				},
+			},
+			want: fmt.Sprintf("the time is %v", now.UnixMilli()),
+		},
+		{
+			name: "now with leading and trailing verbiage",
+			args: args{
+				s:   "Without a doubt now is the time",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%v", r.Start().UnixMilli())
+				},
+			},
+			want: fmt.Sprintf("Without a doubt %v is the time", now.UnixMilli()),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
