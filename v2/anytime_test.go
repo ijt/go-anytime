@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestReplaceAllRangesByFunc_ok(t *testing.T) {
+func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
 	nowRx := regexp.MustCompile(`(?i)\bnow\b`)
 	f := func(source string, r Range) string {
@@ -20,6 +20,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	}{
 		{"empty", ""},
 		{"one space", " "},
+		{"verbiage", "This string contains no times or dates."},
 		{"now", "now"},
 		{"space now", " now"},
 		{"now space", "now "},
