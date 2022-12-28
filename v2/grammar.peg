@@ -14,7 +14,7 @@ LocatedRange <- rangefn:Range {
     }, nil
 }
 
-Range <- "now" {
+Range <- "now"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return Range{
             start: ref,

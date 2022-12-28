@@ -40,6 +40,17 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			want: fmt.Sprintf("%v", now.UnixMilli()),
 		},
 		{
+			name: "NOW",
+			args: args{
+				s:   "NOW",
+				ref: now,
+				f: func(source string, r Range) string {
+					return fmt.Sprintf("%v", r.Start().UnixMilli())
+				},
+			},
+			want: fmt.Sprintf("%v", now.UnixMilli()),
+		},
+		{
 			name: "now with trailing verbiage",
 			args: args{
 				s:   "now is the time",
