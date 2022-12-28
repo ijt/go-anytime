@@ -86,9 +86,10 @@ func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Ran
 		start := startEnd[0]
 		indexes = indexes[1:]
 		filename := fmt.Sprintf("input string starting at position %v", start+1)
-		locRangeAsAny, err := Parse(filename, []byte(s[start:]))
+		inputSlice := s[start:]
+		locRangeAsAny, err := Parse(filename, []byte(inputSlice))
 		if err != nil {
-			break
+			continue
 		}
 		locRange := locRangeAsAny.(LocatedRange)
 		r := locRange.RangeFn(ref, dir)
