@@ -74,11 +74,14 @@ var candidateRx = regexp.MustCompile(`\b[a-zA-Z0-9]`)
 
 func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Range) string, dir Direction) (string, error) {
 	indexes := candidateRx.FindAllStringIndex(s, -1)
-	type stringWithPos struct {
-		s string
+	type stringsWithPos struct {
+		oldStr string
+		newStr string
+
+		// p is the position in the input string s.
 		p int
 	}
-	var timeStrsWithPos []stringWithPos
+	var timeStrsWithPos []stringsWithPos
 	for len(indexes) > 0 {
 		startEnd := indexes[0]
 		start := startEnd[0]
@@ -91,15 +94,23 @@ func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Ran
 		locRange := locRangeAsAny.(LocatedRange)
 		r := locRange.RangeFn(ref, dir)
 		fr := f(string(locRange.Text), r)
-		timeStrsWithPos = append(timeStrsWithPos, stringWithPos{fr, start})
+		swp := stringsWithPos{
+			oldStr: string(locRange.Text),
+			newStr: fr,
+			p:      start,
+		}
+		timeStrsWithPos = append(timeStrsWithPos, swp)
 	}
 
 	if len(timeStrsWithPos) == 0 {
 		return s, nil
 	}
 	var timeStrs []string
+	timeStrs = append(timeStrs, s[0:timeStrsWithPos[0].p])
 	for _, tsp := range timeStrsWithPos {
-		timeStrs = append(timeStrs, tsp.s)
+		timeStrs = append(timeStrs, tsp.newStr)
+		startNonTime := tsp.p + len(tsp.oldStr)
+		timeStrs = append(timeStrs, s[startNonTime:])
 	}
-	return strings.Join(timeStrs, " "), nil
+	return strings.Join(timeStrs, ""), nil
 }
