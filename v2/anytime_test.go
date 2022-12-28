@@ -95,3 +95,22 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkReplaceAllRangesByFunc(b *testing.B) {
+	now := time.UnixMilli(rand.Int63())
+	s := "now now"
+	f := func(source string, r Range) string {
+		return fmt.Sprintf("%v", r.Start().UnixMilli())
+	}
+	b.ResetTimer()
+	want := fmt.Sprintf("%v %v", now.UnixMilli(), now.UnixMilli())
+	for i := 0; i < b.N; i++ {
+		got, err := ReplaceAllRangesByFunc(s, now, f, Past)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if got != want {
+			b.Errorf("got = %v, want %v", got, want)
+		}
+	}
+}
