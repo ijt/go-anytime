@@ -120,6 +120,10 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 		return truncateYear(now), true
 	case "next year":
 		return truncateYear(now.AddDate(1, 0, 0)), true
+	case "last january":
+		return lastSpecificMonth(now, time.January), true
+	case "next january":
+		return nextSpecificMonth(now, time.January), true
 	}
 	return Range{}, false
 }
