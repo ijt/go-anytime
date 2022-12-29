@@ -69,13 +69,13 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 	var parts []string
 	locs := wordSpaceRx.FindAllStringSubmatchIndex(inputStr, -1)
 	p := 0
-	for i := range locs {
+	for i := 0; i < len(locs); i++ {
 		if locs[i][0] > p {
 			parts = append(parts, inputStr[p:locs[i][0]])
 		}
 
 		// If there is a word pair here, try that first.
-		if i+1 < len(locs) && locs[i][3]+1 == locs[i+1][0] {
+		if i+1 < len(locs) && locs[i][1] == locs[i+1][0] {
 			s := inputStr[locs[i][2]:locs[i+1][3]]
 			ns := normalize(s)
 			r, ok := normalizedTwoWordStrToRange(ns, now, dir)
@@ -85,6 +85,7 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 				trailingWhitespace := inputStr[locs[i+1][3]:locs[i+1][1]]
 				parts = append(parts, trailingWhitespace)
 				p = locs[i+1][1]
+				i++
 				continue
 			}
 		}
