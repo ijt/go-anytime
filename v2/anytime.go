@@ -247,9 +247,13 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 		return nextSpecificMonth(now, time.November), true
 	case "next dec":
 		return nextSpecificMonth(now, time.December), true
-
 	}
-	return Range{}, false
+
+	t, err := time.Parse("January 2006", normSrc)
+	if err != nil {
+		return Range{}, false
+	}
+	return truncateMonth(t), true
 }
 
 func normalize(s string) string {
