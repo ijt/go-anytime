@@ -297,14 +297,23 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.Input, func(t *testing.T) {
-			got, err := Parse("input string", []byte(c.Input))
+			var foundRanges []Range
+			_, err := ReplaceAllRangesByFunc(c.Input, now, func(_ string, r Range) string {
+				foundRanges = append(foundRanges, r)
+				return ""
+			}, Future)
 			if err != nil {
 				t.Fatal(err)
 			}
-			gotF := got.(RangeFunc)
-			gotRange := gotF(now, Future)
+			if len(foundRanges) == 0 {
+				t.Fatal("no ranges found")
+			}
+			if len(foundRanges) > 1 {
+				t.Fatalf("got %d ranges, want 1", len(foundRanges))
+			}
+			gotRange := foundRanges[0]
 			if !gotRange.Equal(c.WantRange) {
-				t.Errorf("got %v, want %v", gotRange, c.WantRange)
+				t.Fatalf("got range %v, want %v", gotRange, c.WantRange)
 			}
 		})
 	}
