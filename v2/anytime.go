@@ -120,14 +120,107 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 		return truncateYear(now), true
 	case "next year":
 		return truncateYear(now.AddDate(1, 0, 0)), true
+
+	// last $longMonth
 	case "last january":
 		return lastSpecificMonth(now, time.January), true
+	case "last february":
+		return lastSpecificMonth(now, time.February), true
+	case "last march":
+		return lastSpecificMonth(now, time.March), true
+	case "last april":
+		return lastSpecificMonth(now, time.April), true
+	case "last may":
+		return lastSpecificMonth(now, time.May), true
+	case "last june":
+		return lastSpecificMonth(now, time.June), true
+	case "last july":
+		return lastSpecificMonth(now, time.July), true
+	case "last august":
+		return lastSpecificMonth(now, time.August), true
+	case "last september":
+		return lastSpecificMonth(now, time.September), true
+	case "last october":
+		return lastSpecificMonth(now, time.October), true
+	case "last november":
+		return lastSpecificMonth(now, time.November), true
+	case "last december":
+		return lastSpecificMonth(now, time.December), true
+
+	// last $shortMonth
 	case "last jan":
 		return lastSpecificMonth(now, time.January), true
+	case "last feb":
+		return lastSpecificMonth(now, time.February), true
+	case "last mar":
+		return lastSpecificMonth(now, time.March), true
+	case "last apr":
+		return lastSpecificMonth(now, time.April), true
+	case "last jun":
+		return lastSpecificMonth(now, time.June), true
+	case "last jul":
+		return lastSpecificMonth(now, time.July), true
+	case "last aug":
+		return lastSpecificMonth(now, time.August), true
+	case "last sep":
+		return lastSpecificMonth(now, time.September), true
+	case "last oct":
+		return lastSpecificMonth(now, time.October), true
+	case "last nov":
+		return lastSpecificMonth(now, time.November), true
+	case "last dec":
+		return lastSpecificMonth(now, time.December), true
+
+	// next $longMonth
 	case "next january":
 		return nextSpecificMonth(now, time.January), true
+	case "next february":
+		return nextSpecificMonth(now, time.February), true
+	case "next march":
+		return nextSpecificMonth(now, time.March), true
+	case "next april":
+		return nextSpecificMonth(now, time.April), true
+	case "next may":
+		return nextSpecificMonth(now, time.May), true
+	case "next june":
+		return nextSpecificMonth(now, time.June), true
+	case "next july":
+		return nextSpecificMonth(now, time.July), true
+	case "next august":
+		return nextSpecificMonth(now, time.August), true
+	case "next september":
+		return nextSpecificMonth(now, time.September), true
+	case "next october":
+		return nextSpecificMonth(now, time.October), true
+	case "next november":
+		return nextSpecificMonth(now, time.November), true
+	case "next december":
+		return nextSpecificMonth(now, time.December), true
+
+	// next $shortMonth
 	case "next jan":
 		return nextSpecificMonth(now, time.January), true
+	case "next feb":
+		return nextSpecificMonth(now, time.February), true
+	case "next mar":
+		return nextSpecificMonth(now, time.March), true
+	case "next apr":
+		return nextSpecificMonth(now, time.April), true
+	case "next jun":
+		return nextSpecificMonth(now, time.June), true
+	case "next jul":
+		return nextSpecificMonth(now, time.July), true
+	case "next aug":
+		return nextSpecificMonth(now, time.August), true
+	case "next sep":
+		return nextSpecificMonth(now, time.September), true
+	case "next oct":
+		return nextSpecificMonth(now, time.October), true
+	case "next nov":
+		return nextSpecificMonth(now, time.November), true
+	case "next dec":
+		return nextSpecificMonth(now, time.December), true
+
 	}
 	return Range{}, false
 }
