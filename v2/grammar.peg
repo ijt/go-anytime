@@ -25,6 +25,10 @@ Range <- "now"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return truncateYear(ref.AddDate(-1, 0, 0))
     }), nil
+} / "this"i __ "year"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateYear(ref)
+    }), nil
 } / "next"i __ "year"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return truncateYear(ref.AddDate(1, 0, 0))
