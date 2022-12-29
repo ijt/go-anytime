@@ -88,10 +88,12 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	}
 	inputs := []string{
 		"last year",
+		`"last year"`,
 		"a last year",
 		"last year a",
 		"a last year a",
 		"a last year last year a",
+		"a (last year, last year) a",
 	}
 	for _, input := range inputs {
 		t.Run(input, func(t *testing.T) {
