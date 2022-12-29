@@ -63,17 +63,32 @@ const (
 	Past
 )
 
+var wordsRx = regexp.MustCompile(`\b\w+(\s*\w+)*\b`)
 var twoWordRx = regexp.MustCompile(`\b(\w+)\s+(\w+)\b`)
 var oneWordRx = regexp.MustCompile(`\b(\w+)\b`)
+var wordSpaceRx = regexp.MustCompile(`^\w+\s*`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
-	inputStr = twoWordRx.ReplaceAllStringFunc(inputStr, func(s string) string {
-		ns := normalize(s)
-		r, ok := normalizedTwoWordStrToRange(ns, now, dir)
-		if !ok {
+	inputStr = wordsRx.ReplaceAllStringFunc(inputStr, func(s string) string {
+		replaceTwoWordString := func(s string) string {
+			ns := normalize(s)
+			r, ok := normalizedTwoWordStrToRange(ns, now, dir)
+			if !ok {
+				return s
+			}
+			return f(s, ns, r)
+		}
+		s = twoWordRx.ReplaceAllStringFunc(s, replaceTwoWordString)
+
+		// Handle the odd pairs. If the string is like "a b c" then the
+		// first call to twoWordRx.ReplaceAllStringFunc will replace "a b"
+		// and leave "c" alone. So we need to call it again on "b c".
+		loc := wordSpaceRx.FindStringIndex(s)
+		if loc == nil {
 			return s
 		}
-		return f(s, ns, r)
+		s2 := twoWordRx.ReplaceAllStringFunc(s[loc[1]:], replaceTwoWordString)
+		return s[:loc[1]] + s2
 	})
 	inputStr = oneWordRx.ReplaceAllStringFunc(inputStr, func(s string) string {
 		ns := strings.ToLower(s)
