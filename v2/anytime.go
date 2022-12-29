@@ -63,42 +63,53 @@ const (
 	Past
 )
 
-var wordsRx = regexp.MustCompile(`\b\w+(\s*\w+)*\b`)
-var twoWordRx = regexp.MustCompile(`\b(\w+)\s+(\w+)\b`)
-var oneWordRx = regexp.MustCompile(`\b(\w+)\b`)
-var wordSpaceRx = regexp.MustCompile(`^\w+\s*`)
+var wordSpaceRx = regexp.MustCompile(`^(\w+)\s*`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
-	inputStr = wordsRx.ReplaceAllStringFunc(inputStr, func(s string) string {
-		replaceTwoWordString := func(s string) string {
+	var parts []string
+	locs := wordSpaceRx.FindAllStringSubmatchIndex(inputStr, -1)
+	p := 0
+	for i := range locs {
+		if locs[i][0] > p {
+			parts = append(parts, inputStr[p:locs[i][0]])
+		}
+
+		// If there is a word pair here, try that first.
+		if i+1 < len(locs) && locs[i][3]+1 == locs[i+1][0] {
+			s := inputStr[locs[i][2]:locs[i+1][3]]
 			ns := normalize(s)
 			r, ok := normalizedTwoWordStrToRange(ns, now, dir)
-			if !ok {
-				return s
+			if ok {
+				s2 := f(s, ns, r)
+				parts = append(parts, s2)
+				trailingWhitespace := inputStr[locs[i+1][3]:locs[i+1][1]]
+				parts = append(parts, trailingWhitespace)
+				p = locs[i+1][1]
+				continue
 			}
-			return f(s, ns, r)
 		}
-		s = twoWordRx.ReplaceAllStringFunc(s, replaceTwoWordString)
 
-		// Handle the odd pairs. If the string is like "a b c" then the
-		// first call to twoWordRx.ReplaceAllStringFunc will replace "a b"
-		// and leave "c" alone. So we need to call it again on "b c".
-		loc := wordSpaceRx.FindStringIndex(s)
-		if loc == nil {
-			return s
-		}
-		s2 := twoWordRx.ReplaceAllStringFunc(s[loc[1]:], replaceTwoWordString)
-		return s[:loc[1]] + s2
-	})
-	inputStr = oneWordRx.ReplaceAllStringFunc(inputStr, func(s string) string {
-		ns := strings.ToLower(s)
+		// Try for a single word match.
+		s := inputStr[locs[i][2]:locs[i][3]]
+		ns := normalize(s)
 		r, ok := normalizedOneWordStrToRange(ns, now, dir)
-		if !ok {
-			return s
+		if ok {
+			s2 := f(s, ns, r)
+			parts = append(parts, s2)
+			trailingWhitespace := inputStr[locs[i][3]:locs[i][1]]
+			parts = append(parts, trailingWhitespace)
+			p = locs[i][1]
+			continue
 		}
-		return f(s, ns, r)
-	})
-	return inputStr, nil
+
+		// Default: use this chunk of the input string.
+		parts = append(parts, inputStr[locs[i][0]:locs[i][1]])
+		p = locs[i][1]
+	}
+	if p < len(inputStr) {
+		parts = append(parts, inputStr[p:])
+	}
+	return strings.Join(parts, ""), nil
 }
 
 func normalizedOneWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {

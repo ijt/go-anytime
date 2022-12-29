@@ -44,7 +44,7 @@ func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 			}
 			want := nowRx.ReplaceAllString(tt.input, fmt.Sprintf("%v", now.UnixMilli()))
 			if got != want {
-				t.Errorf("got = %v, want %v", got, want)
+				t.Errorf("got = %q, want %q", got, want)
 			}
 		})
 	}
