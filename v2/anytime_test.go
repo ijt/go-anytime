@@ -80,6 +80,21 @@ For he cannot read his tombstone when he's dead.`
 	}
 }
 
+func TestReplaceAllRangesByFunc_noReplacementCrossTalk(t *testing.T) {
+	input := "last year week"
+	f := func(src, normSrc string, r Range) string {
+		return "maybe next"
+	}
+	want := "maybe next week"
+	got, err := ReplaceAllRangesByFunc(input, time.Time{}, Future, f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != want {
+		t.Fatalf("got = %q, want %q", got, want)
+	}
+}
+
 func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
 	ly := lastYear(now)
