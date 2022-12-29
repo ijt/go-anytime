@@ -63,7 +63,7 @@ const (
 	Past
 )
 
-var twoWordRx = regexp.MustCompile(`\b(\w+) (\w+)\b`)
+var twoWordRx = regexp.MustCompile(`\b(\w+)\s+(\w+)\b`)
 var oneWordRx = regexp.MustCompile(`\b(\w+)\b`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
