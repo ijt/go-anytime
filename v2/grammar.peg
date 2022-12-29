@@ -33,9 +33,17 @@ Range <- "now"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return truncateYear(ref.AddDate(1, 0, 0))
     }), nil
+} / "yesterday"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateDay(ref.AddDate(0, 0, -1))
+    }), nil
 } / "today"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return truncateDay(ref)
+    }), nil
+} / "tomorrow"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateDay(ref.AddDate(0, 0, 1))
     }), nil
 }
 
