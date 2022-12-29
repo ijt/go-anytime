@@ -88,7 +88,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	}{
 		// years
 		{`Last year`, truncateYear(now.AddDate(-1, 0, 0))},
-		//{`Next year`, truncateYear(now.AddDate(1, 0, 0))},
+		{`Next year`, truncateYear(now.AddDate(1, 0, 0))},
 		//
 		//// today
 		//{`Today`, truncateDay(now)},
