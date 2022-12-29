@@ -57,6 +57,18 @@ Range <- "now"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return truncateWeek(ref.AddDate(0, 0, 7))
     }), nil
+} / "last"i __ "month"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateMonth(ref.AddDate(0, -1, 0))
+    }), nil
+} / "this"i __ "month"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateMonth(ref)
+    }), nil
+} / "next"i __ "month"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateMonth(ref.AddDate(0, 1, 0))
+    }), nil
 }
 
 __ "nonempty whitespace" <- [ \t\r\n]+
