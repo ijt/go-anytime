@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 )
@@ -76,6 +77,33 @@ For he cannot read his tombstone when he's dead.`
 		if got != want {
 			b.Errorf("got = %v\n\nwant %v", got, want)
 		}
+	}
+}
+
+func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
+	now := time.UnixMilli(rand.Int63())
+	ly := lastYear(now)
+	f := func(src, normSrc string, r Range) string {
+		return fmt.Sprintf("%v", r.Start().UnixMilli())
+	}
+	inputs := []string{
+		"last year",
+		"a last year",
+		"last year a",
+		"a last year a",
+		"a last year last year a",
+	}
+	for _, input := range inputs {
+		t.Run(input, func(t *testing.T) {
+			got, err := ReplaceAllRangesByFunc(input, now, f, Past)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := strings.ReplaceAll(input, "last year", fmt.Sprintf("%v", ly.Start().UnixMilli()))
+			if got != want {
+				t.Errorf("got = %v, want %v", got, want)
+			}
+		})
 	}
 }
 
