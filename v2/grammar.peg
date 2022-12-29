@@ -33,6 +33,10 @@ Range <- "now"i {
     return RangeFunc(func(ref time.Time, dir Direction) Range {
         return truncateYear(ref.AddDate(1, 0, 0))
     }), nil
+} / "today"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateDay(ref)
+    }), nil
 }
 
 __ "nonempty whitespace" <- [ \t\r\n]+
