@@ -63,7 +63,7 @@ const (
 	Past
 )
 
-var wordSpaceRx = regexp.MustCompile(`(\w+)\s*`)
+var wordSpaceRx = regexp.MustCompile(`(\w+)[,\s]*`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
 	var parts []string
@@ -257,6 +257,7 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 }
 
 func normalize(s string) string {
+	s = strings.ReplaceAll(s, ",", "")
 	fs := strings.Fields(s)
 	s = strings.Join(fs, " ")
 	s = strings.ToLower(s)
