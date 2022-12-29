@@ -104,11 +104,12 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`Last week`, truncateWeek(now.AddDate(0, 0, -7))},
 		{`This week`, truncateWeek(now)},
 		{`Next week`, truncateWeek(now.AddDate(0, 0, 7))},
-		//
-		//// months
-		//{`Last month`, truncateMonth(now.AddDate(0, -1, 0))},
-		//{`Next month`, truncateMonth(now.AddDate(0, 1, 0))},
-		//
+
+		// months
+		{`Last month`, truncateMonth(now.AddDate(0, -1, 0))},
+		{`This month`, truncateMonth(now)},
+		{`Next month`, truncateMonth(now.AddDate(0, 1, 0))},
+
 		//// past weekdays
 		//{`Last sunday`, lastWeekdayFrom(now, time.Sunday)},
 		//{`Last monday`, lastWeekdayFrom(now, time.Monday)},
