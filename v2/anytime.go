@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-//go:generate pigeon -o grammar.go grammar.peg
-
 // LocatedRange is a Range with information about where it was found within the
 // input string.
 type LocatedRange struct {
@@ -72,49 +70,32 @@ const (
 
 var candidateRx = regexp.MustCompile(`\b[a-zA-Z0-9]`)
 
-func ReplaceAllRangesByFunc(s string, ref time.Time, f func(source string, r Range) string, dir Direction) (string, error) {
-	indexes := candidateRx.FindAllStringIndex(s, -1)
-	type stringsWithPos struct {
-		oldStr string
-		newStr string
+var dateTimeRx = regexp.MustCompile(
+	`(?i)\bnow\b`)
 
-		// p is the position in the input string s.
-		p int
-	}
-	var timeStrsWithPos []stringsWithPos
-	for _, startEnd := range indexes {
-		start := startEnd[0]
-		indexes = indexes[1:]
-		filename := fmt.Sprintf("input string starting at position %v", start+1)
-		inputSlice := s[start:]
-		locRangeAsAny, err := Parse(filename, []byte(inputSlice))
-		if err != nil {
-			continue
+func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
+	var errStrs []string
+	s2 := dateTimeRx.ReplaceAllStringFunc(inputStr, func(src string) string {
+		normSrc := normalize(src)
+		switch normSrc {
+		case "now":
+			r := Range{now, time.Second}
+			return f(src, normSrc, r)
 		}
-		locRange := locRangeAsAny.(LocatedRange)
-		r := locRange.RangeFn(ref, dir)
-		fr := f(string(locRange.Text), r)
-		swp := stringsWithPos{
-			oldStr: string(locRange.Text),
-			newStr: fr,
-			p:      start,
-		}
-		timeStrsWithPos = append(timeStrsWithPos, swp)
+		errStr := fmt.Sprintf("unrecognized date/time %q", src)
+		errStrs = append(errStrs, errStr)
+		return ""
+	})
+	if len(errStrs) > 0 {
+		return "", fmt.Errorf(strings.Join(errStrs, ", "))
 	}
+	return s2, nil
+}
 
-	if len(timeStrsWithPos) == 0 {
-		return s, nil
-	}
-	var parts []string
-	parts = append(parts, s[0:timeStrsWithPos[0].p])
-	for i, tsp := range timeStrsWithPos {
-		parts = append(parts, tsp.newStr)
-		startNonTime := tsp.p + len(tsp.oldStr)
-		endNonTime := len(s)
-		if i < len(timeStrsWithPos)-1 {
-			endNonTime = timeStrsWithPos[i+1].p
-		}
-		parts = append(parts, s[startNonTime:endNonTime])
-	}
-	return strings.Join(parts, ""), nil
+var spaceRx = regexp.MustCompile(`\s+`)
+
+func normalize(s string) string {
+	s = spaceRx.ReplaceAllString(s, " ")
+	s = strings.ToLower(s)
+	return s
 }

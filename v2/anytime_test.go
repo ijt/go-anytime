@@ -12,7 +12,7 @@ import (
 func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
 	nowRx := regexp.MustCompile(`(?i)\bnow\b`)
-	f := func(source string, r Range) string {
+	f := func(src, normSrc string, r Range) string {
 		return fmt.Sprintf("%v", r.Start().UnixMilli())
 	}
 	tests := []struct {
@@ -64,7 +64,7 @@ If you think some praise is due him now's the time to slip it to him,
 For he cannot read his tombstone when he's dead.`
 	nowRx := regexp.MustCompile(`(?i)\bnow\b`)
 	want := nowRx.ReplaceAllString(s, fmt.Sprintf("%v", now.UnixMilli()))
-	f := func(source string, r Range) string {
+	f := func(_, _ string, r Range) string {
 		return fmt.Sprintf("%v", r.Start().UnixMilli())
 	}
 	b.ResetTimer()
@@ -301,7 +301,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Input, func(t *testing.T) {
 			var foundRanges []Range
-			_, err := ReplaceAllRangesByFunc(c.Input, now, func(_ string, r Range) string {
+			_, err := ReplaceAllRangesByFunc(c.Input, now, func(_, _ string, r Range) string {
 				foundRanges = append(foundRanges, r)
 				return ""
 			}, Future)
