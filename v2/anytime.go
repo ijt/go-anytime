@@ -128,10 +128,9 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 	return Range{}, false
 }
 
-var spaceRx = regexp.MustCompile(`\s+`)
-
 func normalize(s string) string {
-	s = spaceRx.ReplaceAllString(s, " ")
+	fs := strings.Fields(s)
+	s = strings.Join(fs, " ")
 	s = strings.ToLower(s)
 	return s
 }
