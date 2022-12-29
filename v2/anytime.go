@@ -56,11 +56,6 @@ func (r Range) Equal(other Range) bool {
 	return r.start.Equal(other.start) && r.Duration == other.Duration
 }
 
-// RangeFromTimes returns a range given the start and end times.
-func RangeFromTimes(start, end time.Time) Range {
-	return Range{start, end.Sub(start)}
-}
-
 type Direction int
 
 const (
@@ -68,28 +63,34 @@ const (
 	Past
 )
 
-var candidateRx = regexp.MustCompile(`\b[a-zA-Z0-9]`)
-
 var dateTimeRx = regexp.MustCompile(
-	`(?i)\bnow\b`)
+	`(?i)\bnow|(last|this|next) (week|month|year)\b`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
 	var errStrs []string
 	s2 := dateTimeRx.ReplaceAllStringFunc(inputStr, func(src string) string {
 		normSrc := normalize(src)
-		switch normSrc {
-		case "now":
-			r := Range{now, time.Second}
-			return f(src, normSrc, r)
+		r, err := normalizedStrToRange(normSrc, now, dir)
+		if err != nil {
+			errStrs = append(errStrs, err.Error())
+			return ""
 		}
-		errStr := fmt.Sprintf("unrecognized date/time %q", src)
-		errStrs = append(errStrs, errStr)
-		return ""
+		return f(src, normSrc, r)
 	})
 	if len(errStrs) > 0 {
 		return "", fmt.Errorf(strings.Join(errStrs, ", "))
 	}
 	return s2, nil
+}
+
+func normalizedStrToRange(normSrc string, now time.Time, _ Direction) (Range, error) {
+	switch normSrc {
+	case "now":
+		return Range{now, time.Second}, nil
+	case "last week":
+		return truncateWeek(now.AddDate(0, 0, -7)), nil
+	}
+	return Range{}, fmt.Errorf("unrecognized date/time %q", normSrc)
 }
 
 var spaceRx = regexp.MustCompile(`\s+`)
