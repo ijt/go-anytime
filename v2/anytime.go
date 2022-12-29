@@ -64,7 +64,7 @@ const (
 )
 
 var dateTimeRx = regexp.MustCompile(
-	`(?i)\bnow|(last|this|next) (week|month|year)\b`)
+	`(?i)\bnow|yesterday|today|tomorrow|(last|this|next) (week|month|year)\b`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
 	var errStrs []string
@@ -87,6 +87,12 @@ func normalizedStrToRange(normSrc string, now time.Time, _ Direction) (Range, er
 	switch normSrc {
 	case "now":
 		return Range{now, time.Second}, nil
+	case "yesterday":
+		return truncateDay(now.AddDate(0, 0, -1)), nil
+	case "today":
+		return truncateDay(now), nil
+	case "tomorrow":
+		return truncateDay(now.AddDate(0, 0, 1)), nil
 	case "last week":
 		return truncateWeek(now.AddDate(0, 0, -7)), nil
 	case "this week":
