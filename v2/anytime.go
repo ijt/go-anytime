@@ -91,6 +91,8 @@ func normalizedStrToRange(normSrc string, now time.Time, _ Direction) (Range, er
 		return truncateWeek(now.AddDate(0, 0, -7)), nil
 	case "this week":
 		return truncateWeek(now), nil
+	case "next week":
+		return truncateWeek(now.AddDate(0, 0, 7)), nil
 	}
 	return Range{}, fmt.Errorf("unrecognized date/time %q", normSrc)
 }
