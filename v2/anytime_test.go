@@ -90,10 +90,10 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`Last year`, truncateYear(now.AddDate(-1, 0, 0))},
 		{`This year`, truncateYear(now)},
 		{`Next year`, truncateYear(now.AddDate(1, 0, 0))},
-		//
-		//// today
-		//{`Today`, truncateDay(now)},
-		//
+
+		// today
+		{`Today`, truncateDay(now)},
+
 		//// yesterday
 		//{`Yesterday`, truncateDay(now.AddDate(0, 0, -1))},
 		//
