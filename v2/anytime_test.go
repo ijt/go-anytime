@@ -86,8 +86,8 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		Input     string
 		WantRange Range
 	}{
-		//// years
-		//{`Last year`, truncateYear(now.AddDate(-1, 0, 0))},
+		// years
+		{`Last year`, truncateYear(now.AddDate(-1, 0, 0))},
 		//{`Next year`, truncateYear(now.AddDate(1, 0, 0))},
 		//
 		//// today
@@ -455,18 +455,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 //		})
 //	}
 //}
-
-func location(locStr string) *time.Location {
-	l, err := time.LoadLocation(locStr)
-	if err != nil {
-		panic(fmt.Sprintf("loading location %q: %v", locStr, err))
-	}
-	return l
-}
-
-func timeInLocation(t time.Time, l *time.Location) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), l)
-}
 
 //// Benchmark parsing.
 //func BenchmarkParse(b *testing.B) {
