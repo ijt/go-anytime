@@ -101,8 +101,9 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`Tomorrow`, truncateDay(now.AddDate(0, 0, 1))},
 
 		//// weeks
-		//{`Last week`, truncateWeek(now.AddDate(0, 0, -7))},
-		//{`Next week`, truncateWeek(now.AddDate(0, 0, 7))},
+		{`Last week`, truncateWeek(now.AddDate(0, 0, -7))},
+		{`This week`, truncateWeek(now)},
+		{`Next week`, truncateWeek(now.AddDate(0, 0, 7))},
 		//
 		//// months
 		//{`Last month`, truncateMonth(now.AddDate(0, -1, 0))},
