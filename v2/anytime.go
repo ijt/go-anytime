@@ -250,10 +250,11 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 	}
 
 	t, err := time.Parse("January 2006", normSrc)
-	if err != nil {
-		return Range{}, false
+	if err == nil {
+		return truncateMonth(t), true
 	}
-	return truncateMonth(t), true
+
+	return Range{}, false
 }
 
 func normalize(s string) string {
