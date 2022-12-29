@@ -21,6 +21,12 @@ Range <- "now"i {
             Duration: time.Second,
         }
     }), nil
+} / "last"i __ "year"i {
+    return RangeFunc(func(ref time.Time, dir Direction) Range {
+        return truncateYear(ref.AddDate(-1, 0, 0))
+    }), nil
 }
+
+__ "nonempty whitespace" <- [ \t\r\n]+
 
 EOF <- !.
