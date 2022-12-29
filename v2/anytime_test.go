@@ -132,7 +132,9 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		//
 		//// months
 		{`Last january`, lastSpecificMonth(now, time.January)},
+		{`last jan`, lastSpecificMonth(now, time.January)},
 		{`Next january`, nextSpecificMonth(now, time.January)},
+		{`next jan`, nextSpecificMonth(now, time.January)},
 
 		//// absolute dates
 		//{"January 2017", time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location())},
