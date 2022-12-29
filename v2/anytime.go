@@ -74,7 +74,23 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 			parts = append(parts, inputStr[p:locs[i][0]])
 		}
 
-		// If there is a word pair here, try that first.
+		// If there is a word triple here, try that.
+		if i+2 < len(locs) && locs[i][1] == locs[i+1][0] && locs[i+1][1] == locs[i+2][0] {
+			s := inputStr[locs[i][2]:locs[i+2][3]]
+			ns := normalize(s)
+			r, ok := normalizedThreeWordStrToRange(ns, now, dir)
+			if ok {
+				s2 := f(s, ns, r)
+				parts = append(parts, s2)
+				trailingWhitespace := inputStr[locs[i+2][3]:locs[i+2][1]]
+				parts = append(parts, trailingWhitespace)
+				p = locs[i+2][1]
+				i += 2
+				continue
+			}
+		}
+
+		// If there is a word pair here, try that.
 		if i+1 < len(locs) && locs[i][1] == locs[i+1][0] {
 			s := inputStr[locs[i][2]:locs[i+1][3]]
 			ns := normalize(s)
@@ -111,6 +127,14 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 		parts = append(parts, inputStr[p:])
 	}
 	return strings.Join(parts, ""), nil
+}
+
+func normalizedThreeWordStrToRange(normSrc string, _ time.Time, _ Direction) (Range, bool) {
+	t, err := time.Parse("January 2 2006", normSrc)
+	if err == nil {
+		return truncateDay(t), true
+	}
+	return Range{}, false
 }
 
 func normalizedOneWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {
