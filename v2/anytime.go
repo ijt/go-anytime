@@ -63,56 +63,65 @@ const (
 	Past
 )
 
-var dateTimeRx = regexp.MustCompile(
-	`(?i)\bnow|yesterday|today|tomorrow|(last|this|next) (week|month|year)\b`)
+var twoWordRx = regexp.MustCompile(`\b(\w+) (\w+)\b`)
+var oneWordRx = regexp.MustCompile(`\b(\w+)\b`)
 
 func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
-	var errStrs []string
-	s2 := dateTimeRx.ReplaceAllStringFunc(inputStr, func(src string) string {
-		normSrc := normalize(src)
-		r, err := normalizedStrToRange(normSrc, now, dir)
-		if err != nil {
-			errStrs = append(errStrs, err.Error())
-			return ""
+	inputStr = twoWordRx.ReplaceAllStringFunc(inputStr, func(s string) string {
+		ns := normalize(s)
+		r, ok := normalizedTwoWordStrToRange(ns, now, dir)
+		if !ok {
+			return s
 		}
-		return f(src, normSrc, r)
+		return f(s, ns, r)
 	})
-	if len(errStrs) > 0 {
-		return "", fmt.Errorf(strings.Join(errStrs, ", "))
-	}
-	return s2, nil
+	inputStr = oneWordRx.ReplaceAllStringFunc(inputStr, func(s string) string {
+		ns := strings.ToLower(s)
+		r, ok := normalizedOneWordStrToRange(ns, now, dir)
+		if !ok {
+			return s
+		}
+		return f(s, ns, r)
+	})
+	return inputStr, nil
 }
 
-func normalizedStrToRange(normSrc string, now time.Time, _ Direction) (Range, error) {
+func normalizedOneWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {
 	switch normSrc {
 	case "now":
-		return Range{now, time.Second}, nil
+		return Range{now, time.Second}, true
 	case "yesterday":
-		return truncateDay(now.AddDate(0, 0, -1)), nil
+		return truncateDay(now.AddDate(0, 0, -1)), true
 	case "today":
-		return truncateDay(now), nil
+		return truncateDay(now), true
 	case "tomorrow":
-		return truncateDay(now.AddDate(0, 0, 1)), nil
-	case "last week":
-		return truncateWeek(now.AddDate(0, 0, -7)), nil
-	case "this week":
-		return truncateWeek(now), nil
-	case "next week":
-		return truncateWeek(now.AddDate(0, 0, 7)), nil
-	case "last month":
-		return truncateMonth(now.AddDate(0, -1, 0)), nil
-	case "this month":
-		return truncateMonth(now), nil
-	case "next month":
-		return truncateMonth(now.AddDate(0, 1, 0)), nil
-	case "last year":
-		return truncateYear(now.AddDate(-1, 0, 0)), nil
-	case "this year":
-		return truncateYear(now), nil
-	case "next year":
-		return truncateYear(now.AddDate(1, 0, 0)), nil
+		return truncateDay(now.AddDate(0, 0, 1)), true
 	}
-	return Range{}, fmt.Errorf("unrecognized date/time %q", normSrc)
+	return Range{}, false
+}
+
+func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {
+	switch normSrc {
+	case "last week":
+		return truncateWeek(now.AddDate(0, 0, -7)), true
+	case "this week":
+		return truncateWeek(now), true
+	case "next week":
+		return truncateWeek(now.AddDate(0, 0, 7)), true
+	case "last month":
+		return truncateMonth(now.AddDate(0, -1, 0)), true
+	case "this month":
+		return truncateMonth(now), true
+	case "next month":
+		return truncateMonth(now.AddDate(0, 1, 0)), true
+	case "last year":
+		return truncateYear(now.AddDate(-1, 0, 0)), true
+	case "this year":
+		return truncateYear(now), true
+	case "next year":
+		return truncateYear(now.AddDate(1, 0, 0)), true
+	}
+	return Range{}, false
 }
 
 var spaceRx = regexp.MustCompile(`\s+`)
