@@ -253,6 +253,10 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 	if err == nil {
 		return truncateMonth(t), true
 	}
+	t, err = time.Parse("Jan 2006", normSrc)
+	if err == nil {
+		return truncateMonth(t), true
+	}
 
 	return Range{}, false
 }
