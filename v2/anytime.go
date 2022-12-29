@@ -129,14 +129,6 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 	return strings.Join(parts, ""), nil
 }
 
-func normalizedThreeWordStrToRange(normSrc string, _ time.Time, _ Direction) (Range, bool) {
-	t, err := time.Parse("January 2 2006", normSrc)
-	if err == nil {
-		return truncateDay(t), true
-	}
-	return Range{}, false
-}
-
 func normalizedOneWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {
 	switch normSrc {
 	case "now":
@@ -282,6 +274,18 @@ func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 		return truncateMonth(t), true
 	}
 
+	return Range{}, false
+}
+
+func normalizedThreeWordStrToRange(normSrc string, _ time.Time, _ Direction) (Range, bool) {
+	t, err := time.Parse("January 2 2006", normSrc)
+	if err == nil {
+		return truncateDay(t), true
+	}
+	t, err = time.Parse("Jan 2 2006", normSrc)
+	if err == nil {
+		return truncateDay(t), true
+	}
 	return Range{}, false
 }
 
