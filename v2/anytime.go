@@ -105,6 +105,12 @@ func normalizedStrToRange(normSrc string, now time.Time, _ Direction) (Range, er
 		return truncateMonth(now), nil
 	case "next month":
 		return truncateMonth(now.AddDate(0, 1, 0)), nil
+	case "last year":
+		return truncateYear(now.AddDate(-1, 0, 0)), nil
+	case "this year":
+		return truncateYear(now), nil
+	case "next year":
+		return truncateYear(now.AddDate(1, 0, 0)), nil
 	}
 	return Range{}, fmt.Errorf("unrecognized date/time %q", normSrc)
 }
