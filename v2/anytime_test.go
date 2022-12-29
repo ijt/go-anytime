@@ -38,7 +38,7 @@ func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ReplaceAllRangesByFunc(tt.input, now, f, Future)
+			got, err := ReplaceAllRangesByFunc(tt.input, now, Future, f)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -70,7 +70,7 @@ For he cannot read his tombstone when he's dead.`
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		got, err := ReplaceAllRangesByFunc(s, now, f, Past)
+		got, err := ReplaceAllRangesByFunc(s, now, Past, f)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -97,7 +97,7 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	}
 	for _, input := range inputs {
 		t.Run(input, func(t *testing.T) {
-			got, err := ReplaceAllRangesByFunc(input, now, f, Past)
+			got, err := ReplaceAllRangesByFunc(input, now, Past, f)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -383,10 +383,10 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Input, func(t *testing.T) {
 			var foundRanges []Range
-			_, err := ReplaceAllRangesByFunc(c.Input, now, func(_, _ string, r Range) string {
+			_, err := ReplaceAllRangesByFunc(c.Input, now, Future, func(_, _ string, r Range) string {
 				foundRanges = append(foundRanges, r)
 				return ""
-			}, Future)
+			})
 			if err != nil {
 				t.Fatal(err)
 			}

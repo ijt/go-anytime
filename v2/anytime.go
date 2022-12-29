@@ -68,7 +68,7 @@ var twoWordRx = regexp.MustCompile(`\b(\w+)\s+(\w+)\b`)
 var oneWordRx = regexp.MustCompile(`\b(\w+)\b`)
 var wordSpaceRx = regexp.MustCompile(`^\w+\s*`)
 
-func ReplaceAllRangesByFunc(inputStr string, now time.Time, f func(src, normSrc string, r Range) string, dir Direction) (string, error) {
+func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
 	inputStr = wordsRx.ReplaceAllStringFunc(inputStr, func(s string) string {
 		replaceTwoWordString := func(s string) string {
 			ns := normalize(s)
