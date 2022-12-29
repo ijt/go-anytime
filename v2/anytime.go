@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // LocatedRange is a Range with information about where it was found within the
@@ -69,6 +70,7 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 	var parts []string
 	locs := wordSpaceRx.FindAllStringSubmatchIndex(inputStr, -1)
 	p := 0
+	buf := make([]byte, 0, len(inputStr))
 	for i := 0; i < len(locs); i++ {
 		if locs[i][0] > p {
 			parts = append(parts, inputStr[p:locs[i][0]])
@@ -77,10 +79,10 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 		// If there is a word triple here, try that.
 		if i+2 < len(locs) && locs[i][1] == locs[i+1][0] && locs[i+1][1] == locs[i+2][0] {
 			s := inputStr[locs[i][2]:locs[i+2][3]]
-			ns := normalize(s)
-			r, ok := normalizedThreeWordStrToRange(ns, now, dir)
+			buf = normalize(buf, s)
+			r, ok := normalizedThreeWordStrToRange(string(buf), now, dir)
 			if ok {
-				s2 := f(s, ns, r)
+				s2 := f(s, string(buf), r)
 				parts = append(parts, s2)
 				trailingWhitespace := inputStr[locs[i+2][3]:locs[i+2][1]]
 				parts = append(parts, trailingWhitespace)
@@ -93,10 +95,10 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 		// If there is a word pair here, try that.
 		if i+1 < len(locs) && locs[i][1] == locs[i+1][0] {
 			s := inputStr[locs[i][2]:locs[i+1][3]]
-			ns := normalize(s)
-			r, ok := normalizedTwoWordStrToRange(ns, now, dir)
+			buf = normalize(buf, s)
+			r, ok := normalizedTwoWordStrToRange(string(buf), now, dir)
 			if ok {
-				s2 := f(s, ns, r)
+				s2 := f(s, string(buf), r)
 				parts = append(parts, s2)
 				trailingWhitespace := inputStr[locs[i+1][3]:locs[i+1][1]]
 				parts = append(parts, trailingWhitespace)
@@ -108,10 +110,10 @@ func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f fun
 
 		// Try for a single word match.
 		s := inputStr[locs[i][2]:locs[i][3]]
-		ns := normalize(s)
-		r, ok := normalizedOneWordStrToRange(ns, now, dir)
+		buf = normalize(buf, s)
+		r, ok := normalizedOneWordStrToRange(string(buf), now, dir)
 		if ok {
-			s2 := f(s, ns, r)
+			s2 := f(s, string(buf), r)
 			parts = append(parts, s2)
 			trailingWhitespace := inputStr[locs[i][3]:locs[i][1]]
 			parts = append(parts, trailingWhitespace)
@@ -289,10 +291,30 @@ func normalizedThreeWordStrToRange(normSrc string, _ time.Time, _ Direction) (Ra
 	return Range{}, false
 }
 
-var spacePunctRx = regexp.MustCompile(`[\s,.]+`)
+// normalize fills the given buf with a normalized version of s: lower-cased
+// and with each instance of [\s.,]+ replaced by a single space.
+func normalize(buf []byte, s string) []byte {
+	buf = buf[:0]
+	for i := 0; i < len(s); i++ {
+		if isSpacePunct(s[i]) {
+			// Represent however much space or punctuation in this chunk
+			// with a single space in the normalized version in buf.
+			buf = append(buf, ' ')
+			for i < len(s) && isSpacePunct(s[i]) {
+				i++
+			}
+			i--
+			continue
+		}
+		c := s[i]
+		if 'A' <= c && c <= 'Z' {
+			c += 'a' - 'A'
+		}
+		buf = append(buf, c)
+	}
+	return buf
+}
 
-func normalize(s string) string {
-	s = spacePunctRx.ReplaceAllString(s, " ")
-	s = strings.ToLower(s)
-	return s
+func isSpacePunct(c byte) bool {
+	return unicode.IsSpace(rune(c)) || c == ',' || c == '.'
 }
