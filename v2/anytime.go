@@ -131,7 +131,16 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			}
 		}
 
-		// Try parsing a more general date...
+		// Check for RFC3339 format.
+		if rfc3339Rx.MatchString(s[sofw:eofw]) {
+			t, err := time.Parse(time.RFC3339, s[sofw:eofw])
+			if err == nil {
+				addRangeAndAdvance(eofw, Range{t, time.Second})
+				continue
+			}
+		}
+
+		// Try parsing a more general, multi-word date...
 		var d date
 		// sow is the start of the current word.
 		sow := sofw
@@ -372,7 +381,7 @@ type date struct {
 }
 
 func isSignal(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '-' || r == '+'
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '-' || r == '+' || r == ':'
 }
 
 func oneWordStrToRange(normSrc string, now time.Time) (Range, bool) {
@@ -522,3 +531,5 @@ func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
 
 	return Range{}, false
 }
+
+var rfc3339Rx = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|([+-])(\d{2}):(\d{2}))?$`)
