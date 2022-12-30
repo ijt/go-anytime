@@ -218,7 +218,8 @@ var monthNameToMonth = map[string]time.Month{
 	"december":  time.December,
 }
 
-var ymdRx = regexp.MustCompile(`(\d{4})[-/](\d{1,2})[-/](\d\d)`)
+var ymdRx = regexp.MustCompile(`(\d{4})[-/](\d{1,2})[-/](\d{1,2})`)
+var dmyRx = regexp.MustCompile(`(\d{1,2})[-/](\d{1,2})[-/](\d{4})`)
 
 // parseDateWord sets a field of d based on the given word w and returns
 // true if it can. If no usable information is found, it returns false.
@@ -262,6 +263,16 @@ func parseDateWord(d *date, w string) bool {
 		y, _ := strconv.Atoi(sm[1])
 		m, _ := strconv.Atoi(sm[2])
 		dom, _ := strconv.Atoi(sm[3])
+		d.year = y
+		d.month = time.Month(m)
+		d.dayOfMonth = dom
+		return true
+	}
+
+	if sm := dmyRx.FindStringSubmatch(w); sm != nil {
+		dom, _ := strconv.Atoi(sm[1])
+		m, _ := strconv.Atoi(sm[2])
+		y, _ := strconv.Atoi(sm[3])
 		d.year = y
 		d.month = time.Month(m)
 		d.dayOfMonth = dom
