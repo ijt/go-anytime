@@ -2,7 +2,6 @@ package anytime
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -64,8 +63,6 @@ const (
 	Past
 )
 
-var wordSpaceRx = regexp.MustCompile(`(\w+)[,.\s]*`)
-
 func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
 	ls := strings.ToLower(s)
 	var parts []string
@@ -104,7 +101,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			}
 			// eosw is the end of the second word.
 			eosw := sosw
-			if eosw < len(s) && isSignal(s[eosw]) {
+			for eosw < len(s) && isSignal(s[eosw]) {
 				eosw++
 			}
 			sw := ls[sosw:eosw]
@@ -293,32 +290,4 @@ func normalizedThreeWordStrToRange(normSrc string, _ time.Time, _ Direction) (Ra
 		return truncateDay(t), true
 	}
 	return Range{}, false
-}
-
-// normalize fills the given buf with a normalized version of s: lower-cased
-// and with each instance of [\s.,]+ replaced by a single space.
-func normalize(buf []byte, s string) []byte {
-	buf = buf[:0]
-	for i := 0; i < len(s); i++ {
-		if isSpacePunct(s[i]) {
-			// Represent however much space or punctuation in this chunk
-			// with a single space in the normalized version in buf.
-			buf = append(buf, ' ')
-			for i < len(s) && isSpacePunct(s[i]) {
-				i++
-			}
-			i--
-			continue
-		}
-		c := s[i]
-		if 'A' <= c && c <= 'Z' {
-			c += 'a' - 'A'
-		}
-		buf = append(buf, c)
-	}
-	return buf
-}
-
-func isSpacePunct(c byte) bool {
-	return unicode.IsSpace(rune(c)) || c == ',' || c == '.'
 }
