@@ -137,7 +137,7 @@ func lastSpecificMonth(t time.Time, month time.Month) Range {
 		y--
 	}
 	d := time.Date(y, month, 1, 0, 0, 0, 0, t.Location())
-	e := d.AddDate(0, 1, 0).Add(-time.Second)
+	e := d.AddDate(0, 1, 0)
 	dur := e.Sub(d)
 	return Range{d, dur}
 }
@@ -146,7 +146,7 @@ func lastSpecificMonth(t time.Time, month time.Month) Range {
 func truncateDay(t time.Time) Range {
 	y, m, d := t.Date()
 	s := time.Date(y, m, d, 0, 0, 0, 0, t.Location())
-	e := s.AddDate(0, 0, 1).Add(-time.Second)
+	e := s.AddDate(0, 0, 1)
 	return Range{s, e.Sub(s)}
 }
 
@@ -156,7 +156,7 @@ func truncateWeek(t time.Time) Range {
 		t = t.AddDate(0, 0, -1)
 	}
 	s := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	e := s.AddDate(0, 0, 7).Add(-time.Second)
+	e := s.AddDate(0, 0, 7)
 	return Range{s, e.Sub(s)}
 }
 
@@ -164,14 +164,14 @@ func truncateWeek(t time.Time) Range {
 func truncateMonth(t time.Time) Range {
 	y, m, _ := t.Date()
 	s := time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
-	e := s.AddDate(0, 1, 0).Add(-time.Second)
+	e := s.AddDate(0, 1, 0)
 	return Range{s, e.Sub(s)}
 }
 
 // truncateYear returns a date truncated to the year.
 func truncateYear(t time.Time) Range {
 	s := time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.Location())
-	e := s.AddDate(1, 0, 0).Add(-time.Second)
+	e := s.AddDate(1, 0, 0)
 	return Range{s, e.Sub(s)}
 }
 
