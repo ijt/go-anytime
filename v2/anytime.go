@@ -2,6 +2,7 @@ package anytime
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -63,7 +64,7 @@ const (
 	Past
 )
 
-func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
+func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, r Range) string) (string, error) {
 	ls := strings.ToLower(s)
 	var parts []string
 	endOfPrevDate := 0
@@ -85,7 +86,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		r, ok := oneWordStrToRange(fw, now)
 		if ok {
 			parts = append(parts, s[endOfPrevDate:p])
-			fr := f(s[p:eofw], fw, r)
+			fr := f(s[p:eofw], r)
 			parts = append(parts, fr)
 			endOfPrevDate = eofw
 			p = eofw
@@ -110,7 +111,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			r, ok = lastThisNextStrToRange(fwsw, now)
 			if ok {
 				parts = append(parts, s[endOfPrevDate:p])
-				fr := f(s[p:eosw], fw, r)
+				fr := f(s[p:eosw], r)
 				parts = append(parts, fr)
 				endOfPrevDate = eosw
 				p = eosw
@@ -119,12 +120,181 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		}
 
 		// Try parsing a more general date...
+		var d date
+		// sow is the start of the current word
+		sow := p
+		// eow is the end of the current word
+		eow := sow
+		for eow < len(s) && isSignal(s[eow]) {
+			eow++
+		}
+		for sow < len(s) {
+			// w is the current word, lower-cased.
+			w := ls[sow:eow]
+			ok = parseDateWord(&d, w)
+			if !ok {
+				break
+			}
+			sow = eow
+			for sow < len(s) && !isSignal(s[sow]) {
+				sow++
+			}
+			eow = sow
+			for eow < len(s) && isSignal(s[eow]) {
+				eow++
+			}
+		}
 
-		// Nothing found. Skip over the first word.
-		p = eofw
+		r, ok = inferRange(d, now, dir)
+		if !ok {
+			// Not enough information was given, so skip it.
+			p = eow
+			continue
+		}
+
+		// Got enough information to specify an implicit date range, so
+		// append that to the result:
+		// Add non-date stuff before the current date.
+		parts = append(parts, s[endOfPrevDate:p])
+		// Add the current date, mogrified by the user-provided f.
+		fr := f(s[p:eow], r)
+		parts = append(parts, fr)
+		p = eow
 	}
 	parts = append(parts, s[endOfPrevDate:])
 	return strings.Join(parts, ""), nil
+}
+
+var monthNameToMonth = map[string]time.Month{
+	"jan": time.January,
+	"feb": time.February,
+	"mar": time.March,
+	"apr": time.April,
+	"may": time.May,
+	"jun": time.June,
+	"jul": time.July,
+	"aug": time.August,
+	"sep": time.September,
+	"oct": time.October,
+	"nov": time.November,
+	"dec": time.December,
+
+	"january":   time.January,
+	"february":  time.February,
+	"march":     time.March,
+	"april":     time.April,
+	"june":      time.June,
+	"july":      time.July,
+	"august":    time.August,
+	"september": time.September,
+	"october":   time.October,
+	"november":  time.November,
+	"december":  time.December,
+}
+
+// parseDateWord sets a field of d based on the given word w and returns
+// true if it can. If no usable information is found, it returns false.
+func parseDateWord(d *date, w string) bool {
+	// Year
+	if len(w) == 4 {
+		y, err := strconv.Atoi(w)
+		if err == nil && y >= 1000 && y <= 9999 {
+			d.year = y
+			return true
+		}
+	}
+
+	// Day of month
+	if len(w) == 1 || len(w) == 2 {
+		dom, err := strconv.Atoi(w)
+		if err == nil && dom >= 1 && dom <= 31 {
+			d.dayOfMonth = dom
+			return true
+		}
+	}
+
+	// Month
+	m, ok := monthNameToMonth[w]
+	if ok {
+		d.month = m
+		return true
+	}
+
+	// Time zone like "utc+8"
+	if (len(w) == len("utc+1") || len(w) == len("utc+10")) && w[:3] == "utc" {
+		h, err := strconv.Atoi(w[3:])
+		if err == nil && h >= -12 && h <= 12 {
+			d.loc = fixedZone(h)
+			return true
+		}
+	}
+
+	return false
+}
+
+func inferRange(d date, now time.Time, dir Direction) (Range, bool) {
+	if d.year == 0 && d.month == 0 {
+		return Range{}, false
+	}
+
+	loc := d.loc
+	if loc == nil {
+		loc = now.Location()
+	}
+
+	// Infer the concrete implicit date range from the information given.
+	switch {
+	// Year month dayOfMonth
+	case d.year != 0 && d.month != 0 && d.dayOfMonth != 0:
+		return Range{
+			time.Date(d.year, d.month, d.dayOfMonth, 0, 0, 0, 0, loc),
+			time.Duration(24 * time.Hour),
+		}, true
+
+	// Year month
+	case d.year != 0 && d.month != 0 && d.dayOfMonth == 0:
+		s := time.Date(d.year, d.month, 1, 0, 0, 0, 0, loc)
+		return truncateMonth(s), true
+
+	// Year
+	case d.year != 0 && d.month == 0 && d.dayOfMonth == 0:
+		s := time.Date(d.year, 1, 1, 0, 0, 0, 0, loc)
+		return truncateYear(s), true
+
+	// Month dayOfMonth
+	case d.year == 0 && d.month != 0 && d.dayOfMonth != 0:
+		var r Range
+		if dir == Future {
+			r = nextSpecificMonth(now, d.month)
+		} else {
+			r = lastSpecificMonth(now, d.month)
+		}
+		s := r.start
+		s2 := time.Date(s.Year(), d.month, d.dayOfMonth, 0, 0, 0, 0, loc)
+		return truncateDay(s2), true
+
+	// Month
+	case d.year == 0 && d.month != 0 && d.dayOfMonth == 0:
+		var r Range
+		if dir == Future {
+			r = nextSpecificMonth(now, d.month)
+		} else {
+			r = lastSpecificMonth(now, d.month)
+		}
+		s := r.start
+		s2 := time.Date(s.Year(), d.month, 1, 0, 0, 0, 0, loc)
+		return truncateMonth(s2), true
+
+	default:
+		return Range{}, false
+	}
+}
+
+type date struct {
+	year       int
+	month      time.Month
+	dayOfMonth int
+	loc        *time.Location
 }
 
 func isSignal(b byte) bool {
@@ -277,17 +447,5 @@ func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
 		return truncateMonth(t), true
 	}
 
-	return Range{}, false
-}
-
-func normalizedThreeWordStrToRange(normSrc string, _ time.Time, _ Direction) (Range, bool) {
-	t, err := time.Parse("January 2 2006", normSrc)
-	if err == nil {
-		return truncateDay(t), true
-	}
-	t, err = time.Parse("Jan 2 2006", normSrc)
-	if err == nil {
-		return truncateDay(t), true
-	}
 	return Range{}, false
 }
