@@ -50,7 +50,7 @@ func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 	}
 }
 
-func BenchmarkReplaceAllRangesByFunc(b *testing.B) {
+func BenchmarkReplaceAllRangesByFunc_doItNowPoem(b *testing.B) {
 	now := time.UnixMilli(rand.Int63())
 	s := `
 Do It Now
