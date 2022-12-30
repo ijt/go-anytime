@@ -127,8 +127,30 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 					addRangeAndAdvance(eow3, r)
 					continue
 				}
-				if w3 == "hence" || (w3 == "from" && (w4 == "now" || w4 == "today")) {
+				if w3 == "hence" {
 					r := truncateDay(now.AddDate(0, 0, i))
+					addRangeAndAdvance(eow3, r)
+					continue
+				}
+				if w3 == "from" && (w4 == "now" || w4 == "today") {
+					r := truncateDay(now.AddDate(0, 0, i))
+					addRangeAndAdvance(eow4, r)
+					continue
+				}
+			}
+			if w2 == "week" || w2 == "weeks" {
+				if w3 == "ago" {
+					r := truncateWeek(now.AddDate(0, 0, -i*7))
+					addRangeAndAdvance(eow3, r)
+					continue
+				}
+				if w3 == "hence" {
+					r := truncateWeek(now.AddDate(0, 0, i*7))
+					addRangeAndAdvance(eow3, r)
+					continue
+				}
+				if w3 == "from" && (w4 == "now" || w4 == "today") {
+					r := truncateWeek(now.AddDate(0, 0, i*7))
 					addRangeAndAdvance(eow4, r)
 					continue
 				}
