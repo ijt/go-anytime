@@ -269,9 +269,10 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`1 day ago`, truncateDay(now.Add(-24 * time.Hour))},
 		{`3 days ago`, truncateDay(now.Add(-3 * 24 * time.Hour))},
 		{`Three days ago`, truncateDay(now.Add(-3 * 24 * time.Hour))},
-		//{`1 day from now`, truncateDay(now.Add(24 * time.Hour))},
-		//{`two days from now`, truncateDay(now.AddDate(0, 0, 2))},
-		//{`two days from today`, truncateDay(now.AddDate(0, 0, 2))},
+		{`1 day from now`, truncateDay(now.Add(24 * time.Hour))},
+		{`two days from now`, truncateDay(now.AddDate(0, 0, 2))},
+		{`two days from today`, truncateDay(now.AddDate(0, 0, 2))},
+		{`two days hence`, truncateDay(now.AddDate(0, 0, 2))},
 
 		//// weeks
 		//{`1 week ago`, truncateWeek(now.Add(-7 * 24 * time.Hour))},
