@@ -236,7 +236,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		//{"March 31", truncateMonth(time.Date(2022, 3, 31, 0, 0, 0, 0, now.Location()))},
 		{"January, 2017", truncateMonth(time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location()))},
 		{"Jan, 2017", truncateMonth(time.Date(2017, 1, 1, 0, 0, 0, 0, now.Location()))},
-		//{"April 3 2017", truncateDay(time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location()))},
+		{"April 3 2017", truncateDay(time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location()))},
 		//{"April 3, 2017", truncateDay(time.Date(2017, 4, 3, 0, 0, 0, 0, now.Location()))},
 		//{"Oct 7, 1970", truncateDay(time.Date(1970, 10, 7, 0, 0, 0, 0, now.Location()))},
 		//{"Oct 7, 1970 UTC+3", truncateDay(time.Date(1970, 10, 7, 0, 0, 0, 0, fixedZone(3)))},
