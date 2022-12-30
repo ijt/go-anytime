@@ -72,13 +72,12 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	p := 0
 	for p < len(s) {
 		// sofw is the start of the first word in s[p:].
-		sofw := findNextSignal(ls, p)
+		// eofw is the end of the first word in s[p:]
+		// fw is the first word.
+		sofw, eofw, fw := findSignalNoise(ls, p)
 		if sofw == len(s) {
 			break
 		}
-
-		// eofw is the end of the first word in s[p:]
-		eofw := findNextNoise(ls, sofw)
 
 		addRangeAndAdvance := func(endOfRange int, r Range) {
 			parts = append(parts, s[endOfPrevDate:sofw])
@@ -87,9 +86,6 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			endOfPrevDate = endOfRange
 			p = endOfRange
 		}
-
-		// fw is the first word.
-		fw := ls[sofw:eofw]
 
 		// Try for a match with "now", "today", etc.
 		r, ok := oneWordStrToRange(fw, now)
@@ -101,12 +97,9 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Try for a match with "last week", "this month", "next year", etc.
 		if fw == "last" || fw == "this" || fw == "next" {
 			// sosw is the start of the second word.
-			sosw := findNextSignal(ls, eofw)
 			// eosw is the end of the second word.
-			eosw := findNextNoise(ls, sosw)
-
 			// sw is the second word in s[p:].
-			sw := ls[sosw:eosw]
+			_, eosw, sw := findSignalNoise(ls, eofw)
 
 			// 🚨: fwsw could make an allocation.
 			fwsw := fw + " " + sw
@@ -121,9 +114,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Try for a match with "green october", "blue june", etc.
 		if isColor(fw) {
 			color := fw
-			sosw := findNextSignal(ls, eofw)
-			eosw := findNextNoise(ls, sosw)
-			sw := ls[sosw:eosw]
+			_, eosw, sw := findSignalNoise(ls, eofw)
 			r, ok = colorMonthToRange(color, sw, now)
 			if ok {
 				addRangeAndAdvance(eosw, r)
@@ -146,19 +137,18 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		sow := sofw
 		// eow is the end of the current word.
 		eow := eofw
+		// w is the current word, lower-cased.
+		w := ls[sow:eow]
 		// eolgw is the end of the last good word, i.e., the end of the
 		// last word that was successfully parsed.
 		var eolgw int
 		for sow < len(s) {
-			// w is the current word, lower-cased.
-			w := ls[sow:eow]
 			ok = parseDateWord(&d, w)
 			if !ok {
 				break
 			}
 			eolgw = eow
-			sow = findNextSignal(ls, eow)
-			eow = findNextNoise(ls, sow)
+			sow, eow, w = findSignalNoise(ls, eow)
 		}
 
 		r, ok = inferRange(d, now, dir)
@@ -204,6 +194,12 @@ var colorToDelta = map[string]int{
 	"pink":   7,
 	"silver": 8,
 	"copper": 9,
+}
+
+func findSignalNoise(s string, start int) (int, int, string) {
+	isig := findNextSignal(s, start)
+	inoi := findNextNoise(s, isig)
+	return isig, inoi, s[isig:inoi]
 }
 
 func findNextSignal(s string, start int) int {
