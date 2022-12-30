@@ -84,15 +84,15 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 
 		// eofw is the end of the first word in s[p:]
 		eofw := len(s)
-		for i, roon := range s[p:] {
+		for i, roon := range s[sofw:] {
 			if !isSignal(roon) {
-				eofw = p + i
+				eofw = sofw + i
 				break
 			}
 		}
 
 		// fw is the first word.
-		fw := ls[p:eofw]
+		fw := ls[sofw:eofw]
 
 		// Try for a match with "now", "today", etc.
 		r, ok := oneWordStrToRange(fw, now)
