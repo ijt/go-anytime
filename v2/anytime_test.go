@@ -34,7 +34,7 @@ func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 		{"verbiage now punctuation verbiage", "If you don't know me by now, you will never know me."},
 		{"now now", "now now"},
 		{"nownow", "nownow"},
-		// {"noise with two nows", "a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*("},
+		{"noise with two nows", "a;slas 😅dflasdjfla now laksjdfsdf  xxc,mnv as2w0  @#R$@$ 😑now😵‍💫  ;xlc x;c,nv.s,hriop4qu-u98dsvfjkldfljs $!@@#$WERTwe5u682470sZ)(*&Y)*("},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
