@@ -97,7 +97,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Try for a match with "now", "today", etc.
 		r, ok := oneWordStrToRange(fw, now)
 		if ok {
-			parts = append(parts, s[endOfPrevDate:p])
+			parts = append(parts, s[endOfPrevDate:sofw])
 			fr := f(s[p:eofw], r)
 			parts = append(parts, fr)
 			endOfPrevDate = eofw
