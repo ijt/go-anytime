@@ -132,7 +132,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 
 			r, ok = lastThisNextStrToRange(fwsw, now)
 			if ok {
-				parts = append(parts, s[endOfPrevDate:p])
+				parts = append(parts, s[endOfPrevDate:sofw])
 				fr := f(s[p:eosw], r)
 				parts = append(parts, fr)
 				endOfPrevDate = eosw
