@@ -66,72 +66,76 @@ const (
 
 var wordSpaceRx = regexp.MustCompile(`(\w+)[,.\s]*`)
 
-func ReplaceAllRangesByFunc(inputStr string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
+func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, normSrc string, r Range) string) (string, error) {
+	ls := strings.ToLower(s)
 	var parts []string
-	locs := wordSpaceRx.FindAllStringSubmatchIndex(inputStr, -1)
+	endOfPrevDate := 0
 	p := 0
-	buf := make([]byte, 0, len(inputStr))
-	for i := 0; i < len(locs); i++ {
-		if locs[i][0] > p {
-			parts = append(parts, inputStr[p:locs[i][0]])
+	for p < len(s) {
+		// Find the next possible date.
+		mightBeDateStart := isSignal(s[p]) && (p == 0 || !isSignal(s[p-1]))
+		if !mightBeDateStart {
+			p++
+			continue
 		}
-
-		// If there is a word triple here, try that.
-		if i+2 < len(locs) && locs[i][1] == locs[i+1][0] && locs[i+1][1] == locs[i+2][0] {
-			s := inputStr[locs[i][2]:locs[i+2][3]]
-			buf = normalize(buf, s)
-			r, ok := normalizedThreeWordStrToRange(string(buf), now, dir)
-			if ok {
-				s2 := f(s, string(buf), r)
-				parts = append(parts, s2)
-				trailingWhitespace := inputStr[locs[i+2][3]:locs[i+2][1]]
-				parts = append(parts, trailingWhitespace)
-				p = locs[i+2][1]
-				i += 2
-				continue
-			}
+		// eofw is the end of the first word.
+		eofw := p
+		for eofw < len(s) && isSignal(s[eofw]) {
+			eofw++
 		}
-
-		// If there is a word pair here, try that.
-		if i+1 < len(locs) && locs[i][1] == locs[i+1][0] {
-			s := inputStr[locs[i][2]:locs[i+1][3]]
-			buf = normalize(buf, s)
-			r, ok := normalizedTwoWordStrToRange(string(buf), now, dir)
-			if ok {
-				s2 := f(s, string(buf), r)
-				parts = append(parts, s2)
-				trailingWhitespace := inputStr[locs[i+1][3]:locs[i+1][1]]
-				parts = append(parts, trailingWhitespace)
-				p = locs[i+1][1]
-				i++
-				continue
-			}
-		}
-
-		// Try for a single word match.
-		s := inputStr[locs[i][2]:locs[i][3]]
-		buf = normalize(buf, s)
-		r, ok := normalizedOneWordStrToRange(string(buf), now, dir)
+		// fw is the first word.
+		fw := ls[p:eofw]
+		r, ok := oneWordStrToRange(fw, now)
 		if ok {
-			s2 := f(s, string(buf), r)
-			parts = append(parts, s2)
-			trailingWhitespace := inputStr[locs[i][3]:locs[i][1]]
-			parts = append(parts, trailingWhitespace)
-			p = locs[i][1]
+			parts = append(parts, s[endOfPrevDate:p])
+			fr := f(s[p:eofw], fw, r)
+			parts = append(parts, fr)
+			endOfPrevDate = eofw
+			p = eofw
 			continue
 		}
 
-		// Default: use this chunk of the input string.
-		parts = append(parts, inputStr[locs[i][0]:locs[i][1]])
-		p = locs[i][1]
+		// Try for things like "last week", "this month", "next year".
+		if fw == "last" || fw == "this" || fw == "next" {
+			// sosw is the start of the second word.
+			sosw := eofw
+			for sosw < len(s) && !isSignal(s[sosw]) {
+				sosw++
+			}
+			// eosw is the end of the second word.
+			eosw := sosw
+			if eosw < len(s) && isSignal(s[eosw]) {
+				eosw++
+			}
+			sw := ls[sosw:eosw]
+			// fwsw could make an allocation. Let's get rid of it.
+			fwsw := fw + " " + sw
+			r, ok = lastThisNextStrToRange(fwsw, now)
+			if ok {
+				parts = append(parts, s[endOfPrevDate:p])
+				fr := f(s[p:eosw], fw, r)
+				parts = append(parts, fr)
+				endOfPrevDate = eosw
+				p = eosw
+				continue
+			}
+		}
+
+		// Try parsing a more general date...
+
+		// Nothing found. Skip over the first word.
+		p = eofw
 	}
-	if p < len(inputStr) {
-		parts = append(parts, inputStr[p:])
-	}
+	parts = append(parts, s[endOfPrevDate:])
 	return strings.Join(parts, ""), nil
 }
 
-func normalizedOneWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {
+func isSignal(b byte) bool {
+	r := rune(b)
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || b == '/' || b == '-'
+}
+
+func oneWordStrToRange(normSrc string, now time.Time) (Range, bool) {
 	switch normSrc {
 	case "now":
 		return Range{now, time.Second}, true
@@ -145,7 +149,7 @@ func normalizedOneWordStrToRange(normSrc string, now time.Time, _ Direction) (Ra
 	return Range{}, false
 }
 
-func normalizedTwoWordStrToRange(normSrc string, now time.Time, _ Direction) (Range, bool) {
+func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
 	switch normSrc {
 	case "last week":
 		return truncateWeek(now.AddDate(0, 0, -7)), true
