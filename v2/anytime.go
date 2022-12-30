@@ -72,25 +72,13 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	p := 0
 	for p < len(s) {
 		// sofw is the start of the first word in s[p:].
-		sofw := len(s)
-		for i, roon := range s[p:] {
-			if isSignal(roon) {
-				sofw = p + i
-				break
-			}
-		}
+		sofw := findNextSignal(ls, p)
 		if sofw == len(s) {
 			break
 		}
 
 		// eofw is the end of the first word in s[p:]
-		eofw := len(s)
-		for i, roon := range s[sofw:] {
-			if !isSignal(roon) {
-				eofw = sofw + i
-				break
-			}
-		}
+		eofw := findNextNoise(ls, sofw)
 
 		// fw is the first word.
 		fw := ls[sofw:eofw]
@@ -109,21 +97,9 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Try for a match with "last week", "this month", "next year", etc.
 		if fw == "last" || fw == "this" || fw == "next" {
 			// sosw is the start of the second word.
-			sosw := len(s)
-			for i, roon := range s[eofw:] {
-				if isSignal(roon) {
-					sosw = eofw + i
-					break
-				}
-			}
+			sosw := findNextSignal(ls, eofw)
 			// eosw is the end of the second word.
-			eosw := len(s)
-			for i, roon := range s[sosw:] {
-				if !isSignal(roon) {
-					eosw = sosw + i
-					break
-				}
-			}
+			eosw := findNextNoise(ls, sosw)
 
 			// sw is the second word in s[p:].
 			sw := ls[sosw:eosw]
@@ -148,6 +124,9 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		sow := sofw
 		// eow is the end of the current word.
 		eow := eofw
+		// oelgw is the end of the last good word, i.e., the end of the
+		// last word that was successfully parsed.
+		var eolgw int
 		for sow < len(s) {
 			// w is the current word, lower-cased.
 			w := ls[sow:eow]
@@ -155,20 +134,9 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			if !ok {
 				break
 			}
-			sow = len(s)
-			for i, roon := range s[eow:] {
-				if isSignal(roon) {
-					sow = eow + i
-					break
-				}
-			}
-			eow = len(s)
-			for i, roon := range s[sow:] {
-				if !isSignal(roon) {
-					eow = sow + i
-					break
-				}
-			}
+			eolgw = eow
+			sow = findNextSignal(ls, eow)
+			eow = findNextNoise(ls, sow)
 		}
 
 		r, ok = inferRange(d, now, dir)
@@ -185,10 +153,29 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Add the current date, mogrified by the user-provided f.
 		fr := f(s[p:eow], r)
 		parts = append(parts, fr)
+		endOfPrevDate = eolgw
 		p = eow
 	}
 	parts = append(parts, s[endOfPrevDate:])
 	return strings.Join(parts, ""), nil
+}
+
+func findNextSignal(s string, start int) int {
+	for i, roon := range s[start:] {
+		if isSignal(roon) {
+			return start + i
+		}
+	}
+	return len(s)
+}
+
+func findNextNoise(s string, start int) int {
+	for i, roon := range s[start:] {
+		if !isSignal(roon) {
+			return start + i
+		}
+	}
+	return len(s)
 }
 
 var monthNameToMonth = map[string]time.Month{
