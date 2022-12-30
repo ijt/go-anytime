@@ -120,10 +120,18 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		if i, ok := parseInt(fw); ok {
 			_, eow2, w2 := findSignalNoise(ls, eofw)
 			_, eow3, w3 := findSignalNoise(ls, eow2)
-			if (w2 == "day" || w2 == "days") && w3 == "ago" {
-				r := truncateDay(now.AddDate(0, 0, -i))
-				addRangeAndAdvance(eow3, r)
-				continue
+			_, eow4, w4 := findSignalNoise(ls, eow3)
+			if w2 == "day" || w2 == "days" {
+				if w3 == "ago" {
+					r := truncateDay(now.AddDate(0, 0, -i))
+					addRangeAndAdvance(eow3, r)
+					continue
+				}
+				if w3 == "hence" || (w3 == "from" && (w4 == "now" || w4 == "today")) {
+					r := truncateDay(now.AddDate(0, 0, i))
+					addRangeAndAdvance(eow4, r)
+					continue
+				}
 			}
 		}
 
