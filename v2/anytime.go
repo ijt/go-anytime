@@ -146,7 +146,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		sow := sofw
 		// eow is the end of the current word.
 		eow := eofw
-		// oelgw is the end of the last good word, i.e., the end of the
+		// eolgw is the end of the last good word, i.e., the end of the
 		// last word that was successfully parsed.
 		var eolgw int
 		for sow < len(s) {
