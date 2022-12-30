@@ -80,17 +80,21 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// eofw is the end of the first word in s[p:]
 		eofw := findNextNoise(ls, sofw)
 
+		addRangeAndAdvance := func(endOfRange int, r Range) {
+			parts = append(parts, s[endOfPrevDate:sofw])
+			fr := f(s[p:endOfRange], r)
+			parts = append(parts, fr)
+			endOfPrevDate = endOfRange
+			p = endOfRange
+		}
+
 		// fw is the first word.
 		fw := ls[sofw:eofw]
 
 		// Try for a match with "now", "today", etc.
 		r, ok := oneWordStrToRange(fw, now)
 		if ok {
-			parts = append(parts, s[endOfPrevDate:sofw])
-			fr := f(s[p:eofw], r)
-			parts = append(parts, fr)
-			endOfPrevDate = eofw
-			p = eofw
+			addRangeAndAdvance(eofw, r)
 			continue
 		}
 
@@ -109,11 +113,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 
 			r, ok = lastThisNextStrToRange(fwsw, now)
 			if ok {
-				parts = append(parts, s[endOfPrevDate:sofw])
-				fr := f(s[p:eosw], r)
-				parts = append(parts, fr)
-				endOfPrevDate = eosw
-				p = eosw
+				addRangeAndAdvance(eosw, r)
 				continue
 			}
 		}
@@ -126,11 +126,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			sw := ls[sosw:eosw]
 			r, ok = colorMonthToRange(color, sw, now)
 			if ok {
-				parts = append(parts, s[endOfPrevDate:sofw])
-				fr := f(s[p:eosw], r)
-				parts = append(parts, fr)
-				endOfPrevDate = eosw
-				p = eosw
+				addRangeAndAdvance(eosw, r)
 				continue
 			}
 		}
@@ -165,13 +161,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 
 		// Got enough information to specify an implicit date range, so
 		// append that to the result:
-		// Add non-date stuff before the current date.
-		parts = append(parts, s[endOfPrevDate:p])
-		// Add the current date, mogrified by the user-provided f.
-		fr := f(s[p:eow], r)
-		parts = append(parts, fr)
-		endOfPrevDate = eolgw
-		p = eow
+		addRangeAndAdvance(eolgw, r)
 	}
 	parts = append(parts, s[endOfPrevDate:])
 	return strings.Join(parts, ""), nil
