@@ -117,8 +117,14 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// "N months ago"
 		// "N years ago"
 		// etc.
-		if _, ok := parseInt(fw); ok {
-
+		if i, ok := parseInt(fw); ok {
+			_, eow2, w2 := findSignalNoise(ls, eofw)
+			_, eow3, w3 := findSignalNoise(ls, eow2)
+			if (w2 == "day" || w2 == "days") && w3 == "ago" {
+				r := truncateDay(now.AddDate(0, 0, -i))
+				addRangeAndAdvance(eow3, r)
+				continue
+			}
 		}
 
 		// Try for a match with "green october", "blue june", etc.
