@@ -70,17 +70,27 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	endOfPrevDate := 0
 	p := 0
 	for p < len(s) {
-		// Find the next possible date.
-		mightBeDateStart := isSignal(s[p]) && (p == 0 || !isSignal(s[p-1]))
-		if !mightBeDateStart {
-			p++
-			continue
+		// sofw is the start of the first word in s[p:].
+		sofw := len(s)
+		for i, roon := range s[p:] {
+			if isSignal(roon) {
+				sofw = p + i
+				break
+			}
 		}
-		// eofw is the end of the first word.
-		eofw := p
-		for eofw < len(s) && isSignal(s[eofw]) {
-			eofw++
+		if sofw == len(s) {
+			break
 		}
+
+		// eofw is the end of the first word in s[p:]
+		eofw := len(s)
+		for i, roon := range s[p:] {
+			if !isSignal(roon) {
+				eofw = p + i
+				break
+			}
+		}
+
 		// fw is the first word.
 		fw := ls[p:eofw]
 
@@ -98,18 +108,28 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Try for a match with "last week", "this month", "next year", etc.
 		if fw == "last" || fw == "this" || fw == "next" {
 			// sosw is the start of the second word.
-			sosw := eofw
-			for sosw < len(s) && !isSignal(s[sosw]) {
-				sosw++
+			sosw := len(s)
+			for i, roon := range s[eofw:] {
+				if isSignal(roon) {
+					sosw = eofw + i
+					break
+				}
 			}
 			// eosw is the end of the second word.
-			eosw := sosw
-			for eosw < len(s) && isSignal(s[eosw]) {
-				eosw++
+			eosw := len(s)
+			for i, roon := range s[sosw:] {
+				if !isSignal(roon) {
+					eosw = sosw + i
+					break
+				}
 			}
+
+			// sw is the second word in s[p:].
 			sw := ls[sosw:eosw]
-			// fwsw could make an allocation. Let's get rid of it.
+
+			// 🚨: fwsw could make an allocation.
 			fwsw := fw + " " + sw
+
 			r, ok = lastThisNextStrToRange(fwsw, now)
 			if ok {
 				parts = append(parts, s[endOfPrevDate:p])
@@ -126,9 +146,12 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// sow is the start of the current word
 		sow := p
 		// eow is the end of the current word
-		eow := sow
-		for eow < len(s) && isSignal(s[eow]) {
-			eow++
+		eow := len(s)
+		for i, roon := range s[sow:] {
+			if !isSignal(roon) {
+				eow = sow + i
+				break
+			}
 		}
 		for sow < len(s) {
 			// w is the current word, lower-cased.
@@ -137,13 +160,19 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			if !ok {
 				break
 			}
-			sow = eow
-			for sow < len(s) && !isSignal(s[sow]) {
-				sow++
+			sow = len(s)
+			for i, roon := range s[eow:] {
+				if isSignal(roon) {
+					sow = eow + i
+					break
+				}
 			}
-			eow = sow
-			for eow < len(s) && isSignal(s[eow]) {
-				eow++
+			eow = len(s)
+			for i, roon := range s[sow:] {
+				if !isSignal(roon) {
+					eow = sow + i
+					break
+				}
 			}
 		}
 
@@ -299,9 +328,8 @@ type date struct {
 	loc        *time.Location
 }
 
-func isSignal(b byte) bool {
-	r := rune(b)
-	return unicode.IsLetter(r) || unicode.IsDigit(r) || b == '/' || b == '-'
+func isSignal(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '-'
 }
 
 func oneWordStrToRange(normSrc string, now time.Time) (Range, bool) {
