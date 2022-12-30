@@ -601,22 +601,6 @@ func TestReplaceAllRangesByFunc_colorMonth(t *testing.T) {
 //	}
 //}
 
-//// Benchmark parsing.
-//func BenchmarkParse(b *testing.B) {
-//	b.SetBytes(1)
-//	want := time.Date(2022, time.December, 23, 0, 0, 0, 0, now.Location())
-//	for i := 0; i < b.N; i++ {
-//		v, err := Parse(`december 23, 2022`)
-//		gotTime, err := verbiageToTime(v, now, future)
-//		if err != nil {
-//			b.Fatal(err)
-//		}
-//		if !gotTime.Equal(want) {
-//			b.Errorf("got %v, want %v", gotTime, want)
-//		}
-//	}
-//}
-
 // TestParse_nonTemporal tests parsing with inputs that are not expected to
 // result in time-like output.
 //func TestParse_nonTemporal(t *testing.T) {
