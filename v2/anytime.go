@@ -111,6 +111,16 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			}
 		}
 
+		// Try for a match with
+		// "N days ago", "N days from now",
+		// "N weeks ago"
+		// "N months ago"
+		// "N years ago"
+		// etc.
+		if _, ok := parseInt(fw); ok {
+
+		}
+
 		// Try for a match with "green october", "blue june", etc.
 		if isColor(fw) {
 			color := fw
@@ -164,6 +174,49 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	}
 	parts = append(parts, s[endOfPrevDate:])
 	return strings.Join(parts, ""), nil
+}
+
+func parseInt(s string) (int, bool) {
+	i, ok := strToInt[s]
+	if ok {
+		return i, true
+	}
+	i, err := strconv.Atoi(s)
+	if err == nil {
+		return i, true
+	}
+	return 0, false
+}
+
+var strToInt = map[string]int{
+	"a":         1,
+	"one":       1,
+	"two":       2,
+	"three":     3,
+	"four":      4,
+	"five":      5,
+	"six":       6,
+	"seven":     7,
+	"eight":     8,
+	"nine":      9,
+	"ten":       10,
+	"eleven":    11,
+	"twelve":    12,
+	"thirteen":  13,
+	"fourteen":  14,
+	"fifteen":   15,
+	"sixteen":   16,
+	"seventeen": 17,
+	"eighteen":  18,
+	"nineteen":  19,
+	"twenty":    20,
+	"thirty":    30,
+	"forty":     40,
+	"fifty":     50,
+	"sixty":     60,
+	"seventy":   70,
+	"eighty":    80,
+	"ninety":    90,
 }
 
 func colorMonthToRange(color string, monthName string, now time.Time) (Range, bool) {
