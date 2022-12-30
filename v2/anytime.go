@@ -118,6 +118,23 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			}
 		}
 
+		// Try for a match with "green october", "blue june", etc.
+		if isColor(fw) {
+			color := fw
+			sosw := findNextSignal(ls, eofw)
+			eosw := findNextNoise(ls, sosw)
+			sw := ls[sosw:eosw]
+			r, ok = colorMonthToRange(color, sw, now)
+			if ok {
+				parts = append(parts, s[endOfPrevDate:sofw])
+				fr := f(s[p:eosw], r)
+				parts = append(parts, fr)
+				endOfPrevDate = eosw
+				p = eosw
+				continue
+			}
+		}
+
 		// Try parsing a more general date...
 		var d date
 		// sow is the start of the current word.
@@ -158,6 +175,36 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	}
 	parts = append(parts, s[endOfPrevDate:])
 	return strings.Join(parts, ""), nil
+}
+
+func colorMonthToRange(color string, monthName string, now time.Time) (Range, bool) {
+	delta, ok := colorToDelta[color]
+	if !ok {
+		return Range{}, false
+	}
+	m, ok := monthNameToMonth[monthName]
+	if !ok {
+		return Range{}, false
+	}
+	return truncateMonth(nextSpecificMonth(now, m).Start().AddDate(delta, 0, 0)), true
+}
+
+func isColor(s string) bool {
+	_, ok := colorToDelta[s]
+	return ok
+}
+
+var colorToDelta = map[string]int{
+	"white":  0,
+	"red":    1,
+	"green":  2,
+	"blue":   3,
+	"gold":   4,
+	"purple": 5,
+	"orange": 6,
+	"pink":   7,
+	"silver": 8,
+	"copper": 9,
 }
 
 func findNextSignal(s string, start int) int {
