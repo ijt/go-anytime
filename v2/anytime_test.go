@@ -253,17 +253,17 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{"2022 Feb 1", truncateDay(time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()))},
 		//// yyyy/mm/dd, dd/mm/yyyy etc.
 		{"2014/3/31", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
-		////{"2014/3/31 UTC", time.Date(2014, 3, 31, 0, 0, 0, 0, location("UTC"))},
-		////{"2014/3/31 UTC+1", time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(1))},
-		//{"2014/03/31", time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location())},
-		////{"2014/03/31 UTC-1", time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(-1))},
-		//{"2014-04-26", time.Date(2014, 4, 26, 0, 0, 0, 0, now.Location())},
-		//{"2014-4-26", time.Date(2014, 4, 26, 0, 0, 0, 0, now.Location())},
-		//{"2014-4-6", time.Date(2014, 4, 6, 0, 0, 0, 0, now.Location())},
-		////{"31/3/2014 UTC-8", time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(-8))},
-		////{"31-3-2014 UTC-8", time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(-8))},
-		//{"31/3/2014", time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location())},
-		//{"31-3-2014", time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location())},
+		{"2014/3/31 UTC", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, time.UTC))},
+		{"2014/3/31 UTC+1", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(1)))},
+		{"2014/03/31", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
+		{"2014/03/31 UTC-1", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(-1)))},
+		{"2014-04-26", truncateDay(time.Date(2014, 4, 26, 0, 0, 0, 0, now.Location()))},
+		{"2014-4-26", truncateDay(time.Date(2014, 4, 26, 0, 0, 0, 0, now.Location()))},
+		{"2014-4-6", truncateDay(time.Date(2014, 4, 6, 0, 0, 0, 0, now.Location()))},
+		{"31/3/2014 UTC-8", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(-8)))},
+		{"31-3-2014 UTC-8", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, fixedZone(-8)))},
+		{"31/3/2014", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
+		{"31-3-2014", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
 
 		// color month
 		// http://www.jdawiseman.com/papers/trivia/futures.html
