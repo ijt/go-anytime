@@ -144,15 +144,9 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		// Try parsing a more general date...
 		var d date
 		// sow is the start of the current word
-		sow := p
+		sow := sofw
 		// eow is the end of the current word
-		eow := len(s)
-		for i, roon := range s[sow:] {
-			if !isSignal(roon) {
-				eow = sow + i
-				break
-			}
-		}
+		eow := eofw
 		for sow < len(s) {
 			// w is the current word, lower-cased.
 			w := ls[sow:eow]
