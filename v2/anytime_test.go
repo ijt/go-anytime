@@ -175,7 +175,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		//{`Next thursday`, nextWeekdayFrom(now, time.Thursday)},
 		//{`Next friday`, nextWeekdayFrom(now, time.Friday)},
 		//{`Next saturday`, nextWeekdayFrom(now, time.Saturday)},
-		//
 
 		// months
 		{`Last january`, lastSpecificMonth(now, time.January)},
@@ -266,10 +265,10 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{"31-3-2014", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
 
 		//// days
-		//{`One day ago`, truncateDay(now.Add(-24 * time.Hour))},
-		//{`1 day ago`, truncateDay(now.Add(-24 * time.Hour))},
-		//{`3 days ago`, truncateDay(now.Add(-3 * 24 * time.Hour))},
-		//{`Three days ago`, truncateDay(now.Add(-3 * 24 * time.Hour))},
+		{`One day ago`, truncateDay(now.Add(-24 * time.Hour))},
+		{`1 day ago`, truncateDay(now.Add(-24 * time.Hour))},
+		{`3 days ago`, truncateDay(now.Add(-3 * 24 * time.Hour))},
+		{`Three days ago`, truncateDay(now.Add(-3 * 24 * time.Hour))},
 		//{`1 day from now`, truncateDay(now.Add(24 * time.Hour))},
 		//{`two days from now`, truncateDay(now.AddDate(0, 0, 2))},
 		//{`two days from today`, truncateDay(now.AddDate(0, 0, 2))},
