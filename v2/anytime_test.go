@@ -265,18 +265,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{"31/3/2014", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
 		{"31-3-2014", truncateDay(time.Date(2014, 3, 31, 0, 0, 0, 0, now.Location()))},
 
-		// color month
-		// http://www.jdawiseman.com/papers/trivia/futures.html
-		//{"White october", nextSpecificMonth(now, time.October)},
-		//{"Red october", nextSpecificMonth(now, time.October).Time.AddDate(1, 0, 0)},
-		//{"Green october", nextSpecificMonth(now, time.October).Time.AddDate(2, 0, 0)},
-		//{"Blue october", nextSpecificMonth(now, time.October).Time.AddDate(3, 0, 0)},
-		//{"Gold october", nextSpecificMonth(now, time.October).Time.AddDate(4, 0, 0)},
-		//{"Purple october", nextSpecificMonth(now, time.October).Time.AddDate(5, 0, 0)},
-		//{"Orange october", nextSpecificMonth(now, time.October).Time.AddDate(6, 0, 0)},
-		//{"Pink october", nextSpecificMonth(now, time.October).Time.AddDate(7, 0, 0)},
-		//{"Silver october", nextSpecificMonth(now, time.October).Time.AddDate(8, 0, 0)},
-		//{"Copper october", nextSpecificMonth(now, time.October).Time.AddDate(9, 0, 0)},
 		//// days
 		//{`One day ago`, truncateDay(now.Add(-24 * time.Hour))},
 		//{`1 day ago`, truncateDay(now.Add(-24 * time.Hour))},
@@ -418,6 +406,48 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			gotRange := foundRanges[0]
 			if !gotRange.Equal(c.WantRange) {
 				t.Fatalf("got range %v, want %v", gotRange, c.WantRange)
+			}
+		})
+	}
+}
+
+func TestReplaceAllRangesByFunc_colorMonth(t *testing.T) {
+	now := time.UnixMilli(rand.Int63())
+	var cases = []struct {
+		Input     string
+		WantRange Range
+	}{
+		// color month
+		// http://www.jdawiseman.com/papers/trivia/futures.html
+		{"White october", nextSpecificMonth(now, time.October)},
+		{"Red october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(1, 0, 0))},
+		{"Green october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(2, 0, 0))},
+		{"Blue october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(3, 0, 0))},
+		{"Gold october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(4, 0, 0))},
+		{"Purple october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(5, 0, 0))},
+		{"Orange october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(6, 0, 0))},
+		{"Pink october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(7, 0, 0))},
+		{"Silver october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(8, 0, 0))},
+		{"Copper october", truncateMonth(nextSpecificMonth(now, time.October).Start().AddDate(9, 0, 0))},
+	}
+
+	for _, c := range cases {
+		t.Run(c.Input, func(t *testing.T) {
+			var gotRanges []Range
+			gotStr, err := ReplaceAllRangesByFunc(c.Input, now, Past, func(src string, r Range) string {
+				gotRanges = append(gotRanges, r)
+				return "<range>"
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantStr := "<range>"
+			if gotStr != wantStr {
+				t.Fatalf("gotStr = %q, wantStr %q", gotStr, wantStr)
+			}
+			wantRanges := []Range{c.WantRange}
+			if !reflect.DeepEqual(gotRanges, wantRanges) {
+				t.Fatalf("gotRanges = %#v, wantRanges %#v", gotRanges, wantRanges)
 			}
 		})
 	}
