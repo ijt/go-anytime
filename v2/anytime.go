@@ -2,6 +2,7 @@ package anytime
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -217,6 +218,8 @@ var monthNameToMonth = map[string]time.Month{
 	"december":  time.December,
 }
 
+var ymdRx = regexp.MustCompile(`(\d{4})[-/](\d{1,2})[-/](\d\d)`)
+
 // parseDateWord sets a field of d based on the given word w and returns
 // true if it can. If no usable information is found, it returns false.
 func parseDateWord(d *date, w string) bool {
@@ -252,6 +255,17 @@ func parseDateWord(d *date, w string) bool {
 			d.loc = fixedZone(h)
 			return true
 		}
+	}
+
+	// YYYY/MM/DD
+	if sm := ymdRx.FindStringSubmatch(w); sm != nil {
+		y, _ := strconv.Atoi(sm[1])
+		m, _ := strconv.Atoi(sm[2])
+		dom, _ := strconv.Atoi(sm[3])
+		d.year = y
+		d.month = time.Month(m)
+		d.dayOfMonth = dom
+		return true
 	}
 
 	return false
