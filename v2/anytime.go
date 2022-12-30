@@ -323,7 +323,7 @@ type date struct {
 }
 
 func isSignal(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '-'
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '-' || r == '+'
 }
 
 func oneWordStrToRange(normSrc string, now time.Time) (Range, bool) {
