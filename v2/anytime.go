@@ -83,6 +83,8 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		}
 		// fw is the first word.
 		fw := ls[p:eofw]
+
+		// Try for a match with "now", "today", etc.
 		r, ok := oneWordStrToRange(fw, now)
 		if ok {
 			parts = append(parts, s[endOfPrevDate:p])
@@ -93,7 +95,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			continue
 		}
 
-		// Try for things like "last week", "this month", "next year".
+		// Try for a match with "last week", "this month", "next year", etc.
 		if fw == "last" || fw == "this" || fw == "next" {
 			// sosw is the start of the second word.
 			sosw := eofw
