@@ -82,7 +82,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 
 		addRangeAndAdvance := func(endOfRange int, r Range) {
 			parts = append(parts, s[endOfPrevDate:sofw])
-			fr := f(s[p:endOfRange], r)
+			fr := f(s[sofw:endOfRange], r)
 			parts = append(parts, fr)
 			endOfPrevDate = endOfRange
 			p = endOfRange
