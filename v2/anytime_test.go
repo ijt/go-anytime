@@ -314,9 +314,9 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		//// RFC1123Z
 		//{"Mon, 02 Jan 2006 15:04:05 -0700", time.Date(2006, 1, 2, 15, 4, 5, 0, fixedZone(-7))},
 		//{"Mon 02 Jan 2006 15:04:05 -0700", time.Date(2006, 1, 2, 15, 4, 5, 0, fixedZone(-7))},
-		//// RFC3339
-		//{"2006-01-02T15:04:05Z", time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC)},
-		//{"1990-12-31T15:59:59-08:00", time.Date(1990, 12, 31, 15, 59, 59, 0, time.FixedZone("", -8*60*60))},
+		// RFC3339
+		{"2006-01-02T15:04:05Z", Range{time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC), time.Second}},
+		{"1990-12-31T15:59:59-08:00", Range{time.Date(1990, 12, 31, 15, 59, 59, 0, time.FixedZone("", -8*60*60)), time.Second}},
 
 		//// minutes
 		//{`a minute from now`, now.Add(time.Minute)},
