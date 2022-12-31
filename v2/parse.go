@@ -2,6 +2,7 @@ package anytime
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"time"
@@ -10,6 +11,34 @@ import (
 
 var errNoRangeFound = errors.New("no range found")
 
+// parseAnyRange parses either an explicit range or an implicit range starting
+// at the beginning of s. A lower-cased version of s is given as ls.
+func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
+	eow1 := findNextNoise(s, 0)
+	w1 := ls[:eow1]
+	if w1 == "from" {
+		sow2 := findNextSignal(s, eow1)
+		startRange, parsedStart, err := parseImplicitRange(s[sow2:], ls[sow2:], now, dir)
+		if err != nil {
+			return Range{}, "", fmt.Errorf("parsing range after 'from': %w", err)
+		}
+		eoStart := sow2 + len(parsedStart)
+		_, eoto, to := findSignalNoise(s, eoStart)
+		if to != "to" {
+			return Range{}, "", fmt.Errorf("expected 'to' after %q, got %q", parsedStart, to)
+		}
+		soEnd := findNextSignal(s, eoto)
+		endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], ls[soEnd:], now, dir)
+		if err != nil {
+			return Range{}, "", fmt.Errorf("parsing range after 'to': %w", err)
+		}
+		r := Range{startRange.Start(), endRange.End().Sub(startRange.Start())}
+		eoEnd := soEnd + len(parsedEnd)
+		return r, s[:eoEnd], nil
+	}
+	return parseImplicitRange(s, ls, now, dir)
+}
+
 // parseImplicitRange parses an implicit date range from a string s.
 // An implicit date range is something like "2022ad" as opposed to
 // an expclit range like "from 2020ad to 2022ad".
@@ -17,7 +46,7 @@ var errNoRangeFound = errors.New("no range found")
 // The lowercased version of s is given as ls. The prefix of s that was parsed
 // is also returned. If no range is found at the very beginning of s,
 // errNoRangeFound is returned.
-func parseImplicitRange(s, ls string, now time.Time, dir Direction) (rng Range, parsed string, err error) {
+func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
 	// sofw is the start of the first word in s[p:].
 	// eofw is the end of the first word in s[p:]
 	// fw is the first word.
