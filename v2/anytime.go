@@ -155,6 +155,23 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 					continue
 				}
 			}
+			if w2 == "month" || w2 == "months" {
+				if w3 == "ago" {
+					r := truncateMonth(now.AddDate(0, -i, 0))
+					addRangeAndAdvance(eow3, r)
+					continue
+				}
+				if w3 == "hence" {
+					r := truncateMonth(now.AddDate(0, i, 0))
+					addRangeAndAdvance(eow3, r)
+					continue
+				}
+				if w3 == "from" && (w4 == "now" || w4 == "today") {
+					r := truncateMonth(now.AddDate(0, i, 0))
+					addRangeAndAdvance(eow4, r)
+					continue
+				}
+			}
 		}
 
 		// Try for a match with "green october", "blue june", etc.
