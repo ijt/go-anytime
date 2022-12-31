@@ -124,6 +124,24 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	}
 }
 
+func TestReplaceAllRangesByFunc_lastYearPlusVerbiage(t *testing.T) {
+	now := time.UnixMilli(rand.Int63())
+	wantRange := truncateYear(now.AddDate(-1, 0, 0))
+	f := func(src string, r Range) string {
+		return fmt.Sprintf("%v", r.Start().UnixMilli())
+	}
+	inputStr := `foo last year bar`
+	gotStr, err := ReplaceAllRangesByFunc(inputStr, now, Past, f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unixStr := fmt.Sprintf("%v", wantRange.Start().UnixMilli())
+	wantStr := strings.ReplaceAll(inputStr, "last year", unixStr)
+	if gotStr != wantStr {
+		t.Errorf("gotStr = %v, wantStr %v", gotStr, wantStr)
+	}
+}
+
 func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	now := time.Date(2022, 9, 29, 2, 48, 33, 123, time.UTC)
 
@@ -134,7 +152,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		// years
 		{`Last year`, truncateYear(now.AddDate(-1, 0, 0))},
 		{`last  year`, truncateYear(now.AddDate(-1, 0, 0))},
-		{`foo last year bar`, truncateYear(now.AddDate(-1, 0, 0))},
 		{`This year`, truncateYear(now)},
 		{`Next year`, truncateYear(now.AddDate(1, 0, 0))},
 
