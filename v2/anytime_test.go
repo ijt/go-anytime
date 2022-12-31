@@ -393,7 +393,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			var foundRanges []Range
 			gotStr, err := ReplaceAllRangesByFunc(c.Input, now, Future, func(rs string, r Range) string {
 				foundRanges = append(foundRanges, r)
-				return rs
+				return "<range>"
 			})
 			if err != nil {
 				t.Fatal(err)
@@ -408,8 +408,9 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			if !gotRange.Equal(c.WantRange) {
 				t.Fatalf("got range %v, want %v", gotRange, c.WantRange)
 			}
-			if gotStr != c.Input {
-				t.Fatalf("got string %q, want %q", gotStr, c.Input)
+			wantStr := "<range>"
+			if gotStr != wantStr {
+				t.Fatalf("got string %q, want %q", gotStr, wantStr)
 			}
 		})
 	}
