@@ -121,6 +121,12 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 			_, eow2, w2 := findSignalNoise(ls, eofw)
 			_, eow3, w3 := findSignalNoise(ls, eow2)
 			_, eow4, w4 := findSignalNoise(ls, eow3)
+			if i >= 1000 && i <= 9999 && (w2 == "ad" || w2 == "ce") {
+				// Year
+				r := truncateYear(time.Date(i, 1, 1, 0, 0, 0, 0, now.Location()))
+				addRangeAndAdvance(eow2, r)
+				continue
+			}
 			if w2 == "day" || w2 == "days" {
 				if w3 == "ago" {
 					r := truncateDay(now.AddDate(0, 0, -i))
