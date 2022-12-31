@@ -67,9 +67,9 @@ func isConnector(s string) bool {
 
 // parseImplicitRange parses an implicit date range from a string s.
 // An implicit date range is something like "2022ad" as opposed to
-// an expclit range like "from 2020ad to 2022ad".
+// an explicit range like "from 2020ad to 2022ad".
 //
-// The lowercased version of s is given as ls. The prefix of s that was parsed
+// The lower-cased version of s is given as ls. The prefix of s that was parsed
 // is also returned. If no range is found at the very beginning of s,
 // errNoRangeFound is returned.
 func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
