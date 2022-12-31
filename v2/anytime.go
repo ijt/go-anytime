@@ -427,6 +427,7 @@ func parseDateWord(d *date, w string) bool {
 		return true
 	}
 
+	// DD/MM/YYYY
 	if sm := dmyRx.FindStringSubmatch(w); sm != nil {
 		dom, _ := strconv.Atoi(sm[1])
 		m, _ := strconv.Atoi(sm[2])
