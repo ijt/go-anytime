@@ -24,7 +24,7 @@ func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, 
 		}
 		eoStart := sow2 + len(parsedStart)
 		_, eoto, to := findSignalNoise(s, eoStart)
-		if !(to == "to" || to == "until" || to == "til" || to == "through") {
+		if !isConnector(to) {
 			return Range{}, "", fmt.Errorf("expected 'to|until|til|through' after %q, got %q", parsedStart, to)
 		}
 		soEnd := findNextSignal(s, eoto)
@@ -36,7 +36,29 @@ func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, 
 		eoEnd := soEnd + len(parsedEnd)
 		return r, s[:eoEnd], nil
 	}
-	return parseImplicitRange(s, ls, now, dir)
+	r, parsed, err = parseImplicitRange(s, ls, now, dir)
+	if err != nil {
+		return Range{}, "", fmt.Errorf("parsing implicit range: %w", err)
+	}
+	eor := len(parsed)
+	_, eoto, to := findSignalNoise(s, eor)
+	if !isConnector(to) {
+		return r, parsed, nil
+	}
+	soEnd := findNextSignal(s, eoto)
+	endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], ls[soEnd:], now, dir)
+	if err != nil {
+		// If we can't parse the end of the range, we'll just return the
+		// start of the range.
+		return r, parsed, nil
+	}
+	r = Range{r.Start(), endRange.End().Sub(r.Start())}
+	eoEnd := soEnd + len(parsedEnd)
+	return r, s[:eoEnd], nil
+}
+
+func isConnector(s string) bool {
+	return s == "to" || s == "until" || s == "til" || s == "through"
 }
 
 // parseImplicitRange parses an implicit date range from a string s.
