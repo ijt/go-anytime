@@ -40,3 +40,8 @@ func (r Range) String() string {
 func (r Range) Equal(other Range) bool {
 	return r.start.Equal(other.start) && r.Duration == other.Duration
 }
+
+// RangeFromTimes returns a Range from two times.
+func RangeFromTimes(start, end time.Time) Range {
+	return Range{start, end.Sub(start)}
+}
