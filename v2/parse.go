@@ -90,7 +90,7 @@ func parseRange(s, ls string, now time.Time, dir Direction) (rng Range, parsed s
 		if w2 == "month" || w2 == "months" {
 			if w3 == "ago" {
 				r := truncateMonth(now.AddDate(0, -i, 0))
-				return r, s[sofw:eow2], nil
+				return r, s[sofw:eow3], nil
 			}
 			if w3 == "hence" {
 				r := truncateMonth(now.AddDate(0, i, 0))
