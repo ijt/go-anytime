@@ -19,7 +19,7 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	p := 0
 	for p < len(s) {
 		sofw := findNextSignal(s, p)
-		r, parsed, err := parseRange(s[sofw:], ls[sofw:], now, dir)
+		r, parsed, err := parseImplicitRange(s[sofw:], ls[sofw:], now, dir)
 		if err == errNoRangeFound {
 			eofw := findNextNoise(s, sofw)
 			p = eofw

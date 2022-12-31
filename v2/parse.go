@@ -10,10 +10,14 @@ import (
 
 var errNoRangeFound = errors.New("no range found")
 
-// parseRange parses a date range from a string s. The lowercased version of s
-// is given as ls. The prefix of s that was parsed is also returned. If no range
-// is found at the very beginning of s, errNoRangeFound is returned.
-func parseRange(s, ls string, now time.Time, dir Direction) (rng Range, parsed string, err error) {
+// parseImplicitRange parses an implicit date range from a string s.
+// An implicit date range is something like "2022ad" as opposed to
+// an expclit range like "from 2020ad to 2022ad".
+//
+// The lowercased version of s is given as ls. The prefix of s that was parsed
+// is also returned. If no range is found at the very beginning of s,
+// errNoRangeFound is returned.
+func parseImplicitRange(s, ls string, now time.Time, dir Direction) (rng Range, parsed string, err error) {
 	// sofw is the start of the first word in s[p:].
 	// eofw is the end of the first word in s[p:]
 	// fw is the first word.
