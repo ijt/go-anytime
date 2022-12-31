@@ -295,12 +295,12 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		//{`Last january`, lastSpecificMonth(now, time.January)},
 		//{`Next january`, nextSpecificMonth(now, time.January)},
 
-		//// years
-		//{`One year ago`, truncateYear(now.AddDate(-1, 0, 0))},
-		//{`One year from now`, truncateYear(now.AddDate(1, 0, 0))},
-		//{`One year from today`, truncateYear(now.AddDate(1, 0, 0))},
-		//{`Two years ago`, truncateYear(now.AddDate(-2, 0, 0))},
-		//{`2 years ago`, truncateYear(now.AddDate(-2, 0, 0))},
+		// years
+		{`One year ago`, truncateYear(now.AddDate(-1, 0, 0))},
+		{`One year from now`, truncateYear(now.AddDate(1, 0, 0))},
+		{`One year from today`, truncateYear(now.AddDate(1, 0, 0))},
+		{`Two years ago`, truncateYear(now.AddDate(-2, 0, 0))},
+		{`2 years ago`, truncateYear(now.AddDate(-2, 0, 0))},
 		//{`This year`, truncateYear(now)},
 		//{`1999AD`, truncateYear(time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location()))},
 		//{`1999 AD`, truncateYear(time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location()))},
