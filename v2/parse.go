@@ -33,14 +33,14 @@ func parseRange(s, ls string, now time.Time, dir Direction) (rng Range, parsed s
 		// sosw is the start of the second word.
 		// eosw is the end of the second word.
 		// sw is the second word in s[p:].
-		_, _, sw := findSignalNoise(ls, eofw)
+		_, eosw, sw := findSignalNoise(ls, eofw)
 
 		// 🚨: fwsw could make an allocation.
 		fwsw := fw + " " + sw
 
 		r, ok = lastThisNextStrToRange(fwsw, now)
 		if ok {
-			return r, fwsw, nil
+			return r, s[sofw:eosw], nil
 		}
 	}
 
