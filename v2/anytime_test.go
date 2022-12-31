@@ -281,20 +281,20 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`A week from today`, truncateWeek(now.Add(7 * 24 * time.Hour))},
 		{`2 weeks hence`, truncateWeek(now.Add(2 * 7 * 24 * time.Hour))},
 
-		//// months
-		//{`A month ago`, truncateMonth(now.AddDate(0, -1, 0))},
-		//{`1 month ago`, truncateMonth(now.AddDate(0, -1, 0))},
-		//{`2 months ago`, truncateMonth(now.AddDate(0, -2, 0))},
-		//{`12 months ago`, truncateMonth(now.AddDate(0, -12, 0))},
-		//{`twelve months ago`, truncateMonth(now.AddDate(0, -12, 0))},
-		//{`A month from now`, truncateMonth(now.AddDate(0, 1, 0))},
-		//{`One month hence`, truncateMonth(now.AddDate(0, 1, 0))},
-		//{`1 month from now`, truncateMonth(now.AddDate(0, 1, 0))},
-		//{`2 months from now`, truncateMonth(now.AddDate(0, 2, 0))},
+		// months
+		{`A month ago`, truncateMonth(now.AddDate(0, -1, 0))},
+		{`1 month ago`, truncateMonth(now.AddDate(0, -1, 0))},
+		{`2 months ago`, truncateMonth(now.AddDate(0, -2, 0))},
+		{`12 months ago`, truncateMonth(now.AddDate(0, -12, 0))},
+		{`twelve months ago`, truncateMonth(now.AddDate(0, -12, 0))},
+		{`A month from now`, truncateMonth(now.AddDate(0, 1, 0))},
+		{`One month hence`, truncateMonth(now.AddDate(0, 1, 0))},
+		{`1 month from now`, truncateMonth(now.AddDate(0, 1, 0))},
+		{`2 months from now`, truncateMonth(now.AddDate(0, 2, 0))},
 		//{`Last January`, lastSpecificMonth(now, time.January)},
 		//{`Last january`, lastSpecificMonth(now, time.January)},
 		//{`Next january`, nextSpecificMonth(now, time.January)},
-		//
+
 		//// years
 		//{`One year ago`, truncateYear(now.AddDate(-1, 0, 0))},
 		//{`One year from now`, truncateYear(now.AddDate(1, 0, 0))},
