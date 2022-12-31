@@ -533,6 +533,38 @@ func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
 	case "next year":
 		return truncateYear(now.AddDate(1, 0, 0)), true
 
+	// last $longWeekday
+	case "last monday":
+		return lastWeekdayFrom(now, time.Monday), true
+	case "last tuesday":
+		return lastWeekdayFrom(now, time.Tuesday), true
+	case "last wednesday":
+		return lastWeekdayFrom(now, time.Wednesday), true
+	case "last thursday":
+		return lastWeekdayFrom(now, time.Thursday), true
+	case "last friday":
+		return lastWeekdayFrom(now, time.Friday), true
+	case "last saturday":
+		return lastWeekdayFrom(now, time.Saturday), true
+	case "last sunday":
+		return lastWeekdayFrom(now, time.Sunday), true
+
+	// last $shortWeekday
+	case "last mon":
+		return lastWeekdayFrom(now, time.Monday), true
+	case "last tue":
+		return lastWeekdayFrom(now, time.Tuesday), true
+	case "last wed":
+		return lastWeekdayFrom(now, time.Wednesday), true
+	case "last thu":
+		return lastWeekdayFrom(now, time.Thursday), true
+	case "last fri":
+		return lastWeekdayFrom(now, time.Friday), true
+	case "last sat":
+		return lastWeekdayFrom(now, time.Saturday), true
+	case "last sun":
+		return lastWeekdayFrom(now, time.Sunday), true
+
 	// last $longMonth
 	case "last january":
 		return lastSpecificMonth(now, time.January), true

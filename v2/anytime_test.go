@@ -175,14 +175,21 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`Next month`, truncateMonth(now.AddDate(0, 1, 0))},
 
 		// last $weekday
-		{`Last sunday`, lastWeekdayFrom(now, time.Sunday)},
-		{`Last monday`, lastWeekdayFrom(now, time.Monday)},
-		{`Last Monday`, lastWeekdayFrom(now, time.Monday)},
-		{`Last tuesday`, lastWeekdayFrom(now, time.Tuesday)},
-		{`Last wednesday`, lastWeekdayFrom(now, time.Wednesday)},
-		{`Last Thursday`, lastWeekdayFrom(now, time.Thursday)},
-		{`Last Friday`, lastWeekdayFrom(now, time.Friday)},
-		{`Last saturday`, lastWeekdayFrom(now, time.Saturday)},
+		{`last sunday`, lastWeekdayFrom(now, time.Sunday)},
+		{`last monday`, lastWeekdayFrom(now, time.Monday)},
+		{`last tuesday`, lastWeekdayFrom(now, time.Tuesday)},
+		{`last wednesday`, lastWeekdayFrom(now, time.Wednesday)},
+		{`last thursday`, lastWeekdayFrom(now, time.Thursday)},
+		{`last friday`, lastWeekdayFrom(now, time.Friday)},
+		{`last saturday`, lastWeekdayFrom(now, time.Saturday)},
+
+		{`last sun`, lastWeekdayFrom(now, time.Sunday)},
+		{`last mon`, lastWeekdayFrom(now, time.Monday)},
+		{`last tue`, lastWeekdayFrom(now, time.Tuesday)},
+		{`last wed`, lastWeekdayFrom(now, time.Wednesday)},
+		{`last thu`, lastWeekdayFrom(now, time.Thursday)},
+		{`last fri`, lastWeekdayFrom(now, time.Friday)},
+		{`last sat`, lastWeekdayFrom(now, time.Saturday)},
 
 		// next $weekday
 		//{`Next sunday`, nextWeekdayFrom(now, time.Sunday)},
