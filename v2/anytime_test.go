@@ -475,67 +475,79 @@ func TestReplaceAllRangesByFunc_colorMonth(t *testing.T) {
 	}
 }
 
-//// TestParse_futurePast tests dates and times that are ambiguously in the past
-//// or the future.
-//func TestParse_futurePast(t *testing.T) {
-//	var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.UTC)
-//	tests := []struct {
-//		input      string
-//		wantFuture time.Time
-//		wantPast   time.Time
-//	}{
-//		{
-//			"December 20",
-//			nextMonthDayTime(now, time.December, 20, 0, 0, 0),
-//			prevMonthDayTime(now, time.December, 20, 0, 0, 0),
-//		},
-//		{
-//			"Thursday",
-//			nextWeekdayFrom(now, time.Thursday).Start(),
-//			lastWeekdayFrom(now, time.Thursday).Start(),
-//		},
-//		{
-//			"On thursday",
-//			nextWeekdayFrom(now, time.Thursday).Start(),
-//			lastWeekdayFrom(now, time.Thursday).Start(),
-//		},
-//		//{
-//		//	"December 20 at 9pm",
-//		//	nextMonthDayTime(now, time.December, 20, 21, 0, 0),
-//		//	prevMonthDayTime(now, time.December, 20, 21, 0, 0),
-//		//},
-//		//{
-//		//	"Thursday at 23:59",
-//		//	setTime(nextWeekdayFrom(now, time.Thursday).Time, 23, 59, 0, 0),
-//		//	setTime(lastWeekdayFrom(now, time.Thursday).Time, 23, 59, 0, 0),
-//		//},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.input, func(t *testing.T) {
-//			// future
-//			v, err := Parse(tt.input)
-//			if err != nil {
-//				t.Fatal(err)
-//			}
-//			got, err := verbiageToTime(v, now, future)
-//			if err != nil {
-//				t.Fatal(err)
-//			}
-//			if !got.Equal(tt.wantFuture) {
-//				t.Errorf("got = %v, want %v", got, tt.wantFuture)
-//			}
-//
-//			// past
-//			got, err = verbiageToTime(v, now, past)
-//			if err != nil {
-//				t.Fatal(err)
-//			}
-//			if !got.Equal(tt.wantPast) {
-//				t.Errorf("got %v, want %v", got, tt.wantPast)
-//			}
-//		})
-//	}
-//}
+// TestParse_futurePast tests dates and times that are ambiguously in the past
+// or the future.
+func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *testing.T) {
+	var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.UTC)
+	tests := []struct {
+		input      string
+		wantFuture Range
+		wantPast   Range
+	}{
+		{
+			"December 20",
+			truncateDay(nextMonthDayTime(now, time.December, 20, 0, 0, 0)),
+			truncateDay(prevMonthDayTime(now, time.December, 20, 0, 0, 0)),
+		},
+		//{
+		//	"Thursday",
+		//	nextWeekdayFrom(now, time.Thursday).Start(),
+		//	lastWeekdayFrom(now, time.Thursday).Start(),
+		//},
+		//{
+		//	"On thursday",
+		//	nextWeekdayFrom(now, time.Thursday).Start(),
+		//	lastWeekdayFrom(now, time.Thursday).Start(),
+		//},
+		//{
+		//	"December 20 at 9pm",
+		//	nextMonthDayTime(now, time.December, 20, 21, 0, 0),
+		//	prevMonthDayTime(now, time.December, 20, 21, 0, 0),
+		//},
+		//{
+		//	"Thursday at 23:59",
+		//	setTime(nextWeekdayFrom(now, time.Thursday).Time, 23, 59, 0, 0),
+		//	setTime(lastWeekdayFrom(now, time.Thursday).Time, 23, 59, 0, 0),
+		//},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			// Future
+			var gotRanges []Range
+			_, err := ReplaceAllRangesByFunc(tt.input, now, Future, func(src string, r Range) string {
+				gotRanges = append(gotRanges, r)
+				return ""
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(gotRanges) != 1 {
+				t.Fatalf("got %d ranges, want 1", len(gotRanges))
+			}
+			gotRange := gotRanges[0]
+			if !gotRange.Equal(tt.wantFuture) {
+				t.Fatalf("got range %v, want %v", gotRange, tt.wantFuture)
+			}
+
+			// Past
+			gotRanges = nil
+			_, err = ReplaceAllRangesByFunc(tt.input, now, Past, func(src string, r Range) string {
+				gotRanges = append(gotRanges, r)
+				return ""
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(gotRanges) != 1 {
+				t.Fatalf("got %d ranges, want 1", len(gotRanges))
+			}
+			gotRange = gotRanges[0]
+			if !gotRange.Equal(tt.wantPast) {
+				t.Fatalf("got range %v, want %v", gotRange, tt.wantPast)
+			}
+		})
+	}
+}
 
 //func TestParse_monthOnly(t *testing.T) {
 //	tests := []struct {
