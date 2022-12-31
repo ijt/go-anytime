@@ -403,6 +403,60 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		//{"September 17, 2012 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
 		//{"September 17 2012 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
 		//{"September 17 2012 at 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
+
+		// from A to B
+		{
+			"From 3 feb 2022 to 6 oct 2022",
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
+			),
+		},
+		//// A to B
+		//{
+		//	"3 feb 2022 to 6 oct 2022",
+		//	RangeFromTimes(
+		//		time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+		//		time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
+		//	),
+		//},
+		//// A through B
+		//{
+		//	"3 feb 2022 through 6 oct 2022",
+		//	RangeFromTimes(
+		//		time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+		//		time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
+		//	),
+		//},
+		// from A until B
+		{
+			"from 3 feb 2022 until 6 oct 2022",
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
+			),
+		},
+		//{
+		//	"from tuesday at 5pm -12:00 until thursday 23:52 +14:00",
+		//	RangeFromTimes(
+		//		setLocation(setTime(nextWeekdayFrom(now, time.Tuesday).Time, 12+5, 0, 0, 0), fixedZone(-12)),
+		//		setLocation(setTime(nextWeekdayFrom(now, time.Thursday).Time, 23, 52, 0, 0), fixedZone(14)),
+		//	),
+		//},
+		//{
+		//	"From today until next thursday",
+		//	RangeFromDays(
+		//		today,
+		//		nextWeekdayFrom(today, time.Thursday).Time,
+		//	),
+		//},
+		//{
+		//	"From tomorrow until next tuesday",
+		//	RangeFromDays(
+		//		today.AddDate(0, 0, 1),
+		//		nextWeekdayFrom(today, time.Tuesday).Time,
+		//	),
+		//},
 	}
 
 	for _, c := range cases {
@@ -762,297 +816,6 @@ func Test_truncateWeek(t *testing.T) {
 		})
 	}
 }
-
-//func TestParseRange(t *testing.T) {
-//	tests := []struct {
-//		input string
-//		want  Range
-//	}{
-//		// from A to B
-//		{
-//			"From 3 feb 2022 to 6 oct 2022",
-//			RangeFromTimes(
-//				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
-//			),
-//		},
-//		//// A to B
-//		//{
-//		//	"3 feb 2022 to 6 oct 2022",
-//		//	RangeFromTimes(
-//		//		time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-//		//		time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
-//		//	),
-//		//},
-//		//// A through B
-//		//{
-//		//	"3 feb 2022 through 6 oct 2022",
-//		//	RangeFromTimes(
-//		//		time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-//		//		time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
-//		//	),
-//		//},
-//		// from A until B
-//		{
-//			"from 3 feb 2022 until 6 oct 2022",
-//			RangeFromTimes(
-//				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 10, 6, 23, 59, 59, 0, now.Location()),
-//			),
-//		},
-//		//{
-//		//	"from tuesday at 5pm -12:00 until thursday 23:52 +14:00",
-//		//	RangeFromTimes(
-//		//		setLocation(setTime(nextWeekdayFrom(now, time.Tuesday).Time, 12+5, 0, 0, 0), fixedZone(-12)),
-//		//		setLocation(setTime(nextWeekdayFrom(now, time.Thursday).Time, 23, 52, 0, 0), fixedZone(14)),
-//		//	),
-//		//},
-//		// yesterday
-//		{
-//			"Yesterday",
-//			RangeFromTimes(
-//				today.AddDate(0, 0, -1),
-//				today.Add(-time.Second),
-//			),
-//		},
-//		// today
-//		{
-//			"Today",
-//			RangeFromTimes(
-//				today,
-//				today.AddDate(0, 0, 1).Add(-time.Second),
-//			),
-//		},
-//		// tomorrow
-//		{
-//			"Tomorrow",
-//			RangeFromTimes(
-//				today.AddDate(0, 0, 1),
-//				today.AddDate(0, 0, 2).Add(-time.Second),
-//			),
-//		},
-//		{
-//			"From today until next thursday",
-//			RangeFromDays(
-//				today,
-//				nextWeekdayFrom(today, time.Thursday).Time,
-//			),
-//		},
-//		{
-//			"From tomorrow until next tuesday",
-//			RangeFromDays(
-//				today.AddDate(0, 0, 1),
-//				nextWeekdayFrom(today, time.Tuesday).Time,
-//			),
-//		},
-//		// last week
-//		{
-//			"Last week",
-//			RangeFromTimes(
-//				time.Date(2022, 9, 18, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// this week
-//		{
-//			"This week",
-//			RangeFromTimes(
-//				time.Date(2022, 9, 25, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// next week
-//		{
-//			"next week",
-//			RangeFromTimes(
-//				time.Date(2022, 10, 2, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 10, 9, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// last month
-//		{
-//			"Last month",
-//			RangeFromTimes(
-//				time.Date(2022, 8, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// this month
-//		{
-//			"This month",
-//			RangeFromTimes(
-//				time.Date(2022, 9, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// next month
-//		{
-//			"Next month",
-//			RangeFromTimes(
-//				time.Date(2022, 10, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 11, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// last year
-//		{
-//			"Last year",
-//			RangeFromTimes(
-//				time.Date(2021, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// this year
-//		{
-//			"This year",
-//			RangeFromTimes(
-//				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// next year
-//		{
-//			"Next year",
-//			RangeFromTimes(
-//				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2024, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// absolute year
-//		{
-//			"2025Ad",
-//			RangeFromTimes(
-//				time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		{
-//			"2025ce",
-//			RangeFromTimes(
-//				time.Date(2025, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2026, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// absolute month
-//		{
-//			"Feb 2025",
-//			RangeFromTimes(
-//				time.Date(2025, 2, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2025, 3, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// absolute day
-//		{
-//			"3 feb 2025",
-//			RangeFromTimes(
-//				time.Date(2025, 2, 3, 0, 0, 0, 0, now.Location()),
-//				time.Date(2025, 2, 4, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		//// absolute hour
-//		//{
-//		//	"3 feb 2025 at 5PM",
-//		//	RangeFromTimes(
-//		//		time.Date(2025, 2, 3, 12+5, 0, 0, 0, now.Location()),
-//		//		time.Date(2025, 2, 3, 12+5+1, 0, 0, 0, now.Location()).Add(-time.Second),
-//		//	),
-//		//},
-//		//// absolute minute
-//		//{
-//		//	"3 feb 2025 at 5:35pm",
-//		//	RangeFromTimes(
-//		//		time.Date(2025, 2, 3, 12+5, 35, 0, 0, now.Location()),
-//		//		time.Date(2025, 2, 3, 12+5, 36, 0, 0, now.Location()).Add(-time.Second),
-//		//	),
-//		//},
-//		//// absolute second
-//		//{
-//		//	"3 Feb 2025 at 5:35:52pm",
-//		//	RangeFromTimes(
-//		//		time.Date(2025, 2, 3, 12+5, 35, 52, 0, now.Location()),
-//		//		time.Date(2025, 2, 3, 12+5, 35, 53, 0, now.Location()),
-//		//	),
-//		//},
-//		//// 2022 jan 1 0:0:0
-//		//{
-//		//	"2022 jan 1 0:0:0",
-//		//	RangeFromTimes(
-//		//		time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//		//		time.Date(2022, 1, 1, 0, 0, 1, 0, now.Location()),
-//		//	),
-//		//},
-//		//// 2022 jan 1 0:0
-//		//{
-//		//	"2022 jan 1 0:0",
-//		//	RangeFromTimes(
-//		//		time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//		//		time.Date(2022, 1, 1, 0, 1, 0, 0, now.Location()).Add(-time.Second),
-//		//	),
-//		//},
-//		//// 2022 jan 1 12am
-//		//{
-//		//	"2022 jan 1 12am",
-//		//	RangeFromTimes(
-//		//		time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//		//		time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()).Add(-time.Second),
-//		//	),
-//		//},
-//		//// 2022 jan 1 0am
-//		//{
-//		//	"2022 jan 1 0am",
-//		//	RangeFromTimes(
-//		//		time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//		//		time.Date(2022, 1, 1, 1, 0, 0, 0, now.Location()).Add(-time.Second),
-//		//	),
-//		//},
-//		// 2022 jan 1
-//		{
-//			"2022 jan 1",
-//			RangeFromTimes(
-//				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 1, 2, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// 2022 jan
-//		{
-//			"2022 jan",
-//			RangeFromTimes(
-//				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2022, 2, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// 2022
-//		{
-//			"2022ce",
-//			RangeFromTimes(
-//				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//		// 2022
-//		{
-//			"2022CE",
-//			RangeFromTimes(
-//				time.Date(2022, 1, 1, 0, 0, 0, 0, now.Location()),
-//				time.Date(2023, 1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second),
-//			),
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.input, func(t *testing.T) {
-//			got, err := Parse(tt.input)
-//			if err != nil {
-//				t.Fatal(err)
-//			}
-//			gotRange, err := verbiageToRange(got, now, future)
-//			if err != nil {
-//				t.Fatal(err)
-//			}
-//			if !gotRange.Equal(tt.want) {
-//				t.Errorf("got = %v, want %v", gotRange, tt.want)
-//			}
-//		})
-//	}
-//}
 
 //func Test_nextWeek(t *testing.T) {
 //	type args struct {
