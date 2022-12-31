@@ -438,6 +438,15 @@ func parseDateWord(d *date, w string) bool {
 		return true
 	}
 
+	// 1999AD
+	if len(w) == len("1999AD") && (w[4:] == "ad" || w[4:] == "ce") {
+		y, err := strconv.Atoi(w[:4])
+		if err == nil && y >= 1000 && y <= 9999 {
+			d.year = y
+			return true
+		}
+	}
+
 	return false
 }
 
