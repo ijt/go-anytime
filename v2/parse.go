@@ -24,8 +24,8 @@ func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, 
 		}
 		eoStart := sow2 + len(parsedStart)
 		_, eoto, to := findSignalNoise(s, eoStart)
-		if to != "to" {
-			return Range{}, "", fmt.Errorf("expected 'to' after %q, got %q", parsedStart, to)
+		if !(to == "to" || to == "until" || to == "til" || to == "through") {
+			return Range{}, "", fmt.Errorf("expected 'to|until|til|through' after %q, got %q", parsedStart, to)
 		}
 		soEnd := findNextSignal(s, eoto)
 		endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], ls[soEnd:], now, dir)
