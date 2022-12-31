@@ -209,13 +209,21 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`this sat`, thisWeekdayFrom(now, time.Saturday)},
 
 		// next $weekday
-		//{`Next sunday`, nextWeekdayFrom(now, time.Sunday)},
-		//{`Next monday`, nextWeekdayFrom(now, time.Monday)},
-		//{`Next tuesday`, nextWeekdayFrom(now, time.Tuesday)},
-		//{`Next wednesday`, nextWeekdayFrom(now, time.Wednesday)},
-		//{`Next thursday`, nextWeekdayFrom(now, time.Thursday)},
-		//{`Next friday`, nextWeekdayFrom(now, time.Friday)},
-		//{`Next saturday`, nextWeekdayFrom(now, time.Saturday)},
+		{`next sunday`, nextWeekdayFrom(now, time.Sunday)},
+		{`next monday`, nextWeekdayFrom(now, time.Monday)},
+		{`next tuesday`, nextWeekdayFrom(now, time.Tuesday)},
+		{`next wednesday`, nextWeekdayFrom(now, time.Wednesday)},
+		{`next thursday`, nextWeekdayFrom(now, time.Thursday)},
+		{`next friday`, nextWeekdayFrom(now, time.Friday)},
+		{`next saturday`, nextWeekdayFrom(now, time.Saturday)},
+
+		{`next sun`, nextWeekdayFrom(now, time.Sunday)},
+		{`next mon`, nextWeekdayFrom(now, time.Monday)},
+		{`next tue`, nextWeekdayFrom(now, time.Tuesday)},
+		{`next wed`, nextWeekdayFrom(now, time.Wednesday)},
+		{`next thu`, nextWeekdayFrom(now, time.Thursday)},
+		{`next fri`, nextWeekdayFrom(now, time.Friday)},
+		{`next sat`, nextWeekdayFrom(now, time.Saturday)},
 
 		// months
 		{`Last january`, lastSpecificMonth(now, time.January)},
