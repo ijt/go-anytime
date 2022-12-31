@@ -16,6 +16,8 @@ var errNoRangeFound = errors.New("no range found")
 func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
 	eow1 := findNextNoise(s, 0)
 	w1 := ls[:eow1]
+
+	// "from A to B" for implicit ranges A and B:
 	if w1 == "from" {
 		sow2 := findNextSignal(s, eow1)
 		startRange, parsedStart, err := parseImplicitRange(s[sow2:], ls[sow2:], now, dir)
@@ -36,6 +38,8 @@ func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, 
 		eoEnd := soEnd + len(parsedEnd)
 		return r, s[:eoEnd], nil
 	}
+
+	// Either "A" or "A to B":
 	r, parsed, err = parseImplicitRange(s, ls, now, dir)
 	if err != nil {
 		return Range{}, "", fmt.Errorf("parsing implicit range: %w", err)
