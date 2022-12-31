@@ -581,7 +581,7 @@ func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
 	case "this sunday":
 		return thisWeekdayFrom(now, time.Sunday), true
 
-		// this $shortWeekday
+	// this $shortWeekday
 	case "this mon":
 		return thisWeekdayFrom(now, time.Monday), true
 	case "this tue":
@@ -596,6 +596,38 @@ func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
 		return thisWeekdayFrom(now, time.Saturday), true
 	case "this sun":
 		return thisWeekdayFrom(now, time.Sunday), true
+
+	// next $longWeekday
+	case "next monday":
+		return nextWeekdayFrom(now, time.Monday), true
+	case "next tuesday":
+		return nextWeekdayFrom(now, time.Tuesday), true
+	case "next wednesday":
+		return nextWeekdayFrom(now, time.Wednesday), true
+	case "next thursday":
+		return nextWeekdayFrom(now, time.Thursday), true
+	case "next friday":
+		return nextWeekdayFrom(now, time.Friday), true
+	case "next saturday":
+		return nextWeekdayFrom(now, time.Saturday), true
+	case "next sunday":
+		return nextWeekdayFrom(now, time.Sunday), true
+
+	// next $shortWeekday
+	case "next mon":
+		return nextWeekdayFrom(now, time.Monday), true
+	case "next tue":
+		return nextWeekdayFrom(now, time.Tuesday), true
+	case "next wed":
+		return nextWeekdayFrom(now, time.Wednesday), true
+	case "next thu":
+		return nextWeekdayFrom(now, time.Thursday), true
+	case "next fri":
+		return nextWeekdayFrom(now, time.Friday), true
+	case "next sat":
+		return nextWeekdayFrom(now, time.Saturday), true
+	case "next sun":
+		return nextWeekdayFrom(now, time.Sunday), true
 
 	// last $longMonth
 	case "last january":

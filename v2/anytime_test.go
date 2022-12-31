@@ -356,14 +356,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`2008CE`, truncateYear(time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location()))},
 		{`2008 CE`, truncateYear(time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location()))},
 
-		// formats from the Go time package:
-		// ANSIC
-		//{"Mon Jan  2 15:04:05 2006", time.Date(2006, 1, 2, 15, 4, 5, 0, now.Location())},
-		//// RubyDate
-		//{"Mon Jan 02 15:04:05 -0700 2006", time.Date(2006, 1, 2, 15, 4, 5, 0, fixedZone(-7))},
-		//// RFC1123Z
-		//{"Mon, 02 Jan 2006 15:04:05 -0700", time.Date(2006, 1, 2, 15, 4, 5, 0, fixedZone(-7))},
-		//{"Mon 02 Jan 2006 15:04:05 -0700", time.Date(2006, 1, 2, 15, 4, 5, 0, fixedZone(-7))},
 		// RFC3339
 		{"2006-01-02T15:04:05Z", Range{time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC), time.Second}},
 		{"1990-12-31T15:59:59-08:00", Range{time.Date(1990, 12, 31, 15, 59, 59, 0, time.FixedZone("", -8*60*60)), time.Second}},
@@ -570,6 +562,11 @@ func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *test
 		wantFuture Range
 		wantPast   Range
 	}{
+		{
+			"December",
+			truncateMonth(nextMonthDayTime(now, time.December, 20, 0, 0, 0)),
+			truncateMonth(prevMonthDayTime(now, time.December, 20, 0, 0, 0)),
+		},
 		{
 			"December 20",
 			truncateDay(nextMonthDayTime(now, time.December, 20, 0, 0, 0)),
