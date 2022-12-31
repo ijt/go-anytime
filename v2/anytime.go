@@ -401,6 +401,12 @@ func parseDateWord(d *date, w string) bool {
 		return true
 	}
 
+	// UTC time zone
+	if w == "utc" {
+		d.loc = time.UTC
+		return true
+	}
+
 	// Time zone like "utc+8"
 	if (len(w) == len("utc+1") || len(w) == len("utc+10")) && w[:3] == "utc" {
 		h, err := strconv.Atoi(w[3:])
