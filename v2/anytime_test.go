@@ -191,6 +191,23 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`last fri`, lastWeekdayFrom(now, time.Friday)},
 		{`last sat`, lastWeekdayFrom(now, time.Saturday)},
 
+		// this $weekday
+		{`this sunday`, thisWeekdayFrom(now, time.Sunday)},
+		{`this monday`, thisWeekdayFrom(now, time.Monday)},
+		{`this tuesday`, thisWeekdayFrom(now, time.Tuesday)},
+		{`this wednesday`, thisWeekdayFrom(now, time.Wednesday)},
+		{`this thursday`, thisWeekdayFrom(now, time.Thursday)},
+		{`this friday`, thisWeekdayFrom(now, time.Friday)},
+		{`this saturday`, thisWeekdayFrom(now, time.Saturday)},
+
+		{`this sun`, thisWeekdayFrom(now, time.Sunday)},
+		{`this mon`, thisWeekdayFrom(now, time.Monday)},
+		{`this tue`, thisWeekdayFrom(now, time.Tuesday)},
+		{`this wed`, thisWeekdayFrom(now, time.Wednesday)},
+		{`this thu`, thisWeekdayFrom(now, time.Thursday)},
+		{`this fri`, thisWeekdayFrom(now, time.Friday)},
+		{`this sat`, thisWeekdayFrom(now, time.Saturday)},
+
 		// next $weekday
 		//{`Next sunday`, nextWeekdayFrom(now, time.Sunday)},
 		//{`Next monday`, nextWeekdayFrom(now, time.Monday)},

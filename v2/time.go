@@ -67,13 +67,23 @@ func lastWeekdayFrom(t time.Time, day time.Weekday) Range {
 	return truncateDay(t.AddDate(0, 0, -int(d)))
 }
 
-// nextWeekdayFrom returns the next week day relative to time t.
-func nextWeekdayFrom(t time.Time, day time.Weekday) Range {
-	d := day - t.Weekday()
-	if d <= 0 {
-		d += 7
+// thisWeekdayFrom returns the first instance of the given weekday after t.
+func thisWeekdayFrom(t time.Time, wd time.Weekday) Range {
+	i := 1
+	for {
+		d := t.AddDate(0, 0, i)
+		if d.Weekday() == wd {
+			return truncateDay(d)
+		}
+		i++
 	}
-	return truncateDay(t.AddDate(0, 0, int(d)))
+}
+
+// nextWeekdayFrom returns the second instance of the given weekday relative
+// to t.
+func nextWeekdayFrom(t time.Time, day time.Weekday) Range {
+	d := thisWeekdayFrom(t, day)
+	return truncateDay(d.start.AddDate(0, 0, 7))
 }
 
 // nextMonthDayTime returns the next month relative to time t, with given day of month and time of day.
