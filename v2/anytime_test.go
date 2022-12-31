@@ -301,11 +301,11 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`One year from today`, truncateYear(now.AddDate(1, 0, 0))},
 		{`Two years ago`, truncateYear(now.AddDate(-2, 0, 0))},
 		{`2 years ago`, truncateYear(now.AddDate(-2, 0, 0))},
-		//{`This year`, truncateYear(now)},
-		//{`1999AD`, truncateYear(time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location()))},
-		//{`1999 AD`, truncateYear(time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location()))},
-		//{`2008CE`, truncateYear(time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location()))},
-		//{`2008 CE`, truncateYear(time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location()))},
+		{`This year`, truncateYear(now)},
+		{`1999AD`, truncateYear(time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location()))},
+		{`1999 AD`, truncateYear(time.Date(1999, 1, 1, 0, 0, 0, 0, now.Location()))},
+		{`2008CE`, truncateYear(time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location()))},
+		{`2008 CE`, truncateYear(time.Date(2008, 1, 1, 0, 0, 0, 0, now.Location()))},
 
 		// formats from the Go time package:
 		// ANSIC
