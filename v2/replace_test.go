@@ -416,3 +416,26 @@ func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *test
 		})
 	}
 }
+
+func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
+	f.Add("", rand.Int63(), false)
+	f.Add("", rand.Int63(), true)
+	f.Add("2022ad", rand.Int63(), true)
+	f.Add("December", rand.Int63(), false)
+	f.Fuzz(func(t *testing.T, s string, nowMillis int64, defaultToFuture bool) {
+		var dir Direction = Past
+		if defaultToFuture {
+			dir = Future
+		}
+		now := time.UnixMilli(nowMillis)
+		s2, err := ReplaceAllRangesByFunc(s, now, dir, func(src string, r Range) string {
+			return src
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if s2 != s {
+			t.Fatalf("got %q, want %q", s2, s)
+		}
+	})
+}
