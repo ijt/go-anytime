@@ -1,7 +1,6 @@
 package anytime
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -23,17 +22,6 @@ func (r Range) Start() time.Time {
 // End is when the range ends, exclusive.
 func (r Range) End() time.Time {
 	return r.start.Add(r.Duration)
-}
-
-// EndInclusiveDay returns the beginning of the last day of the range.
-// The range is assumed to be long enough for that to make sense.
-func (r Range) EndInclusiveDay() time.Time {
-	return r.End().Add(-24 * time.Hour)
-}
-
-// String returns a string with the time and duration of the range.
-func (r Range) String() string {
-	return fmt.Sprintf("{start: %v, duration: %v}", r.start, r.Duration)
 }
 
 // Equal returns true if the two ranges are equal.
