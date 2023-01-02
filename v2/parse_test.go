@@ -69,8 +69,8 @@ func Test_parseImplicitRange_monthOnly(t *testing.T) {
 	}
 }
 
-// Test_parseAnyRange_fail tests parsing with inputs that are expected to fail.
-func Test_parseAnyRange_fail(t *testing.T) {
+// TestParseAnyRange_fail tests parsing with inputs that are expected to fail.
+func TestParseRange_fail(t *testing.T) {
 	var badCases = []struct {
 		input string
 	}{
@@ -149,7 +149,7 @@ func Test_parseAnyRange_fail(t *testing.T) {
 	for _, c := range badCases {
 		t.Run(c.input, func(t *testing.T) {
 			lower := strings.ToLower(c.input)
-			_, _, err := parseRange(c.input, lower, time.Time{}, Future)
+			_, _, err := ParseRange(c.input, lower, time.Time{}, Future)
 			if err == nil {
 				t.Error("parsing succeeded, want failure")
 			}
