@@ -75,6 +75,7 @@ func TestParseRange_fail(t *testing.T) {
 		input string
 	}{
 		{``},
+		{`�`},
 		{`a`},
 		{`next thing`},
 		{`not a date or a time`},
