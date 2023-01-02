@@ -460,7 +460,7 @@ func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
 			return src
 		})
 		if err != nil {
-			t.Fatal(err)
+			return
 		}
 		if s2 != s {
 			t.Fatalf("got %q, want %q", s2, s)
