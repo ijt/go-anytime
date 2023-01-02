@@ -149,7 +149,7 @@ func Test_parseAnyRange_fail(t *testing.T) {
 	for _, c := range badCases {
 		t.Run(c.input, func(t *testing.T) {
 			lower := strings.ToLower(c.input)
-			_, _, err := parseAnyRange(c.input, lower, time.Time{}, Future)
+			_, _, err := parseRange(c.input, lower, time.Time{}, Future)
 			if err == nil {
 				t.Error("parsing succeeded, want failure")
 			}

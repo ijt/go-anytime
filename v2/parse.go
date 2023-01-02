@@ -12,9 +12,9 @@ import (
 
 var errNoRangeFound = errors.New("no range found")
 
-// parseAnyRange parses either an explicit range or an implicit range starting
+// parseRange parses either an explicit range or an implicit range starting
 // at the beginning of s. A lower-cased version of s is given as ls.
-func parseAnyRange(s string, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
+func parseRange(s string, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
 	eow1 := findNextNoise(s, 0)
 	w1 := ls[:eow1]
 
