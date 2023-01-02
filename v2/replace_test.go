@@ -254,74 +254,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{"2006-01-02T15:04:05Z", Range{time.Date(2006, 1, 2, 15, 4, 5, 0, time.UTC), time.Second}},
 		{"1990-12-31T15:59:59-08:00", Range{time.Date(1990, 12, 31, 15, 59, 59, 0, time.FixedZone("", -8*60*60)), time.Second}},
 
-		//// minutes
-		//{`a minute from now`, now.Add(time.Minute)},
-		//{`a minute ago`, now.Add(-time.Minute)},
-		//{`1 minute ago`, now.Add(-time.Minute)},
-		//
-		//{`5 minutes ago`, now.Add(-5 * time.Minute)},
-		//{`five minutes ago`, now.Add(-5 * time.Minute)},
-		//{`   5    minutes  ago   `, now.Add(-5 * time.Minute)},
-		//{`2 minutes from now`, now.Add(2 * time.Minute)},
-		//{`two minutes from now`, now.Add(2 * time.Minute)},
-		//
-		//// hours
-		//{`an hour from now`, now.Add(time.Hour)},
-		//{`an hour ago`, now.Add(-time.Hour)},
-		//{`1 hour ago`, now.Add(-time.Hour)},
-		//{`6 hours ago`, now.Add(-6 * time.Hour)},
-		//{`1 hour from now`, now.Add(time.Hour)},
-		//
-		//// times
-		//{"noon", dateAtTime(today, 12, 0, 0)},
-		//{"5:35:52pm", dateAtTime(today, 12+5, 35, 52)},
-		//{`10am`, dateAtTime(today, 10, 0, 0)},
-		//{`10 am`, dateAtTime(today, 10, 0, 0)},
-		//{`5pm`, dateAtTime(today, 12+5, 0, 0)},
-		//{`10:25am`, dateAtTime(today, 10, 25, 0)},
-		//{`1:05pm`, dateAtTime(today, 12+1, 5, 0)},
-		//{`10:25:10am`, dateAtTime(today, 10, 25, 10)},
-		//{`1:05:10pm`, dateAtTime(today, 12+1, 5, 10)},
-		//{`10:25`, dateAtTime(today, 10, 25, 0)},
-		//{`10:25:30`, dateAtTime(today, 10, 25, 30)},
-		//{`17:25:30`, dateAtTime(today, 17, 25, 30)},
-		//
-		//// dates with times
-		//{"On Friday at noon UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Friday).Time, 12, 0, 0), time.UTC)},
-		//{"On Tuesday at 11am UTC", timeInLocation(dateAtTime(nextWeekdayFrom(now, time.Tuesday).Time, 11, 0, 0), time.UTC)},
-		//{"On 3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
-		//{"3 feb 2025 at 5:35:52pm", time.Date(2025, time.February, 3, 12+5, 35, 52, 0, now.Location())},
-		//{`3 days ago at 11:25am`, dateAtTime(now.Add(-3*24*time.Hour), 11, 25, 0)},
-		//{`3 days from now at 14:26`, dateAtTime(now.Add(3*24*time.Hour), 14, 26, 0)},
-		//{`2 weeks ago at 8am`, dateAtTime(now.Add(-2*7*24*time.Hour), 8, 0, 0)},
-		//{`Today at 10am`, dateAtTime(now, 10, 0, 0)},
-		//{`10am today`, dateAtTime(now, 10, 0, 0)},
-		//{`Yesterday 10am`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
-		//{`10am yesterday`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
-		//{`Yesterday at 10am`, dateAtTime(now.AddDate(0, 0, -1), 10, 0, 0)},
-		//{`Yesterday at 10:15am`, dateAtTime(now.AddDate(0, 0, -1), 10, 15, 0)},
-		//{`Tomorrow 10am`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
-		//{`10am tomorrow`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
-		//{`Tomorrow at 10am`, dateAtTime(now.AddDate(0, 0, 1), 10, 0, 0)},
-		//{`Tomorrow at 10:15am`, dateAtTime(now.AddDate(0, 0, 1), 10, 15, 0)},
-		//{`10:15am tomorrow`, dateAtTime(now.AddDate(0, 0, 1), 10, 15, 0)},
-		//{"Next dec 22nd at 3pm", timeInLocation(nextMonthDayTime(now, time.December, 22, 12+3, 0, 0), now.Location())},
-		//{"Next December 25th at 7:30am UTC-7", timeInLocation(nextMonthDayTime(now, time.December, 25, 7, 30, 0), fixedZone(-7))},
-		//{`Next December 23rd AT 5:25 PM`, nextMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
-		//{`Last December 23rd AT 5:25 PM`, prevMonthDayTime(now, time.December, 23, 12+5, 25, 0)},
-		//{`Last sunday at 5:30pm`, dateAtTime(lastWeekdayFrom(now, time.Sunday).Time, 12+5, 30, 0)},
-		//{`Next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday).Time, 22, 45, 0)},
-		//{`Next sunday at 22:45`, dateAtTime(nextWeekdayFrom(now, time.Sunday).Time, 22, 45, 0)},
-		//{`November 3rd, 1986 at 4:30pm`, time.Date(1986, 11, 3, 12+4, 30, 0, 0, now.Location())},
-		//{"September 17, 2012 at 10:09am UTC", time.Date(2012, 9, 17, 10, 9, 0, 0, time.UTC)},
-		//{"September 17, 2012 at 10:09am UTC-8", time.Date(2012, 9, 17, 10, 9, 0, 0, fixedZone(-8))},
-		//{"September 17, 2012 at 10:09am UTC+8", time.Date(2012, 9, 17, 10, 9, 0, 0, fixedZone(8))},
-		//{"September 17, 2012, 10:11:09", time.Date(2012, 9, 17, 10, 11, 9, 0, now.Location())},
-		//{"September 17, 2012, 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
-		//{"September 17, 2012 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
-		//{"September 17 2012 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
-		//{"September 17 2012 at 10:11", time.Date(2012, 9, 17, 10, 11, 0, 0, now.Location())},
-
 		// from A to B
 		{
 			"From 3 feb 2022 to 6 oct 2022",
@@ -354,13 +286,6 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 				time.Date(2022, 10, 7, 0, 0, 0, 0, now.Location()),
 			),
 		},
-		//{
-		//	"from tuesday at 5pm -12:00 until thursday 23:52 +14:00",
-		//	RangeFromTimes(
-		//		setLocation(setTime(nextWeekdayFrom(now, time.Tuesday).Time, 12+5, 0, 0, 0), fixedZone(-12)),
-		//		setLocation(setTime(nextWeekdayFrom(now, time.Thursday).Time, 23, 52, 0, 0), fixedZone(14)),
-		//	),
-		//},
 	}
 
 	for _, c := range cases {
@@ -452,26 +377,6 @@ func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *test
 			truncateDay(nextMonthDayTime(now, time.December, 20, 0, 0, 0)),
 			truncateDay(prevMonthDayTime(now, time.December, 20, 0, 0, 0)),
 		},
-		//{
-		//	"Thursday",
-		//	nextWeekdayFrom(now, time.Thursday).Start(),
-		//	lastWeekdayFrom(now, time.Thursday).Start(),
-		//},
-		//{
-		//	"On thursday",
-		//	nextWeekdayFrom(now, time.Thursday).Start(),
-		//	lastWeekdayFrom(now, time.Thursday).Start(),
-		//},
-		//{
-		//	"December 20 at 9pm",
-		//	nextMonthDayTime(now, time.December, 20, 21, 0, 0),
-		//	prevMonthDayTime(now, time.December, 20, 21, 0, 0),
-		//},
-		//{
-		//	"Thursday at 23:59",
-		//	setTime(nextWeekdayFrom(now, time.Thursday).Time, 23, 59, 0, 0),
-		//	setTime(lastWeekdayFrom(now, time.Thursday).Time, 23, 59, 0, 0),
-		//},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
