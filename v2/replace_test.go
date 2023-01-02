@@ -241,6 +241,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 		{`One year ago`, truncateYear(now.AddDate(-1, 0, 0))},
 		{`One year from now`, truncateYear(now.AddDate(1, 0, 0))},
 		{`One year from today`, truncateYear(now.AddDate(1, 0, 0))},
+		{`One year hence`, truncateYear(now.AddDate(1, 0, 0))},
 		{`Two years ago`, truncateYear(now.AddDate(-2, 0, 0))},
 		{`2 years ago`, truncateYear(now.AddDate(-2, 0, 0))},
 		{`This year`, truncateYear(now)},
