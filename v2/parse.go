@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -215,7 +216,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 		sow, eow, w = findSignalNoise(ls, eow)
 	}
 
-	r, ok = inferRange(d, now, dir)
+	r, ok = inferRange(d, now, dir, ls[sofw:eolgw])
 	if !ok {
 		// Not enough information was given, so skip it.
 		return Range{}, "", errNoRangeFound
@@ -302,7 +303,7 @@ func parseDateWord(d *date, w string) bool {
 	return false
 }
 
-func inferRange(d date, now time.Time, dir Direction) (Range, bool) {
+func inferRange(d date, now time.Time, dir Direction, src string) (Range, bool) {
 	if d.year == 0 && d.month == 0 {
 		return Range{}, false
 	}
@@ -327,7 +328,7 @@ func inferRange(d date, now time.Time, dir Direction) (Range, bool) {
 		return truncateMonth(s), true
 
 	// Year
-	case d.year != 0 && d.month == 0 && d.dayOfMonth == 0:
+	case d.year != 0 && d.month == 0 && d.dayOfMonth == 0 && (strings.HasSuffix(src, "ad") || strings.HasSuffix(src, "ce")):
 		s := time.Date(d.year, 1, 1, 0, 0, 0, 0, loc)
 		return truncateYear(s), true
 
