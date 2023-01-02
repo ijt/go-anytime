@@ -417,6 +417,34 @@ func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *test
 	}
 }
 
+func TestReplaceAllRangesByFunc_identity(t *testing.T) {
+	var now = time.Date(2022, 9, 29, 2, 48, 33, 123, time.UTC)
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{"", ""},
+		{"�", "�"},
+		{" ", " "},
+		{"a", "a"},
+		{"a b", "a b"},
+		{"a b c", "a b c"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got, err := ReplaceAllRangesByFunc(tt.input, now, Past, func(src string, r Range) string {
+				return src
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != tt.want {
+				t.Fatalf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
 	f.Add("", rand.Int63(), false)
 	f.Add("", rand.Int63(), true)
@@ -436,6 +464,125 @@ func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
 		}
 		if s2 != s {
 			t.Fatalf("got %q, want %q", s2, s)
+		}
+	})
+}
+
+func FuzzReplaceAllRangesByFunc_allRanges(f *testing.F) {
+	rangeStrs := []string{
+		`Last year`,
+		`last  year`,
+		`This year`,
+		`Next year`,
+		`Yesterday`,
+		`Today`,
+		`Tomorrow`,
+		`Last week`,
+		`This week`,
+		`Next week`,
+		`Last month`,
+		`This month`,
+		`Next month`,
+		"January 2017",
+		"Jan 2017",
+		"March 31",
+		"January",
+		"Jan",
+		"April 3 2017",
+		"April 3",
+		"Oct 7",
+		"Oct 7",
+		"Oct 7 1970",
+		"Oct. 7",
+		"September 17",
+		"September 17",
+		"September 17",
+		"7 oct 1970",
+		"7 oct",
+		"03 February 2013",
+		"2 July 2013",
+		"2022 Feb 1",
+		"2014/3/31",
+		"2014/3/31 UTC",
+		"2014/3/31 UTC+1",
+		"2014/03/31",
+		"2014/03/31 UTC-1",
+		"2014-04-26",
+		"2014-4-26",
+		"2014-4-6",
+		"31/3/2014 UTC-8",
+		"31-3-2014 UTC-8",
+		"31/3/2014",
+		"31-3-2014",
+		`One day ago`,
+		`1 day ago`,
+		`3 days ago`,
+		`Three days ago`,
+		`1 day from now`,
+		`two days from now`,
+		`two days from today`,
+		`two days hence`,
+		`1 week ago`,
+		`2 weeks ago`,
+		`A week from now`,
+		`A week from today`,
+		`2 weeks hence`,
+		`A month ago`,
+		`1 month ago`,
+		`2 months ago`,
+		`12 months ago`,
+		`twelve months ago`,
+		`A month from now`,
+		`One month hence`,
+		`1 month from now`,
+		`2 months from now`,
+		`One year ago`,
+		`One year from now`,
+		`One year from today`,
+		`One year hence`,
+		`Two years ago`,
+		`2 years ago`,
+		`This year`,
+		`1999AD`,
+		`1999 AD`,
+		`2008CE`,
+		`2008 CE`,
+		"2006-01-02T15:04:05Z",
+		"1990-12-31T15:59:59-08:00",
+		"From 3 feb 2022 to 6 oct 2022",
+		"3 feb 2022 to 6 oct 2022",
+		"3 feb 2022 through 6 oct 2022",
+		"from 3 feb 2022 until 6 oct 2022",
+	}
+
+	f.Add([]byte("a0"))
+	f.Add([]byte{})
+	f.Add([]byte{0})
+	f.Add([]byte{1, 2})
+	f.Add([]byte{0, byte(len(rangeStrs) - 1)})
+	f.Fuzz(func(t *testing.T, rangeIDs []byte) {
+		var parts []string
+		for _, ridb := range rangeIDs {
+			if ridb < 0 {
+				ridb = -ridb
+			}
+			rid := int(ridb) % len(rangeStrs)
+			rs := rangeStrs[rid]
+			parts = append(parts, rs)
+		}
+
+		s := strings.Join(parts, " ")
+
+		s2, err := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
+			return ""
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := ""
+		s3 := strings.TrimSpace(s2)
+		if s3 != want {
+			t.Fatalf("got %q, want %q", s3, want)
 		}
 	})
 }
