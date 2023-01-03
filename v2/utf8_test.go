@@ -1,6 +1,9 @@
 package anytime
 
-import "testing"
+import (
+	"testing"
+	"unicode/utf8"
+)
 
 func Test_fixUTF8(t *testing.T) {
 	type args struct {
@@ -47,4 +50,16 @@ func Test_fixUTF8(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Fuzz_fixUTF8(f *testing.F) {
+	f.Add("\xd8")
+	f.Add("abc")
+	f.Add("\xd8abc")
+	f.Fuzz(func(t *testing.T, s string) {
+		s2 := fixUTF8(s)
+		if !utf8.Valid([]byte(s2)) {
+			t.Fatalf("got invalid utf8 result: %q", s2)
+		}
+	})
 }
