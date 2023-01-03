@@ -111,10 +111,7 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 		// eosw is the end of the second word.
 		// sw is the second word in s[p:].
 		_, eosw, sw := findSignalNoise(s, eofw)
-
-		// 🚨: fwsw could make an allocation.
 		fwsw := fw + " " + sw
-
 		r, ok = lastThisNextStrToRange(fwsw, now)
 		if ok {
 			return r, s[sofw:eosw], nil
