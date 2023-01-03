@@ -37,6 +37,20 @@ For he cannot read his tombstone when he's dead.`
 	}
 }
 
+func BenchmarkReplaceTimesByFunc_jabberwockyPoem(b *testing.B) {
+	now := time.UnixMilli(rand.Int63())
+	s := `'Twas brillig and the slithy toves did gyre and gimble in 50 wabe. All mimsy were the borogroves and the mome raths outgrabe. Beware the jabberwock my son, the jaws that bite January 2020 the claws that catch. Avoid the jubjub bird and shun the frumious bandersnatch. He took his vorpal sword in hand, longtime...`
+	want := strings.ReplaceAll(s, "January 2020", "<range>")
+	for i := 0; i < b.N; i++ {
+		got := ReplaceAllRangesByFunc(s, now, Future, func(src string, r Range) string {
+			return "<range>"
+		})
+		if got != want {
+			b.Fatalf("\ngot  %q\nwant %q", got, want)
+		}
+	}
+}
+
 func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
 	nowRx := regexp.MustCompile(`(?i)\bnow\b`)
