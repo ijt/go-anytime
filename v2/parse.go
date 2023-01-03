@@ -207,11 +207,22 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 	// eolgw is the end of the last good word, i.e., the end of the
 	// last word that was successfully parsed.
 	var eolgw int
+	code := ""
 	for sow < len(s) {
-		ok = parseDateWord(&d, w)
+		prevD := d
+		c, ok := parseDateWord(&d, w)
 		if !ok {
+			d = prevD
 			break
 		}
+		// "d" has to come either at the beginning or after a month name,
+		// or we ignore it and consider the implicit range to have ended
+		// one word before.
+		if c == "d" && !(len(code) == 0 || code[len(code)-1] == 'm') {
+			d = prevD
+			break
+		}
+		code = code + c
 		eolgw = eow
 		sow, eow, w = findSignalNoise(ls, eow)
 	}
@@ -228,13 +239,15 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 
 // parseDateWord sets a field of d based on the given word w and returns
 // true if it can. If no usable information is found, it returns false.
-func parseDateWord(d *date, w string) bool {
+// It also returns a string signifying which type of thing was found:
+// "y" for year, "m" for month, "d" for day, "ymd" for "YYYY/MM/DD" etc.
+func parseDateWord(d *date, w string) (string, bool) {
 	// Year
 	if len(w) == 4 {
 		y, err := strconv.Atoi(w)
 		if err == nil && y >= 1000 && y <= 9999 {
 			d.year = y
-			return true
+			return "y", true
 		}
 	}
 
@@ -243,7 +256,7 @@ func parseDateWord(d *date, w string) bool {
 		dom, err := strconv.Atoi(w)
 		if err == nil && dom >= 1 && dom <= 31 {
 			d.dayOfMonth = dom
-			return true
+			return "d", true
 		}
 	}
 
@@ -251,13 +264,13 @@ func parseDateWord(d *date, w string) bool {
 	m, ok := monthNameToMonth[w]
 	if ok {
 		d.month = m
-		return true
+		return "m", true
 	}
 
 	// UTC time zone
 	if w == "utc" {
 		d.loc = time.UTC
-		return true
+		return "z", true
 	}
 
 	// Time zone like "utc+8"
@@ -265,7 +278,7 @@ func parseDateWord(d *date, w string) bool {
 		h, err := strconv.Atoi(w[3:])
 		if err == nil && h >= -12 && h <= 12 {
 			d.loc = fixedZone(h)
-			return true
+			return "z", true
 		}
 	}
 
@@ -277,7 +290,7 @@ func parseDateWord(d *date, w string) bool {
 		d.year = y
 		d.month = time.Month(m)
 		d.dayOfMonth = dom
-		return true
+		return "ymd", true
 	}
 
 	// DD/MM/YYYY
@@ -288,7 +301,7 @@ func parseDateWord(d *date, w string) bool {
 		d.year = y
 		d.month = time.Month(m)
 		d.dayOfMonth = dom
-		return true
+		return "dmy", true
 	}
 
 	// 1999AD
@@ -296,11 +309,11 @@ func parseDateWord(d *date, w string) bool {
 		y, err := strconv.Atoi(w[:4])
 		if err == nil && y >= 1000 && y <= 9999 {
 			d.year = y
-			return true
+			return "y", true
 		}
 	}
 
-	return false
+	return "", false
 }
 
 func inferRange(d date, now time.Time, dir Direction, src string) (Range, bool) {
