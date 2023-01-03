@@ -10,7 +10,20 @@ import (
 	"unicode"
 )
 
-var errNoRangeFound = errors.New("no range found")
+var ErrNoRangeStartFound = errors.New("no start of range found just after `from`")
+var ErrNoRangeEndFound = errors.New("no end of range found just after `to` or similar")
+
+type ErrNoConnectorFound struct {
+	ParsedStart    string
+	WordAfterStart string
+}
+
+func (e *ErrNoConnectorFound) Error() string {
+	return fmt.Sprintf("expected 'to|until|til|through' after %q, got %q", e.ParsedStart, e.WordAfterStart)
+}
+
+var ErrNoRangeFound = errors.New("no range found")
+var ErrNoImplicitRangeFound = errors.New("no implicit range found")
 
 // ParseRange parses either an explicit range or an implicit range starting
 // at the beginning of s. A lower-cased version of s is given as ls.
@@ -23,17 +36,17 @@ func ParseRange(s string, now time.Time, dir Direction) (r Range, parsed string,
 		sow2 := findNextSignal(s, eow1)
 		startRange, parsedStart, err := parseImplicitRange(s[sow2:], now, dir)
 		if err != nil {
-			return Range{}, "", fmt.Errorf("parsing range after 'from': %w", err)
+			return Range{}, "", ErrNoRangeStartFound
 		}
 		eoStart := sow2 + len(parsedStart)
 		_, eoto, to := findSignalNoise(s, eoStart)
 		if !isConnector(to) {
-			return Range{}, "", fmt.Errorf("expected 'to|until|til|through' after %q, got %q", parsedStart, to)
+			return Range{}, "", &ErrNoConnectorFound{parsedStart, to}
 		}
 		soEnd := findNextSignal(s, eoto)
 		endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], now, dir)
 		if err != nil {
-			return Range{}, "", fmt.Errorf("parsing range after 'to': %w", err)
+			return Range{}, "", ErrNoRangeEndFound
 		}
 		r := Range{startRange.Start(), endRange.End().Sub(startRange.Start())}
 		eoEnd := soEnd + len(parsedEnd)
@@ -43,7 +56,7 @@ func ParseRange(s string, now time.Time, dir Direction) (r Range, parsed string,
 	// Either "A" or "A to B":
 	r, parsed, err = parseImplicitRange(s, now, dir)
 	if err != nil {
-		return Range{}, "", fmt.Errorf("parsing implicit range: %w", err)
+		return Range{}, "", ErrNoImplicitRangeFound
 	}
 	eor := len(parsed)
 	_, eoto, to := findSignalNoise(s, eor)
@@ -76,14 +89,14 @@ func eq(a, b string) bool {
 //
 // The lower-cased version of s is given as ls. The prefix of s that was parsed
 // is also returned. If no range is found at the very beginning of s,
-// errNoRangeFound is returned.
+// ErrNoRangeFound is returned.
 func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed string, err error) {
 	// sofw is the start of the first word in s[p:].
 	// eofw is the end of the first word in s[p:]
 	// fw is the first word.
 	sofw, eofw, fw := findSignalNoise(s, 0)
 	if sofw == len(s) {
-		return Range{}, "", errNoRangeFound
+		return Range{}, "", ErrNoRangeFound
 	}
 
 	// Try for a match with "now", "today", etc.
@@ -235,13 +248,13 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 		// The only valid thing that can come after a day of month is a specific
 		// month. Also, a day of month by itself is not enough to be
 		// unambiguous. So bail.
-		return Range{}, "", errNoRangeFound
+		return Range{}, "", ErrNoRangeFound
 	}
 
 	r, ok = inferRange(d, now, dir, strings.ToLower(s[sofw:eolgw]))
 	if !ok {
 		// Not enough information was given, so skip it.
-		return Range{}, "", errNoRangeFound
+		return Range{}, "", ErrNoRangeFound
 	}
 
 	// Got enough information to specify an implicit date range.
