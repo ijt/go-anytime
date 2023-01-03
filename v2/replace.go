@@ -29,9 +29,11 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 	endOfPrevDate := 0
 	p := 0
 	for p < len(s) {
+		// sofw is the start of the first word.
 		sofw := findNextSignal(s, p)
 		r, parsed, err := ParseRange(s[sofw:], now, dir)
 		if err != nil {
+			// eofw is the end of the first word.
 			eofw := findNextNoise(s, sofw)
 			p = eofw
 			continue
