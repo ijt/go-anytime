@@ -210,3 +210,59 @@ func Test_parseImplicitRange(t *testing.T) {
 		})
 	}
 }
+
+func TestParseRange(t *testing.T) {
+	now := time.UnixMilli(rand.Int63())
+	type args struct {
+		s   string
+		now time.Time
+		dir Direction
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantR      Range
+		wantParsed string
+		wantErr    bool
+	}{
+		{
+			name: "NOW TO evaluates to NOW",
+			args: args{
+				s:   "now to",
+				now: now,
+			},
+			wantR: Range{
+				start:    now,
+				Duration: time.Second,
+			},
+			wantParsed: "now",
+		},
+		{
+			name: "NOW TO BAR evaluates to NOW",
+			args: args{
+				s:   "now to bar",
+				now: now,
+			},
+			wantR: Range{
+				start:    now,
+				Duration: time.Second,
+			},
+			wantParsed: "now",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotR, gotParsed, err := ParseRange(tt.args.s, tt.args.now, tt.args.dir)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseRange() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("ParseRange() gotR = %v, want %v", gotR, tt.wantR)
+			}
+			if gotParsed != tt.wantParsed {
+				t.Errorf("ParseRange() gotParsed = %v, want %v", gotParsed, tt.wantParsed)
+			}
+		})
+	}
+}
