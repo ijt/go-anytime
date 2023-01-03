@@ -30,10 +30,7 @@ For he cannot read his tombstone when he's dead.`
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		got, err := ReplaceAllRangesByFunc(s, now, Past, f)
-		if err != nil {
-			b.Fatal(err)
-		}
+		got := ReplaceAllRangesByFunc(s, now, Past, f)
 		if got != want {
 			b.Errorf("got = %v\n\nwant %v", got, want)
 		}
@@ -68,10 +65,7 @@ func TestReplaceAllRangesByFunc_nows(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ReplaceAllRangesByFunc(tt.input, now, Future, f)
-			if err != nil {
-				t.Fatal(err)
-			}
+			got := ReplaceAllRangesByFunc(tt.input, now, Future, f)
 			want := nowRx.ReplaceAllString(tt.input, fmt.Sprintf("%v", now.UnixMilli()))
 			if got != want {
 				t.Errorf("\ngot\n%q\nwant\n%q", got, want)
@@ -86,10 +80,7 @@ func TestReplaceAllRangesByFunc_noReplacementCrossTalk(t *testing.T) {
 		return "maybe next"
 	}
 	want := "maybe next week"
-	got, err := ReplaceAllRangesByFunc(input, time.Time{}, Future, f)
-	if err != nil {
-		t.Fatal(err)
-	}
+	got := ReplaceAllRangesByFunc(input, time.Time{}, Future, f)
 	if got != want {
 		t.Fatalf("got = %q, want %q", got, want)
 	}
@@ -112,10 +103,7 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	}
 	for _, input := range inputs {
 		t.Run(input, func(t *testing.T) {
-			got, err := ReplaceAllRangesByFunc(input, now, Past, f)
-			if err != nil {
-				t.Fatal(err)
-			}
+			got := ReplaceAllRangesByFunc(input, now, Past, f)
 			want := strings.ReplaceAll(input, "last year", fmt.Sprintf("%v", ly.Start().UnixMilli()))
 			if got != want {
 				t.Errorf("got = %v, want %v", got, want)
@@ -131,10 +119,7 @@ func TestReplaceAllRangesByFunc_lastYearPlusVerbiage(t *testing.T) {
 		return fmt.Sprintf("%v", r.Start().UnixMilli())
 	}
 	inputStr := `foo last year bar`
-	gotStr, err := ReplaceAllRangesByFunc(inputStr, now, Past, f)
-	if err != nil {
-		t.Fatal(err)
-	}
+	gotStr := ReplaceAllRangesByFunc(inputStr, now, Past, f)
 	unixStr := fmt.Sprintf("%v", wantRange.Start().UnixMilli())
 	wantStr := strings.ReplaceAll(inputStr, "last year", unixStr)
 	if gotStr != wantStr {
@@ -291,13 +276,10 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Input, func(t *testing.T) {
 			var foundRanges []Range
-			gotStr, err := ReplaceAllRangesByFunc(c.Input, now, Future, func(rs string, r Range) string {
+			gotStr := ReplaceAllRangesByFunc(c.Input, now, Future, func(rs string, r Range) string {
 				foundRanges = append(foundRanges, r)
 				return "<range>"
 			})
-			if err != nil {
-				t.Fatal(err)
-			}
 			if len(foundRanges) == 0 {
 				t.Fatal("no ranges found")
 			}
@@ -339,13 +321,10 @@ func TestReplaceAllRangesByFunc_colorMonth(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Input, func(t *testing.T) {
 			var gotRanges []Range
-			gotStr, err := ReplaceAllRangesByFunc(c.Input, now, Past, func(src string, r Range) string {
+			gotStr := ReplaceAllRangesByFunc(c.Input, now, Past, func(src string, r Range) string {
 				gotRanges = append(gotRanges, r)
 				return "<range>"
 			})
-			if err != nil {
-				t.Fatal(err)
-			}
 			wantStr := "<range>"
 			if gotStr != wantStr {
 				t.Fatalf("gotStr = %q, wantStr %q", gotStr, wantStr)
@@ -382,13 +361,10 @@ func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *test
 		t.Run(tt.input, func(t *testing.T) {
 			// Future
 			var gotRanges []Range
-			_, err := ReplaceAllRangesByFunc(tt.input, now, Future, func(src string, r Range) string {
+			_ = ReplaceAllRangesByFunc(tt.input, now, Future, func(src string, r Range) string {
 				gotRanges = append(gotRanges, r)
 				return ""
 			})
-			if err != nil {
-				t.Fatal(err)
-			}
 			if len(gotRanges) != 1 {
 				t.Fatalf("got %d ranges, want 1", len(gotRanges))
 			}
@@ -399,13 +375,10 @@ func TestReplaceAllRangesByFunc_ambiguitiesResolvedByDirectionPreference(t *test
 
 			// Past
 			gotRanges = nil
-			_, err = ReplaceAllRangesByFunc(tt.input, now, Past, func(src string, r Range) string {
+			_ = ReplaceAllRangesByFunc(tt.input, now, Past, func(src string, r Range) string {
 				gotRanges = append(gotRanges, r)
 				return ""
 			})
-			if err != nil {
-				t.Fatal(err)
-			}
 			if len(gotRanges) != 1 {
 				t.Fatalf("got %d ranges, want 1", len(gotRanges))
 			}
@@ -432,12 +405,9 @@ func TestReplaceAllRangesByFunc_identity(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
-			got, err := ReplaceAllRangesByFunc(tt.input, now, Past, func(src string, r Range) string {
+			got := ReplaceAllRangesByFunc(tt.input, now, Past, func(src string, r Range) string {
 				return src
 			})
-			if err != nil {
-				t.Fatal(err)
-			}
 			if got != tt.want {
 				t.Fatalf("got %q, want %q", got, tt.want)
 			}
@@ -537,12 +507,9 @@ func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
 		f.Add(rs)
 	}
 	f.Fuzz(func(t *testing.T, s string) {
-		s2, err := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
+		s2 := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
 			return src
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
 		if s2 != s {
 			t.Fatalf("got %q, want %q", s2, s)
 		}
@@ -568,12 +535,9 @@ func FuzzReplaceAllRangesByFunc_allRanges(f *testing.F) {
 
 		s := strings.Join(parts, " x ")
 
-		s2, err := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
+		s2 := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
 			return ""
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
 		n := len(parts) - 1
 		if n < 0 {
 			n = 0

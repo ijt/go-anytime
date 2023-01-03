@@ -24,7 +24,7 @@ const (
 //
 // In ambiguous cases like "December" that could be in the past or the future,
 // the dir argument tells whether to choose the Past or Future instance of it.
-func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, r Range) string) (string, error) {
+func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, r Range) string) string {
 	var parts []string
 	endOfPrevDate := 0
 	p := 0
@@ -45,5 +45,5 @@ func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src s
 		endOfPrevDate = p
 	}
 	parts = append(parts, s[endOfPrevDate:])
-	return strings.Join(parts, ""), nil
+	return strings.Join(parts, "")
 }
