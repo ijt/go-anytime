@@ -446,17 +446,12 @@ func TestReplaceAllRangesByFunc_identity(t *testing.T) {
 }
 
 func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
-	f.Add("", rand.Int63(), false)
-	f.Add("", rand.Int63(), true)
-	f.Add("2022ad", rand.Int63(), true)
-	f.Add("December", rand.Int63(), false)
-	f.Fuzz(func(t *testing.T, s string, nowMillis int64, defaultToFuture bool) {
-		var dir Direction = Past
-		if defaultToFuture {
-			dir = Future
-		}
-		now := time.UnixMilli(nowMillis)
-		s2, err := ReplaceAllRangesByFunc(s, now, dir, func(src string, r Range) string {
+	f.Add("")
+	f.Add("")
+	f.Add("2022ad")
+	f.Add("December")
+	f.Fuzz(func(t *testing.T, s string) {
+		s2, err := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
 			return src
 		})
 		if err != nil {
