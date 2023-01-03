@@ -447,7 +447,6 @@ func TestReplaceAllRangesByFunc_identity(t *testing.T) {
 
 func FuzzReplaceAllRangesByFunc_stringsUnchangedWhenFReturnsSrc(f *testing.F) {
 	f.Add("")
-	f.Add("")
 	f.Add("2022ad")
 	f.Add("December")
 	f.Fuzz(func(t *testing.T, s string) {
