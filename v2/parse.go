@@ -227,6 +227,13 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 		sow, eow, w = findSignalNoise(ls, eow)
 	}
 
+	if strings.HasPrefix(code, "d") && !strings.HasPrefix(code, "dm") {
+		// The only valid thing that can come after a day of month is a specific
+		// month. Also, a day of month by itself is not enough to be
+		// unambiguous. So bail.
+		return Range{}, "", errNoRangeFound
+	}
+
 	r, ok = inferRange(d, now, dir, ls[sofw:eolgw])
 	if !ok {
 		// Not enough information was given, so skip it.
