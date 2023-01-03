@@ -85,7 +85,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 	// Try for a match with "now", "today", etc.
 	r, ok := oneWordStrToRange(fw, now)
 	if ok {
-		return r, fw, nil
+		return r, s[sofw:eofw], nil
 	}
 
 	// Try for a match with "last week", "this month", "next year", etc.
