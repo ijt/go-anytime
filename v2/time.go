@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// fixedZoneHM returns the time zone with the given offset in hours and minutes
+// from UTC.
 func fixedZoneHM(h, m int) *time.Location {
 	offset := h*60*60 + m*60
 	sign := "+"
@@ -16,6 +18,7 @@ func fixedZoneHM(h, m int) *time.Location {
 	return time.FixedZone(name, offset)
 }
 
+// fixedZone returns the time zone with the given offset in hours from UTC.
 func fixedZone(offsetHours int) *time.Location {
 	return fixedZoneHM(offsetHours, 0)
 }
