@@ -19,7 +19,7 @@ func ParseRange(s string, now time.Time, dir Direction) (r Range, parsed string,
 	w1 := s[:eow1]
 
 	// "from A to B" for implicit ranges A and B:
-	if w1 == "from" {
+	if eq(w1, "from") {
 		sow2 := findNextSignal(s, eow1)
 		startRange, parsedStart, err := parseImplicitRange(s[sow2:], now, dir)
 		if err != nil {
@@ -66,6 +66,10 @@ func isConnector(s string) bool {
 	return s == "to" || s == "until" || s == "til" || s == "through"
 }
 
+func eq(a, b string) bool {
+	return strings.EqualFold(a, b)
+}
+
 // parseImplicitRange parses an implicit date range from a string s.
 // An implicit date range is something like "2022ad" as opposed to
 // an explicit range like "from 2020ad to 2022ad".
@@ -89,7 +93,7 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 	}
 
 	// Try for a match with "last week", "this month", "next year", etc.
-	if fw == "last" || fw == "this" || fw == "next" {
+	if eq(fw, "last") || eq(fw, "this") || eq(fw, "next") {
 		// sosw is the start of the second word.
 		// eosw is the end of the second word.
 		// sw is the second word in s[p:].
@@ -114,63 +118,63 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 		_, eow2, w2 := findSignalNoise(s, eofw)
 		_, eow3, w3 := findSignalNoise(s, eow2)
 		_, eow4, w4 := findSignalNoise(s, eow3)
-		if i >= 1000 && i <= 9999 && (w2 == "ad" || w2 == "ce") {
+		if i >= 1000 && i <= 9999 && (eq(w2, "ad") || eq(w2, "ce")) {
 			// Year
 			r := truncateYear(time.Date(i, 1, 1, 0, 0, 0, 0, now.Location()))
 			return r, s[sofw:eow2], nil
 		}
-		if w2 == "day" || w2 == "days" {
-			if w3 == "ago" {
+		if eq(w2, "day") || eq(w2, "days") {
+			if eq(w3, "ago") {
 				r := truncateDay(now.AddDate(0, 0, -i))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "hence" {
+			if eq(w3, "hence") {
 				r := truncateDay(now.AddDate(0, 0, i))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "from" && (w4 == "now" || w4 == "today") {
+			if eq(w3, "from") && (eq(w4, "now") || eq(w4, "today")) {
 				r := truncateDay(now.AddDate(0, 0, i))
 				return r, s[sofw:eow4], nil
 			}
 		}
-		if w2 == "week" || w2 == "weeks" {
+		if eq(w2, "week") || eq(w2, "weeks") {
 			if w3 == "ago" {
 				r := truncateWeek(now.AddDate(0, 0, -i*7))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "hence" {
+			if eq(w3, "hence") {
 				r := truncateWeek(now.AddDate(0, 0, i*7))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "from" && (w4 == "now" || w4 == "today") {
+			if eq(w3, "from") && (eq(w4, "now") || eq(w4, "today")) {
 				r := truncateWeek(now.AddDate(0, 0, i*7))
 				return r, s[sofw:eow4], nil
 			}
 		}
-		if w2 == "month" || w2 == "months" {
-			if w3 == "ago" {
+		if eq(w2, "month") || eq(w2, "months") {
+			if eq(w3, "ago") {
 				r := truncateMonth(now.AddDate(0, -i, 0))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "hence" {
+			if eq(w3, "hence") {
 				r := truncateMonth(now.AddDate(0, i, 0))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "from" && (w4 == "now" || w4 == "today") {
+			if eq(w3, "from") && (eq(w4, "now") || eq(w4, "today")) {
 				r := truncateMonth(now.AddDate(0, i, 0))
 				return r, s[sofw:eow4], nil
 			}
 		}
-		if w2 == "year" || w2 == "years" {
-			if w3 == "ago" {
+		if eq(w2, "year") || eq(w2, "years") {
+			if eq(w3, "ago") {
 				r := truncateYear(now.AddDate(-i, 0, 0))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "hence" {
+			if eq(w3, "hence") {
 				r := truncateYear(now.AddDate(i, 0, 0))
 				return r, s[sofw:eow3], nil
 			}
-			if w3 == "from" && (w4 == "now" || w4 == "today") {
+			if eq(w3, "from") && (eq(w4, "now") || eq(w4, "today")) {
 				r := truncateYear(now.AddDate(i, 0, 0))
 				return r, s[sofw:eow4], nil
 			}
@@ -267,28 +271,6 @@ func parseDateWord(d *date, w string) (string, bool) {
 		}
 	}
 
-	// Month
-	m, ok := monthNameToMonth[w]
-	if ok {
-		d.month = m
-		return "m", true
-	}
-
-	// UTC time zone
-	if w == "utc" {
-		d.loc = time.UTC
-		return "z", true
-	}
-
-	// Time zone like "utc+8"
-	if (len(w) == len("utc+1") || len(w) == len("utc+10")) && w[:3] == "utc" {
-		h, err := strconv.Atoi(w[3:])
-		if err == nil && h >= -12 && h <= 12 {
-			d.loc = fixedZone(h)
-			return "z", true
-		}
-	}
-
 	// YYYY/MM/DD
 	if sm := ymdRx.FindStringSubmatch(w); sm != nil {
 		y, _ := strconv.Atoi(sm[1])
@@ -311,8 +293,32 @@ func parseDateWord(d *date, w string) (string, bool) {
 		return "dmy", true
 	}
 
+	w = strings.ToLower(w)
+
+	// Month
+	m, ok := monthNameToMonth[w]
+	if ok {
+		d.month = m
+		return "m", true
+	}
+
+	// UTC time zone
+	if w == "utc" {
+		d.loc = time.UTC
+		return "z", true
+	}
+
+	// Time zone like "utc+8"
+	if (len(w) == len("utc+1") || len(w) == len("utc+10")) && w[:3] == "utc" {
+		h, err := strconv.Atoi(w[3:])
+		if err == nil && h >= -12 && h <= 12 {
+			d.loc = fixedZone(h)
+			return "z", true
+		}
+	}
+
 	// 1999AD
-	if len(w) == len("1999AD") && (w[4:] == "ad" || w[4:] == "ce") {
+	if len(w) == len("1999ad") && (w[4:] == "ad" || w[4:] == "ce") {
 		y, err := strconv.Atoi(w[:4])
 		if err == nil && y >= 1000 && y <= 9999 {
 			d.year = y
@@ -324,6 +330,7 @@ func parseDateWord(d *date, w string) (string, bool) {
 }
 
 func inferRange(d date, now time.Time, dir Direction, src string) (Range, bool) {
+	src = strings.ToLower(src)
 	if d.year == 0 && d.month == 0 {
 		return Range{}, false
 	}
@@ -389,7 +396,7 @@ type date struct {
 }
 
 func parseInt(s string) (int, bool) {
-	i, ok := strToInt[s]
+	i, ok := strToInt[strings.ToLower(s)]
 	if ok {
 		return i, true
 	}
@@ -432,11 +439,11 @@ var strToInt = map[string]int{
 }
 
 func colorMonthToRange(color string, monthName string, now time.Time) (Range, bool) {
-	delta, ok := colorToDelta[color]
+	delta, ok := colorToDelta[strings.ToLower(color)]
 	if !ok {
 		return Range{}, false
 	}
-	m, ok := monthNameToMonth[monthName]
+	m, ok := monthNameToMonth[strings.ToLower(monthName)]
 	if !ok {
 		return Range{}, false
 	}
@@ -444,8 +451,12 @@ func colorMonthToRange(color string, monthName string, now time.Time) (Range, bo
 }
 
 func isColor(s string) bool {
-	_, ok := colorToDelta[s]
-	return ok
+	for k := range colorToDelta {
+		if eq(k, s) {
+			return true
+		}
+	}
+	return false
 }
 
 var colorToDelta = map[string]int{
@@ -519,39 +530,39 @@ func isSignal(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '/' || r == '-' || r == '+' || r == ':'
 }
 
-func oneWordStrToRange(normSrc string, now time.Time) (Range, bool) {
-	switch normSrc {
-	case "now":
+func oneWordStrToRange(w string, now time.Time) (Range, bool) {
+	switch {
+	case eq(w, "now"):
 		return Range{now, time.Second}, true
-	case "yesterday":
+	case eq(w, "yesterday"):
 		return truncateDay(now.AddDate(0, 0, -1)), true
-	case "today":
+	case eq(w, "today"):
 		return truncateDay(now), true
-	case "tomorrow":
+	case eq(w, "tomorrow"):
 		return truncateDay(now.AddDate(0, 0, 1)), true
 	}
 	return Range{}, false
 }
 
-func lastThisNextStrToRange(normSrc string, now time.Time) (Range, bool) {
-	switch normSrc {
-	case "last week":
+func lastThisNextStrToRange(w string, now time.Time) (Range, bool) {
+	switch {
+	case eq(w, "last week"):
 		return truncateWeek(now.AddDate(0, 0, -7)), true
-	case "this week":
+	case eq(w, "this week"):
 		return truncateWeek(now), true
-	case "next week":
+	case eq(w, "next week"):
 		return truncateWeek(now.AddDate(0, 0, 7)), true
-	case "last month":
+	case eq(w, "last month"):
 		return truncateMonth(now.AddDate(0, -1, 0)), true
-	case "this month":
+	case eq(w, "this month"):
 		return truncateMonth(now), true
-	case "next month":
+	case eq(w, "next month"):
 		return truncateMonth(now.AddDate(0, 1, 0)), true
-	case "last year":
+	case eq(w, "last year"):
 		return truncateYear(now.AddDate(-1, 0, 0)), true
-	case "this year":
+	case eq(w, "this year"):
 		return truncateYear(now), true
-	case "next year":
+	case eq(w, "next year"):
 		return truncateYear(now.AddDate(1, 0, 0)), true
 	}
 
