@@ -182,6 +182,14 @@ func Test_parseImplicitRange(t *testing.T) {
 			wantR:      truncateMonth(time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)),
 			wantParsed: "Jan 2017",
 		},
+		{
+			name: "small int before year at beginning causes failure",
+			args: args{
+				s:  "1 2017 Jan",
+				ls: "1 2017 jan",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
