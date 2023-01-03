@@ -69,7 +69,6 @@ func Test_parseImplicitRange_monthOnly(t *testing.T) {
 	}
 }
 
-// TestParseAnyRange_fail tests parsing with inputs that are expected to fail.
 func TestParseRange_fail(t *testing.T) {
 	var badCases = []struct {
 		input string
@@ -77,6 +76,12 @@ func TestParseRange_fail(t *testing.T) {
 		{``},
 		{`�`},
 		{`a`},
+		{`from`},
+		{`from foo`},
+		{`from yesterday`},
+		{`from yesterday to`},
+		{`from yesterday to beeblebrox`},
+		{`red raspberry`},
 		{`next thing`},
 		{`not a date or a time`},
 		{`Message me in 2 minutes`},
