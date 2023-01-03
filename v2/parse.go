@@ -207,7 +207,7 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 	// eow is the end of the current word.
 	eow := eofw
 	// w is the current word, lower-cased.
-	w := s[sow:eow]
+	w := fw
 	// eolgw is the end of the last good word, i.e., the end of the
 	// last word that was successfully parsed.
 	var eolgw int
@@ -238,7 +238,7 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 		return Range{}, "", errNoRangeFound
 	}
 
-	r, ok = inferRange(d, now, dir, s[sofw:eolgw])
+	r, ok = inferRange(d, now, dir, strings.ToLower(s[sofw:eolgw]))
 	if !ok {
 		// Not enough information was given, so skip it.
 		return Range{}, "", errNoRangeFound
@@ -293,8 +293,6 @@ func parseDateWord(d *date, w string) (string, bool) {
 		return "dmy", true
 	}
 
-	w = strings.ToLower(w)
-
 	// Month
 	m, ok := monthNameToMonth[w]
 	if ok {
@@ -330,7 +328,6 @@ func parseDateWord(d *date, w string) (string, bool) {
 }
 
 func inferRange(d date, now time.Time, dir Direction, src string) (Range, bool) {
-	src = strings.ToLower(src)
 	if d.year == 0 && d.month == 0 {
 		return Range{}, false
 	}
@@ -396,7 +393,7 @@ type date struct {
 }
 
 func parseInt(s string) (int, bool) {
-	i, ok := strToInt[strings.ToLower(s)]
+	i, ok := strToInt[s]
 	if ok {
 		return i, true
 	}
@@ -439,11 +436,11 @@ var strToInt = map[string]int{
 }
 
 func colorMonthToRange(color string, monthName string, now time.Time) (Range, bool) {
-	delta, ok := colorToDelta[strings.ToLower(color)]
+	delta, ok := colorToDelta[color]
 	if !ok {
 		return Range{}, false
 	}
-	m, ok := monthNameToMonth[strings.ToLower(monthName)]
+	m, ok := monthNameToMonth[monthName]
 	if !ok {
 		return Range{}, false
 	}
@@ -451,12 +448,8 @@ func colorMonthToRange(color string, monthName string, now time.Time) (Range, bo
 }
 
 func isColor(s string) bool {
-	for k := range colorToDelta {
-		if eq(k, s) {
-			return true
-		}
-	}
-	return false
+	_, ok := colorToDelta[s]
+	return ok
 }
 
 var colorToDelta = map[string]int{
@@ -475,7 +468,7 @@ var colorToDelta = map[string]int{
 func findSignalNoise(s string, start int) (int, int, string) {
 	isig := findNextSignal(s, start)
 	inoi := findNextNoise(s, isig)
-	return isig, inoi, s[isig:inoi]
+	return isig, inoi, strings.ToLower(s[isig:inoi])
 }
 
 func findNextSignal(s string, start int) int {
