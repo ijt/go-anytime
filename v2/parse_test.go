@@ -2,6 +2,7 @@ package anytime
 
 import (
 	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -153,6 +154,47 @@ func TestParseRange_fail(t *testing.T) {
 			_, _, err := ParseRange(c.input, lower, time.Time{}, Future)
 			if err == nil {
 				t.Error("parsing succeeded, want failure")
+			}
+		})
+	}
+}
+
+func Test_parseImplicitRange(t *testing.T) {
+	type args struct {
+		s   string
+		ls  string
+		now time.Time
+		dir Direction
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantR      Range
+		wantParsed string
+		wantErr    bool
+	}{
+		{
+			name: "small int after year is ignored",
+			args: args{
+				s:  "Jan 2017 1",
+				ls: "jan 2017 1",
+			},
+			wantR:      truncateMonth(time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)),
+			wantParsed: "Jan 2017",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotR, gotParsed, err := parseImplicitRange(tt.args.s, tt.args.ls, tt.args.now, tt.args.dir)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseImplicitRange() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotR, tt.wantR) {
+				t.Errorf("parseImplicitRange() gotR = %v, want %v", gotR, tt.wantR)
+			}
+			if gotParsed != tt.wantParsed {
+				t.Errorf("parseImplicitRange() gotParsed = %v, want %v", gotParsed, tt.wantParsed)
 			}
 		})
 	}
