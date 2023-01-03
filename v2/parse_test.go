@@ -266,3 +266,35 @@ func TestParseRange(t *testing.T) {
 		})
 	}
 }
+
+func TestErrNoConnectorFound_Error(t *testing.T) {
+	type fields struct {
+		ParsedStart    string
+		WordAfterStart string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "now foo",
+			fields: fields{
+				ParsedStart:    "now",
+				WordAfterStart: "foo",
+			},
+			want: "expected 'to|until|til|through' after \"now\", got \"foo\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &ErrNoConnectorFound{
+				ParsedStart:    tt.fields.ParsedStart,
+				WordAfterStart: tt.fields.WordAfterStart,
+			}
+			if got := e.Error(); got != tt.want {
+				t.Errorf("Error() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

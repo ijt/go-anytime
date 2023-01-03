@@ -195,10 +195,9 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 	}
 
 	// Try for a match with "green october", "blue june", etc.
-	if isColor(fw) {
-		color := fw
+	if delta, ok := colorToDelta[fw]; ok {
 		_, eosw, sw := findSignalNoise(s, eofw)
-		r, ok = colorMonthToRange(color, sw, now)
+		r, ok = colorMonthToRange(delta, sw, now)
 		if ok {
 			return r, s[sofw:eosw], nil
 		}
@@ -448,21 +447,12 @@ var strToInt = map[string]int{
 	"ninety":    90,
 }
 
-func colorMonthToRange(color string, monthName string, now time.Time) (Range, bool) {
-	delta, ok := colorToDelta[color]
-	if !ok {
-		return Range{}, false
-	}
+func colorMonthToRange(colorDelta int, monthName string, now time.Time) (Range, bool) {
 	m, ok := monthNameToMonth[monthName]
 	if !ok {
 		return Range{}, false
 	}
-	return truncateMonth(nextSpecificMonth(now, m).Start().AddDate(delta, 0, 0)), true
-}
-
-func isColor(s string) bool {
-	_, ok := colorToDelta[s]
-	return ok
+	return truncateMonth(nextSpecificMonth(now, m).Start().AddDate(colorDelta, 0, 0)), true
 }
 
 var colorToDelta = map[string]int{
