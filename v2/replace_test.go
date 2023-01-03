@@ -571,7 +571,7 @@ func FuzzReplaceAllRangesByFunc_allRanges(f *testing.F) {
 			parts = append(parts, rs)
 		}
 
-		s := strings.Join(parts, " ")
+		s := strings.Join(parts, " x ")
 
 		s2, err := ReplaceAllRangesByFunc(s, time.Time{}, Future, func(src string, r Range) string {
 			return ""
@@ -579,10 +579,13 @@ func FuzzReplaceAllRangesByFunc_allRanges(f *testing.F) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := ""
-		s3 := strings.TrimSpace(s2)
-		if s3 != want {
-			t.Fatalf("got %q, want %q", s3, want)
+		n := len(parts) - 1
+		if n < 0 {
+			n = 0
+		}
+		want := strings.Repeat(" x ", n)
+		if s2 != want {
+			t.Fatalf("got %q, want %q", s2, want)
 		}
 	})
 }
