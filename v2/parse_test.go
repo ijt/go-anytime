@@ -3,7 +3,6 @@ package anytime
 import (
 	"math/rand"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -42,7 +41,7 @@ func Test_parseImplicitRange_monthOnly(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			// future
-			gotRange, parsed, err := parseImplicitRange(tt.input, strings.ToLower(tt.input), now, Future)
+			gotRange, parsed, err := parseImplicitRange(tt.input, now, Future)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -55,7 +54,7 @@ func Test_parseImplicitRange_monthOnly(t *testing.T) {
 			}
 
 			// past
-			gotRange, parsed, err = parseImplicitRange(tt.input, strings.ToLower(tt.input), now, Past)
+			gotRange, parsed, err = parseImplicitRange(tt.input, now, Past)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -150,8 +149,7 @@ func TestParseRange_fail(t *testing.T) {
 	}
 	for _, c := range badCases {
 		t.Run(c.input, func(t *testing.T) {
-			lower := strings.ToLower(c.input)
-			_, _, err := ParseRange(c.input, lower, time.Time{}, Future)
+			_, _, err := ParseRange(c.input, time.Time{}, Future)
 			if err == nil {
 				t.Error("parsing succeeded, want failure")
 			}
@@ -193,7 +191,7 @@ func Test_parseImplicitRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotR, gotParsed, err := parseImplicitRange(tt.args.s, tt.args.ls, tt.args.now, tt.args.dir)
+			gotR, gotParsed, err := parseImplicitRange(tt.args.s, tt.args.now, tt.args.dir)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseImplicitRange() error = %v, wantErr %v", err, tt.wantErr)
 				return

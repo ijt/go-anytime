@@ -14,14 +14,14 @@ var errNoRangeFound = errors.New("no range found")
 
 // ParseRange parses either an explicit range or an implicit range starting
 // at the beginning of s. A lower-cased version of s is given as ls.
-func ParseRange(s string, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
+func ParseRange(s string, now time.Time, dir Direction) (r Range, parsed string, err error) {
 	eow1 := findNextNoise(s, 0)
-	w1 := ls[:eow1]
+	w1 := s[:eow1]
 
 	// "from A to B" for implicit ranges A and B:
 	if w1 == "from" {
 		sow2 := findNextSignal(s, eow1)
-		startRange, parsedStart, err := parseImplicitRange(s[sow2:], ls[sow2:], now, dir)
+		startRange, parsedStart, err := parseImplicitRange(s[sow2:], now, dir)
 		if err != nil {
 			return Range{}, "", fmt.Errorf("parsing range after 'from': %w", err)
 		}
@@ -31,7 +31,7 @@ func ParseRange(s string, ls string, now time.Time, dir Direction) (r Range, par
 			return Range{}, "", fmt.Errorf("expected 'to|until|til|through' after %q, got %q", parsedStart, to)
 		}
 		soEnd := findNextSignal(s, eoto)
-		endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], ls[soEnd:], now, dir)
+		endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], now, dir)
 		if err != nil {
 			return Range{}, "", fmt.Errorf("parsing range after 'to': %w", err)
 		}
@@ -41,7 +41,7 @@ func ParseRange(s string, ls string, now time.Time, dir Direction) (r Range, par
 	}
 
 	// Either "A" or "A to B":
-	r, parsed, err = parseImplicitRange(s, ls, now, dir)
+	r, parsed, err = parseImplicitRange(s, now, dir)
 	if err != nil {
 		return Range{}, "", fmt.Errorf("parsing implicit range: %w", err)
 	}
@@ -51,7 +51,7 @@ func ParseRange(s string, ls string, now time.Time, dir Direction) (r Range, par
 		return r, parsed, nil
 	}
 	soEnd := findNextSignal(s, eoto)
-	endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], ls[soEnd:], now, dir)
+	endRange, parsedEnd, err := parseImplicitRange(s[soEnd:], now, dir)
 	if err != nil {
 		// If we can't parse the end of the range, we'll just return the
 		// start of the range.
@@ -73,11 +73,11 @@ func isConnector(s string) bool {
 // The lower-cased version of s is given as ls. The prefix of s that was parsed
 // is also returned. If no range is found at the very beginning of s,
 // errNoRangeFound is returned.
-func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, parsed string, err error) {
+func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed string, err error) {
 	// sofw is the start of the first word in s[p:].
 	// eofw is the end of the first word in s[p:]
 	// fw is the first word.
-	sofw, eofw, fw := findSignalNoise(ls, 0)
+	sofw, eofw, fw := findSignalNoise(s, 0)
 	if sofw == len(s) {
 		return Range{}, "", errNoRangeFound
 	}
@@ -93,7 +93,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 		// sosw is the start of the second word.
 		// eosw is the end of the second word.
 		// sw is the second word in s[p:].
-		_, eosw, sw := findSignalNoise(ls, eofw)
+		_, eosw, sw := findSignalNoise(s, eofw)
 
 		// 🚨: fwsw could make an allocation.
 		fwsw := fw + " " + sw
@@ -111,9 +111,9 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 	// "N years ago"
 	// etc.
 	if i, ok := parseInt(fw); ok {
-		_, eow2, w2 := findSignalNoise(ls, eofw)
-		_, eow3, w3 := findSignalNoise(ls, eow2)
-		_, eow4, w4 := findSignalNoise(ls, eow3)
+		_, eow2, w2 := findSignalNoise(s, eofw)
+		_, eow3, w3 := findSignalNoise(s, eow2)
+		_, eow4, w4 := findSignalNoise(s, eow3)
 		if i >= 1000 && i <= 9999 && (w2 == "ad" || w2 == "ce") {
 			// Year
 			r := truncateYear(time.Date(i, 1, 1, 0, 0, 0, 0, now.Location()))
@@ -180,7 +180,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 	// Try for a match with "green october", "blue june", etc.
 	if isColor(fw) {
 		color := fw
-		_, eosw, sw := findSignalNoise(ls, eofw)
+		_, eosw, sw := findSignalNoise(s, eofw)
 		r, ok = colorMonthToRange(color, sw, now)
 		if ok {
 			return r, s[sofw:eosw], nil
@@ -203,7 +203,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 	// eow is the end of the current word.
 	eow := eofw
 	// w is the current word, lower-cased.
-	w := ls[sow:eow]
+	w := s[sow:eow]
 	// eolgw is the end of the last good word, i.e., the end of the
 	// last word that was successfully parsed.
 	var eolgw int
@@ -224,7 +224,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 		}
 		code = code + c
 		eolgw = eow
-		sow, eow, w = findSignalNoise(ls, eow)
+		sow, eow, w = findSignalNoise(s, eow)
 	}
 
 	if strings.HasPrefix(code, "d") && !strings.HasPrefix(code, "dm") {
@@ -234,7 +234,7 @@ func parseImplicitRange(s, ls string, now time.Time, dir Direction) (r Range, pa
 		return Range{}, "", errNoRangeFound
 	}
 
-	r, ok = inferRange(d, now, dir, ls[sofw:eolgw])
+	r, ok = inferRange(d, now, dir, s[sofw:eolgw])
 	if !ok {
 		// Not enough information was given, so skip it.
 		return Range{}, "", errNoRangeFound

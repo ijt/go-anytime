@@ -1,7 +1,6 @@
 package anytime
 
 import (
-	"fmt"
 	"strings"
 	"time"
 )
@@ -26,16 +25,12 @@ const (
 // In ambiguous cases like "December" that could be in the past or the future,
 // the dir argument tells whether to choose the Past or Future instance of it.
 func ReplaceAllRangesByFunc(s string, now time.Time, dir Direction, f func(src string, r Range) string) (string, error) {
-	ls := strings.ToLower(s)
-	if len(ls) != len(s) {
-		return "", fmt.Errorf("lower-casing failed for input string %q", s)
-	}
 	var parts []string
 	endOfPrevDate := 0
 	p := 0
 	for p < len(s) {
 		sofw := findNextSignal(s, p)
-		r, parsed, err := ParseRange(s[sofw:], ls[sofw:], now, dir)
+		r, parsed, err := ParseRange(s[sofw:], now, dir)
 		if err != nil {
 			eofw := findNextNoise(s, sofw)
 			p = eofw
