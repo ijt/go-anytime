@@ -3,6 +3,7 @@ package anytime
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"reflect"
 	"strings"
 	"testing"
@@ -1374,5 +1375,28 @@ func TestReplaceDateRangesByFunc(t *testing.T) {
 				t.Errorf("ReplaceDateRangesByFunc() got = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func BenchmarkReplaceTimesByFunc(b *testing.B) {
+	now := time.UnixMilli(rand.Int63())
+	s := `
+Do It Now
+by Berton Braley
+IF WITH PLEASURE you are viewing any work a man is doing,
+If you like him or you love him, tell him now;
+Don't withhold your approbation till the parson makes oration
+And he lies with snowy lilies on his brow;
+No matter how you shout it he won't really care about it;
+He won't know how many teardrops you have shed;
+If you think some praise is due him now's the time to slip it to him,
+For he cannot read his tombstone when he's dead.`
+	for i := 0; i < b.N; i++ {
+		_, err := ReplaceTimesByFunc(s, now, func(t time.Time) string {
+			return fmt.Sprintf("%v", t.UnixMilli())
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }
