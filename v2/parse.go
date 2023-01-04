@@ -342,6 +342,9 @@ func parseDateWord(d *date, w string) (string, bool) {
 func parseDayOfMonth(w string) (int, bool) {
 	i, ok := strToInt[w]
 	if ok {
+		if !okDayOfMonth(i) {
+			return 0, false
+		}
 		return i, true
 	}
 	w = strings.TrimSuffix(w, "st")
@@ -349,10 +352,14 @@ func parseDayOfMonth(w string) (int, bool) {
 	w = strings.TrimSuffix(w, "rd")
 	w = strings.TrimSuffix(w, "th")
 	i, err := strconv.Atoi(w)
-	if err == nil {
+	if err == nil && okDayOfMonth(i) {
 		return i, true
 	}
 	return 0, false
+}
+
+func okDayOfMonth(dom int) bool {
+	return 1 <= dom && dom <= 31
 }
 
 func inferRange(d date, now time.Time, dir Direction, src string) (Range, bool) {
