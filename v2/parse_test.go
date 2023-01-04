@@ -235,6 +235,16 @@ func Test_parseImplicitRange(t *testing.T) {
 			wantR:      truncateDay(time.Date(2023, 3, 4, 0, 0, 0, 0, time.UTC)),
 			wantParsed: "mar 4th",
 		},
+		{
+			name: "december 40",
+			args: args{
+				s:   "december 40",
+				now: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				dir: Future,
+			},
+			wantR:      truncateMonth(time.Date(2022, 12, 1, 0, 0, 0, 0, time.UTC)),
+			wantParsed: "december",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
