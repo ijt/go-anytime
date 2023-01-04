@@ -301,6 +301,20 @@ func TestParseRange(t *testing.T) {
 			},
 			wantParsed: "now",
 		},
+		{
+			name: "from april to may",
+			args: args{
+				s:   "from april to may",
+				now: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				dir: Future,
+			},
+			wantR: RangeFromTimes(
+				time.Date(2022, 4, 1, 0, 0, 0, 0, time.UTC),
+				time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC),
+			),
+			wantParsed: "from april to may",
+			wantErr:    false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
