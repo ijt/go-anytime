@@ -223,19 +223,25 @@ func parseImplicitRange(s string, now time.Time, dir Direction) (r Range, parsed
 	code := ""
 	for sow < len(s) {
 		prevD := d
-		c, ok := parseDateWord(&d, w)
+		wCode, ok := parseDateWord(&d, w)
 		if !ok {
+			d = prevD
+			break
+		}
+		// If the date word just parsed is one of the things already parsed
+		// for this date then don't accept it and stop parsing.
+		if strings.ContainsAny(code, wCode) {
 			d = prevD
 			break
 		}
 		// "d" has to come either at the beginning or after a month name,
 		// or we ignore it and consider the implicit range to have ended
 		// one word before.
-		if c == "d" && !(len(code) == 0 || code[len(code)-1] == 'm') {
+		if wCode == "d" && !(len(code) == 0 || code[len(code)-1] == 'm') {
 			d = prevD
 			break
 		}
-		code = code + c
+		code = code + wCode
 		eolgw = eow
 		sow, eow, w = findSignalNoise(s, eow)
 	}
