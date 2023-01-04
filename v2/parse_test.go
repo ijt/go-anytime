@@ -165,7 +165,6 @@ func TestParseRange_fail(t *testing.T) {
 func Test_parseImplicitRange(t *testing.T) {
 	type args struct {
 		s   string
-		ls  string
 		now time.Time
 		dir Direction
 	}
@@ -179,8 +178,7 @@ func Test_parseImplicitRange(t *testing.T) {
 		{
 			name: "small int after year is ignored",
 			args: args{
-				s:  "Jan 2017 1",
-				ls: "jan 2017 1",
+				s: "Jan 2017 1",
 			},
 			wantR:      truncateMonth(time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)),
 			wantParsed: "Jan 2017",
@@ -188,10 +186,18 @@ func Test_parseImplicitRange(t *testing.T) {
 		{
 			name: "small int before year at beginning causes failure",
 			args: args{
-				s:  "1 2017 Jan",
-				ls: "1 2017 jan",
+				s: "1 2017 Jan",
 			},
 			wantErr: true,
+		},
+		{
+			name: "oct nov",
+			args: args{
+				s:   "oct nov",
+				now: time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
+			},
+			wantR:      truncateMonth(time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC)),
+			wantParsed: "oct",
 		},
 	}
 	for _, tt := range tests {
