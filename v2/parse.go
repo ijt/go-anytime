@@ -340,6 +340,14 @@ func parseDateWord(d *date, w string) (string, bool) {
 }
 
 func parseDayOfMonth(w string) (int, bool) {
+	dom, ok := parseDayOfMonthNoCheck(w)
+	if !ok || !okDayOfMonth(dom) {
+		return 0, false
+	}
+	return dom, ok
+}
+
+func parseDayOfMonthNoCheck(w string) (int, bool) {
 	i, ok := strToInt[w]
 	if ok {
 		return i, true
@@ -353,6 +361,10 @@ func parseDayOfMonth(w string) (int, bool) {
 		return i, true
 	}
 	return 0, false
+}
+
+func okDayOfMonth(dom int) bool {
+	return 1 <= dom && dom <= 31
 }
 
 func inferRange(d date, now time.Time, dir Direction, src string) (Range, bool) {
