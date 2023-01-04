@@ -258,7 +258,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			"From 3 feb 2022 to 6 oct 2022",
 			RangeFromTimes(
 				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 7, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
 			),
 		},
 		// A to B
@@ -266,7 +266,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			"3 feb 2022 to 6 oct 2022",
 			RangeFromTimes(
 				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 7, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
 			),
 		},
 		// A through B
@@ -274,7 +274,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			"3 feb 2022 through 6 oct 2022",
 			RangeFromTimes(
 				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 7, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
 			),
 		},
 		// from A until B
@@ -282,7 +282,7 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			"from 3 feb 2022 until 6 oct 2022",
 			RangeFromTimes(
 				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
-				time.Date(2022, 10, 7, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
 			),
 		},
 	}
