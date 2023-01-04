@@ -48,7 +48,7 @@ func ParseRange(s string, now time.Time, dir Direction) (r Range, parsed string,
 		if err != nil {
 			return Range{}, "", ErrNoRangeEndFound
 		}
-		r := Range{startRange.Start(), endRange.End().Sub(startRange.Start())}
+		r := Range{startRange.Start(), endRange.Start().Sub(startRange.Start())}
 		eoEnd := soEnd + len(parsedEnd)
 		return r, s[:eoEnd], nil
 	}
