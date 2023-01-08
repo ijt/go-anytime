@@ -104,7 +104,7 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
 	ly := lastYear(now)
 	f := func(src string, r Range) string {
-		return fmt.Sprintf("%v", r.Start().UnixMilli())
+		return fmt.Sprintf("%v - %v", r.Start().UnixMilli(), r.End().UnixMilli())
 	}
 	inputs := []string{
 		"last year",
@@ -118,7 +118,7 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	for _, input := range inputs {
 		t.Run(input, func(t *testing.T) {
 			got := ReplaceAllRangesByFunc(input, now, Past, f)
-			want := strings.ReplaceAll(input, "last year", fmt.Sprintf("%v", ly.Start().UnixMilli()))
+			want := strings.ReplaceAll(input, "last year", fmt.Sprintf("%v - %v", ly.Start().UnixMilli(), ly.End().UnixMilli()))
 			if got != want {
 				t.Errorf("got = %v, want %v", got, want)
 			}
@@ -267,6 +267,21 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 			RangeFromTimes(
 				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
 				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
+			),
+		},
+		// A - B
+		{
+			"3 feb 2022 - 6 oct 2022",
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
+			),
+		},
+		{
+			"2016/08/01 - 2016/08/31",
+			RangeFromTimes(
+				time.Date(2016, 8, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2016, 8, 31, 0, 0, 0, 0, now.Location()),
 			),
 		},
 		// A through B

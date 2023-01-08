@@ -76,7 +76,7 @@ func ParseRange(s string, now time.Time, dir Direction) (r Range, parsed string,
 }
 
 func isConnector(s string) bool {
-	return s == "to" || s == "until" || s == "til" || s == "through"
+	return s == "to" || s == "until" || s == "til" || s == "through" || s == "-"
 }
 
 func eq(a, b string) bool {
