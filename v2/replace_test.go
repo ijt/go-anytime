@@ -104,7 +104,7 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	now := time.UnixMilli(rand.Int63())
 	ly := lastYear(now)
 	f := func(src string, r Range) string {
-		return fmt.Sprintf("%v", r.Start().UnixMilli())
+		return fmt.Sprintf("%v - %v", r.Start().UnixMilli(), r.End().UnixMilli())
 	}
 	inputs := []string{
 		"last year",
@@ -118,7 +118,7 @@ func TestReplaceAllRangesByFunc_lastYearReplacements(t *testing.T) {
 	for _, input := range inputs {
 		t.Run(input, func(t *testing.T) {
 			got := ReplaceAllRangesByFunc(input, now, Past, f)
-			want := strings.ReplaceAll(input, "last year", fmt.Sprintf("%v", ly.Start().UnixMilli()))
+			want := strings.ReplaceAll(input, "last year", fmt.Sprintf("%v - %v", ly.Start().UnixMilli(), ly.End().UnixMilli()))
 			if got != want {
 				t.Errorf("got = %v, want %v", got, want)
 			}
