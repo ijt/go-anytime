@@ -269,6 +269,21 @@ func TestReplaceAllRangesByFunc_ok(t *testing.T) {
 				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
 			),
 		},
+		// A - B
+		{
+			"3 feb 2022 - 6 oct 2022",
+			RangeFromTimes(
+				time.Date(2022, 2, 3, 0, 0, 0, 0, now.Location()),
+				time.Date(2022, 10, 6, 0, 0, 0, 0, now.Location()),
+			),
+		},
+		{
+			"2016/08/01 - 2016/08/31",
+			RangeFromTimes(
+				time.Date(2016, 8, 1, 0, 0, 0, 0, now.Location()),
+				time.Date(2016, 8, 31, 0, 0, 0, 0, now.Location()),
+			),
+		},
 		// A through B
 		{
 			"3 feb 2022 through 6 oct 2022",
