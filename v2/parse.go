@@ -565,6 +565,21 @@ func oneWordStrToRange(w string, now time.Time) (Range, bool) {
 	case eq(w, "tomorrow"):
 		return truncateDay(now.AddDate(0, 0, 1)), true
 	}
+
+	// Try for a date like mar-24.
+	if strings.Count(w, "-") == 1 {
+		dashParts := strings.Split(w, "-")
+		if len(dashParts) == 2 {
+			m, ok := monthNameToMonth[dashParts[0]]
+			if ok {
+				dom, ok := parseDayOfMonthNoCheck(dashParts[1])
+				if ok && okDayOfMonth(dom) {
+					return truncateDay(time.Date(now.Year(), m, dom, 0, 0, 0, 0, now.Location())), true
+				}
+			}
+		}
+	}
+
 	return Range{}, false
 }
 
