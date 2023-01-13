@@ -314,16 +314,16 @@ func parseDateWord(d *date, w string) (string, bool) {
 
 	// MMM-DD
 	if strings.Count(w, "-") == 1 {
-		dashParts := strings.Split(w, "-")
-		if len(dashParts) == 2 {
-			m, ok := monthNameToMonth[dashParts[0]]
-			if ok {
-				dom, ok := parseDayOfMonthNoCheck(dashParts[1])
-				if ok && okDayOfMonth(dom) {
-					d.month = m
-					d.dayOfMonth = dom
-					return "md", true
-				}
+		idash := strings.IndexByte(w, '-')
+		mstr := w[:idash]
+		domstr := w[idash+1:]
+		m, ok := monthNameToMonth[mstr]
+		if ok {
+			dom, ok := parseDayOfMonthNoCheck(domstr)
+			if ok && okDayOfMonth(dom) {
+				d.month = m
+				d.dayOfMonth = dom
+				return "md", true
 			}
 		}
 	}
