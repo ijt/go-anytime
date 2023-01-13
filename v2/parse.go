@@ -372,6 +372,9 @@ func parseDayOfMonthNoCheck(w string) (int, bool) {
 	w = strings.TrimSuffix(w, "nd")
 	w = strings.TrimSuffix(w, "rd")
 	w = strings.TrimSuffix(w, "th")
+	if len(w) == 0 || w[0] < '0' || '9' < w[0] {
+		return 0, false
+	}
 	i, err := strconv.Atoi(w)
 	if err == nil {
 		return i, true
