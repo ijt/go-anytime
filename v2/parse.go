@@ -312,6 +312,22 @@ func parseDateWord(d *date, w string) (string, bool) {
 		return "m", true
 	}
 
+	// MMM-DD
+	if strings.Count(w, "-") == 1 {
+		idash := strings.IndexByte(w, '-')
+		mstr := w[:idash]
+		domstr := w[idash+1:]
+		m, ok := monthNameToMonth[mstr]
+		if ok {
+			dom, ok := parseDayOfMonthNoCheck(domstr)
+			if ok && okDayOfMonth(dom) {
+				d.month = m
+				d.dayOfMonth = dom
+				return "md", true
+			}
+		}
+	}
+
 	// UTC time zone
 	if w == "utc" {
 		d.loc = time.UTC
@@ -356,6 +372,9 @@ func parseDayOfMonthNoCheck(w string) (int, bool) {
 	w = strings.TrimSuffix(w, "nd")
 	w = strings.TrimSuffix(w, "rd")
 	w = strings.TrimSuffix(w, "th")
+	if len(w) == 0 || w[0] < '0' || '9' < w[0] {
+		return 0, false
+	}
 	i, err := strconv.Atoi(w)
 	if err == nil {
 		return i, true
@@ -565,21 +584,6 @@ func oneWordStrToRange(w string, now time.Time) (Range, bool) {
 	case eq(w, "tomorrow"):
 		return truncateDay(now.AddDate(0, 0, 1)), true
 	}
-
-	// Try for a date like mar-24.
-	if strings.Count(w, "-") == 1 {
-		dashParts := strings.Split(w, "-")
-		if len(dashParts) == 2 {
-			m, ok := monthNameToMonth[dashParts[0]]
-			if ok {
-				dom, ok := parseDayOfMonthNoCheck(dashParts[1])
-				if ok && okDayOfMonth(dom) {
-					return truncateDay(time.Date(now.Year(), m, dom, 0, 0, 0, 0, now.Location())), true
-				}
-			}
-		}
-	}
-
 	return Range{}, false
 }
 
