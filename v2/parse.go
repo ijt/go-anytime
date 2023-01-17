@@ -312,18 +312,36 @@ func parseDateWord(d *date, w string) (string, bool) {
 		return "m", true
 	}
 
-	// MMM-DD
 	if strings.Count(w, "-") == 1 {
 		idash := strings.IndexByte(w, '-')
-		mstr := w[:idash]
-		domstr := w[idash+1:]
-		m, ok := monthNameToMonth[mstr]
+		part1 := w[:idash]
+		part2 := w[idash+1:]
+		m, ok := monthNameToMonth[part1]
 		if ok {
-			dom, ok := parseDayOfMonthNoCheck(domstr)
-			if ok && okDayOfMonth(dom) {
-				d.month = m
-				d.dayOfMonth = dom
-				return "md", true
+			i, ok := parseDayOfMonthNoCheck(part2)
+			if ok {
+				if okDayOfMonth(i) {
+					// MMM-DD
+					d.month = m
+					d.dayOfMonth = i
+					return "md", true
+				} else if okYear(i) {
+					// MMM-YYYY
+					d.month = m
+					d.year = i
+					return "my", true
+				}
+			}
+		} else {
+			m, ok := monthNameToMonth[part2]
+			if ok {
+				// YYYY-MMM
+				y, err := strconv.Atoi(part1)
+				if err == nil && okYear(y) {
+					d.month = m
+					d.year = y
+					return "ym", true
+				}
 			}
 		}
 	}
@@ -355,6 +373,10 @@ func parseDateWord(d *date, w string) (string, bool) {
 	return "", false
 }
 
+func okYear(y int) bool {
+	return 1000 <= y && y <= 9999
+}
+
 func parseDayOfMonth(w string) (int, bool) {
 	dom, ok := parseDayOfMonthNoCheck(w)
 	if !ok || !okDayOfMonth(dom) {
@@ -363,6 +385,8 @@ func parseDayOfMonth(w string) (int, bool) {
 	return dom, ok
 }
 
+// parseDayOfMonthNoCheck returns w parsed as an int, and whether the parse
+// was successful.
 func parseDayOfMonthNoCheck(w string) (int, bool) {
 	i, ok := strToInt[w]
 	if ok {
