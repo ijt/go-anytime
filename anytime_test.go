@@ -504,6 +504,14 @@ func TestParse_bad(t *testing.T) {
 
 		// Goofy input:
 		{`10:am`},
+
+		// Invalid 12-hour times must error, not panic (#70).
+		{`13pm`},
+		{`19pm`},
+		{`13am`},
+		{`19am`},
+		{`13:00pm`},
+		{`19:30pm`},
 	}
 	for _, c := range badCases {
 		t.Run(c.input, func(t *testing.T) {
