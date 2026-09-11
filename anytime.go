@@ -385,7 +385,8 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		n.Result = n.Child[0].Result
 	})
 
-	hour12 := gp.Regex(`[0-1]?\d`).Map(func(n *gp.Result) {
+	// 0-12, optional leading zero. 13-19 used to match and panic (#70).
+	hour12 := gp.Regex(`(?:1[0-2]|0?[0-9])`).Map(func(n *gp.Result) {
 		h, err := strconv.Atoi(n.Token)
 		if err != nil {
 			panic(fmt.Sprintf("parsing hour (12h clock): %v", err))
@@ -458,22 +459,20 @@ func Parser(ref time.Time, options ...func(o *opts)) gp.Parser {
 		m := 0
 		s := 0
 		ap := strings.ToLower(n.Child[2].Token)
-		t, err := time.Parse("3pm", fmt.Sprintf("%d%s", h, ap))
-		if err != nil {
-			panic(err)
+		if h == 12 {
+			h = 0
+		}
+		if ap == "pm" {
+			h += 12
 		}
 		if c1 != nil {
 			ms := n.Child[1].Result.(Range)
 			m = ms.Minute()
 			s = ms.Second()
-			t, err = time.Parse("3:4:5pm", fmt.Sprintf("%d:%d:%d%s", h, m, s, ap))
-			if err != nil {
-				panic(err)
-			}
 			dur = ms.Duration
 		}
 		n.Result = Range{
-			time.Date(ref.Year(), ref.Month(), ref.Day(), t.Hour(), t.Minute(), t.Second(), 0, ref.Location()),
+			time.Date(ref.Year(), ref.Month(), ref.Day(), h, m, s, 0, ref.Location()),
 			dur,
 		}
 	})
